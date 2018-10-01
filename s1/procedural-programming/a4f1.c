@@ -16,6 +16,6 @@ main() {
 
     calculateIt(amount, profitRate, &profit, &total);
 
-    printf("The profit is %f and the total sale amount is %f.", profit, total);
+    printf("The profit is %0.2f and the total sale amount is %0.2f.\n", profit, total);
 
 }

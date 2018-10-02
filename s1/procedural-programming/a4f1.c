@@ -3,34 +3,36 @@
 typedef struct result_t
 {
     double profit;
-    double total;
+    double saleAmount;
 } result_t;
 
 /* We cannot return two values from a function, so it has to be done in a different way. */
-result_t calculateIt(long amount, long profitRate)
+result_t calculateIt(long purchaseAmount, long rate)
 {
     result_t result;
-    result.profit = (double)amount * (double)profitRate / 100.0;
-    result.total = (double)amount + result.profit;
+    result.profit = (double)purchaseAmount * (double)rate / 100.0;
+    result.saleAmount = (double)purchaseAmount + result.profit;
     return result;
 }
 
 int main()
 {
-    long amount, profitRate;
+    long purchaseAmount;
+    int rate;
 
     /* INPUT */
-    printf("Give the total amount: ");
-    scanf("%d", &amount);
-    printf("Give the profit rate: ");
-    scanf("%d", &profitRate);
+    printf("Dwse thn katharh axia: ");
+    scanf("%ld", &purchaseAmount);
+    printf("Dwse to pososto kerdous: ");
+    scanf("%d", &rate);
 
     /* COMPUTATION */
-    result_t result = calculateIt(amount, profitRate);
+    result_t result = calculateIt(purchaseAmount, rate);
 
     /* OUTPUT */
-    printf("The profit is %0.2f and the total sale amount is %0.2f.\n", result.profit, result.total);
+    printf("To kerdos einai %0.2f\n", result.profit);
+    printf("To synoliko poso einai %0.2f\n", result.saleAmount);
 
-    /* Without this, Code::Blocks displays that "Process terminated with exit code <something other than zero>." */
+    /* Without this, Code::Blocks displays that "Process terminated with status <something other than zero>." */
     return 0;
 }

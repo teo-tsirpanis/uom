@@ -13,15 +13,15 @@ int main()
     unsigned long kathara, mikta;
     double dt, df;
 
-    printf("Dose ta kathara tetragonika: ");
-    scanf("%u", &kathara);
-    printf("Dose ta mikta tetragonika: ");
-    scanf("%u", &mikta);
+    printf("Dwse ta ka8ara tm tou spitiou? ");
+    scanf("%lu", &kathara);
+    printf("Dose ta mikta tm tou spitiou ? ");
+    scanf("%lu", &mikta);
 
     calculateIt(kathara, mikta, &dt, &df);
 
-    printf("Ta dimotika teli einai: %0.2f\n", dt);
-    printf("Ta mikta teli einai: %0.2f\n", df);
+    printf("Ta DT einai : %0.2f\n", dt);
+    printf("O DF einai: %0.2f\n", df);
 
     return 0;
 }

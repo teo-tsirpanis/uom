@@ -14,13 +14,15 @@ int main()
     printf("Dwse tis imeres ergasias tou etous: ");
     scanf("%d", &days);
     printf("Dwse thn hmerisia amoibh: ");
-    scanf("%d", &wage);
+    scanf("%ld", &wage);
     printf("Dwse to pososto dwrou: ");
-    scanf("%f", &rate);
+    scanf("%lf", &rate);
 
     double gift = calculateIt(days, wage, rate);
 
-    printf("To dwro einai %f", gift);
+    /* In the exercise, with the parameters being 354, 5445, and 0.25, it says that the gift is 484883 instead of 484882.5.
+    I would have rounded the result to an integer, had its type being a double not been explicitly stated. */
+    printf("To dwro einai %0.2f\n", gift);
 
     return 0;
 }

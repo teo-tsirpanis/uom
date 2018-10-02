@@ -1,16 +1,23 @@
 #include <stdio.h>
 
-/* We cannot return two values from a function, so it has to be done the pointer way. */
-void calculateIt(long amount, long profitRate, double *profit, double *total)
+typedef struct result_t
 {
-    *profit = amount * profitRate / 100.0;
-    *total = (double)amount + *profit;
+    double profit;
+    double total;
+} result_t;
+
+/* We cannot return two values from a function, so it has to be done in a different way. */
+result_t calculateIt(long amount, long profitRate)
+{
+    result_t result;
+    result.profit = (double)amount * (double)profitRate / 100.0;
+    result.total = (double)amount + result.profit;
+    return result;
 }
 
 int main()
 {
     long amount, profitRate;
-    double profit, total;
 
     /* INPUT */
     printf("Give the total amount: ");
@@ -19,11 +26,11 @@ int main()
     scanf("%d", &profitRate);
 
     /* COMPUTATION */
-    calculateIt(amount, profitRate, &profit, &total);
+    result_t result = calculateIt(amount, profitRate);
 
     /* OUTPUT */
-    printf("The profit is %0.2f and the total sale amount is %0.2f.\n", profit, total);
+    printf("The profit is %0.2f and the total sale amount is %0.2f.\n", result.profit, result.total);
 
-    /* Code::Blocks displays that "Process terminated with exit code <something other than zero>." */
+    /* Without this, Code::Blocks displays that "Process terminated with exit code <something other than zero>." */
     return 0;
 }

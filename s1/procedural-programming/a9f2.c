@@ -1,35 +1,39 @@
 #include <math.h>
 #include <stdio.h>
 
-int firstTwoDigits (int x) {
-    return x / pow(10, ceil(log10((double) x)) - 2);
+int firstTwoDigits(int x)
+{
+    return x / pow(10, ceil(log10((double)x)) - 2);
 }
 
-int productCodeToPrice (int x) {
+int productCodeToPrice(int x)
+{
     /* It is nowhere stated that the product code is just four digits long.
-    It also works where the product code is two or three digits long.
+    This function also works where the product code is two or three digits long.
     Yet it fails when the product code has just one digit, but the exercise's statement
     does not say anything about handling cases with short product codes. */
     return firstTwoDigits(x) + (x % 100);
 }
 
-double calculateProductPrice (int quantity, int price) {
-    return (double) quantity * (double) price;
+double calculateProductPrice(int quantity, int price)
+{
+    return (double)quantity * (double)price;
 }
 
-double calculateDiscount (int quantity, int price) {
+double calculateDiscount(int quantity, int price)
+{
     double discountRate = 0.0;
-    if (quantity <= 30) {
+    if (quantity <= 30)
         discountRate = 0.1;
-    } else if (quantity <= 70) {
+    else if (quantity <= 70)
         discountRate = 0.2;
-    } else {
+    else
         discountRate = 0.35;
-    };
     return calculateProductPrice(quantity, price) * discountRate;
 }
 
-int main () {
+int main()
+{
     int productCode = 0;
     int quantity = 0;
 

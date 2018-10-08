@@ -14,6 +14,8 @@ double calculateWeeklySalaryByYear (double salary) {
 
 int main() {
     long employeeCode = 0;
+    double weeklySalary = 0.0;
+
     printf("Dwse ton kwdiko:");
     scanf("%ld", &employeeCode);
 
@@ -24,20 +26,20 @@ int main() {
         printf("Dwse tis wres ebdomadiaias ergasias:");
         scanf("%d", &hours);
         printf("Dwse thn amoibh ana wra:");
-        scanf("%f", &wage);
+        scanf("%lf", &wage);
 
-        double weeklySalary = calculateWeeklySalaryByWage(hours, wage);
+        weeklySalary = calculateWeeklySalaryByWage(hours, wage);
 
-        printf("H ebdomadaia amoibh einai %0.2f\n", weeklySalary);
     } else {
         double salary = 0.0;
 
         printf("Dwse ton ethsio mistho:");
-        scanf("%f", &salary);
+        scanf("%lf", &salary);
 
-        double weeklySalary = calculateWeeklySalaryByYear(salary);
-
-        printf("H ebdomadiaia amoibh einai %0.2f\n", weeklySalary);
+        weeklySalary = calculateWeeklySalaryByYear(salary);
     }
+
+    printf("H ebdomadiaia amoibh einai %0.2f\n", weeklySalary);
+
     return 0;
 }

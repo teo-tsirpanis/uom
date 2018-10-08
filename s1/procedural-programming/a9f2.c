@@ -9,10 +9,9 @@ int firstTwoDigits(int x)
 int productCodeToPrice(int x)
 {
     /* It is nowhere stated that the product code is just four digits long.
-    This function also works where the product code is two or three digits long.
-    Yet it fails when the product code has just one digit, but the exercise's statement
-    does not say anything about handling cases with short product codes. */
-    return firstTwoDigits(x) + (x % 100);
+    This function also works where the product code less than four digits long.
+    If it is just a single digit, we return the product code itself. */
+    return !(x / 10) ? firstTwoDigits(x) + (x % 100) : x;
 }
 
 double calculateProductPrice(int quantity, int price)

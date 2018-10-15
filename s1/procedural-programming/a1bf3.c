@@ -7,7 +7,7 @@ issues with the Roberts' library, I decided to compile it myself. and use it. */
 #include "simpio.h"
 #include <stdio.h>
 
-#define EXERCISE_1A /* Uncomment for Exercise 1b. */
+// #define EXERCISE_1A /* Uncomment for Exercise 1b. */
 
 unsigned int findFirstGeormetricProgressionTermLargerThan (double a, double ratio, double limit)
 {

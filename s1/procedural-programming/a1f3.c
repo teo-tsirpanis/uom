@@ -1,4 +1,10 @@
 #include <math.h>
+/* I think it's time for a concession. Using scanf alone
+makes programs way too unreliable, and prone to faulty input.
+As a sidenote, C itself is terrible at reading input from the
+user, unlike Pascal, for example. Because of binary incompatibility
+issues with the Roberts' library, I decided to compile it myself. and use it. */
+#include "simpio.h"
 #include <stdio.h>
 
 #define EXERCISE_1A /* Uncomment for Exercise 1b. */
@@ -38,11 +44,11 @@ int main()
 
     #ifndef EXERCISE_1A
     printf("Dwse ton arxiko arithmo autokinhtwn: ");
-    scanf("%u", &cars);
+    cars = GetInteger();
     printf("Dwse ton ethsio rythmo ayxhshs: ");
-    scanf("%lf", &rate);
+    rate = GetReal();
     printf("Dwse to orio: ");
-    scanf("%u", &limit);
+    limit = GetInteger();
     #endif
 
     unsigned int year = (cars != limit) ? getYearOfExcessiveCars(cars, rate, limit) : 1;

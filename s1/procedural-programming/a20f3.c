@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include "simpio.h"
 
-#define promptForAge printf("Dwse ilikia: "), GetInteger()
+#define promptForAge() printf("Dwse ilikia: "), GetInteger()
 
 int main()
 {
     int min, max, x;
 
-    x = min = max = promptForAge;
+    x = min = max = promptForAge();
 
     if (x != -1)
     {
         /* While a negative age is an absurdity, the program still stops exactly
         when the age is equal to -1, because that was what the excercise requires. */
-        while ((x = promptForAge) != -1)
+        while ((x = promptForAge()) != -1)
         {
             if (x > max)
                 max = x;

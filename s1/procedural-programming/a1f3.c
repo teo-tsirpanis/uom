@@ -31,7 +31,7 @@ unsigned int getCarsAtYear (unsigned int initialCars, double rate, unsigned int 
 
 int main()
 {
-    
+
     unsigned int cars = INITIAL_CARS;
     double rate = RATE;
     unsigned int limit = LIMIT;

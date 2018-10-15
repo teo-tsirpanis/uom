@@ -5,7 +5,8 @@
             "intelliSenseMode": "gcc-x64",
             "compilerPath": "C:/Program Files (x86)/CodeBlocks/MinGW/bin/gcc.exe",
             "includePath": [
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "E:/teots/Documents/roberts"
             ],
             "defines": [],
             "cStandard": "c11",

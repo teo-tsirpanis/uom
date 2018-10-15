@@ -6,47 +6,49 @@
 unsigned int findFirstGeormetricProgressionTermLargerThan (double a, double ratio, double limit)
 {
     /* A simple inequality manipulation can lead to a solution without any loops whatsoever. */
-    return ceil(log(limit / a) / log(ratio));
+    return ceil(log(limit / a) / log(1.0 + ratio));
 }
 
 /* The problem of finding the year when the number of cars exceed a given number is essentially
 a problem of finding the first term of a geometric progression which is larger than a given number. */
-#define getYearOfExcessiveCars(initialCars, yearlyCarsGrowthPercent, carsLimit) findFirstGeormetricProgressionTermLargerThan(initialCars, 1.0 + yearlyCarsGrowthPercent / 100.0, carsLimit)
+#define getYearOfExcessiveCars findFirstGeormetricProgressionTermLargerThan
 
-unsigned int getCarsAtYear (unsigned int initialCars, double ratio, unsigned int year)
+unsigned int getCarsAtYear (unsigned int initialCars, double rate, unsigned int year)
 {
     unsigned int a = initialCars;
-    for (int i = 0; i < year; i++)
+    int i = 0; /* Code::Blocks says that 'for' loop initial declarations are only allowed in C99 mode */
+
+    for (i = 0; i < year; i++)
     {
-        a = ceil(a * (1.0 + ratio / 100.0));
+        a = ceil(a * (1.0 + rate));
     }
     return a;
 }
 
 #define INITIAL_CARS 80000
-#define RATE_PERCENT 7
+#define RATE 0.07
 #define LIMIT 160000
 
 int main()
 {
     
     unsigned int cars = INITIAL_CARS;
-    double ratePercent = RATE_PERCENT;
+    double rate = RATE;
     unsigned int limit = LIMIT;
 
     #ifndef EXERCISE_1A
     printf("Dwse ton arxiko arithmo autokinhtwn: ");
     scanf("%u", &cars);
     printf("Dwse ton ethsio rythmo ayxhshs: ");
-    scanf("%lf", %ratePercent);
+    scanf("%lf", &rate);
     printf("Dwse to orio: ");
     scanf("%u", &limit);
     #endif
 
-    unsigned int year = getYearOfExcessiveCars(cars, ratePercent, limit);
+    unsigned int year = (cars != limit) ? getYearOfExcessiveCars(cars, rate, limit) : 1;
 
     printf("%u\n", year);
-    printf("%u\n", getCarsAtYear(cars, ratePercent, year));
+    printf("%u\n", getCarsAtYear(cars, rate, year));
 
     return 0;
 }

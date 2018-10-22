@@ -26,7 +26,7 @@ int main()
     PROMPT_FOR(b);
     PROMPT_FOR(c);
 
-    printf("Y = %d", calculateY(a, b, c));
+    printf("Y = %d\n", calculateY(a, b, c));
 
     return 0;
 }

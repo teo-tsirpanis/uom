@@ -2,6 +2,8 @@
 
 unsigned int total(unsigned int x)
 {
+    /* The arithmetic progression sum formula.
+    Fun fact: When compiling with -O3, this function isn't even called at all! */
     return (1 + x) * x / 2;
 }
 

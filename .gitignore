@@ -3,3 +3,5 @@
 *.o
 *.cbp
 *.depend
+*.layout
+s1/procedural-programming/main.c

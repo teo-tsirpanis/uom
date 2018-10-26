@@ -1,10 +1,13 @@
 package dai19090.oop1.tictactoe.core;
 
+/**
+ * Thrown to indicate an invalid column character (ie. not {@code A}, {@code B}, or {@code C}.
+ */
 public class InvalidColumnCharacterException extends TicTacToeException {
 
     private final char offendingChar;
 
-    public InvalidColumnCharacterException(char x) {
+    InvalidColumnCharacterException(char x) {
         super();
         offendingChar = x;
     }
@@ -19,6 +22,6 @@ public class InvalidColumnCharacterException extends TicTacToeException {
 
     @Override
     public String toString() {
-        return "Invalid column character: \'" + offendingChar + "\'. Valid column characters are \'A\', \'B\', and \'C\'.";
+        return "Invalid column character: \'" + getOffendingChar() + "\'. Valid column characters are \'A\', \'B\', and \'C\'.";
     }
 }

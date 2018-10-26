@@ -49,7 +49,7 @@ public final class Board implements BoardViewer {
     void setCell(Position position, CellState state) {
         Board result = new Board(this);
         if (state == null) throw new NullPointerException("state");
-        if (getCell(position) != null) throw new CellAlreadySetException();
+        if (getCell(position) != null) throw new CellAlreadySetException(position);
         result._board[position.getRowIndex()][position.getColumnIndex()] = state;
     }
 

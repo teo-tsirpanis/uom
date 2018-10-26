@@ -1,13 +1,13 @@
 package dai19090.oop1.tictactoe.core;
 
 /**
- * Invalid row character (ie. not {@code 1}, {@code 2}, or {@code 3}.
+ * Thrown to indicate an invalid row character (ie. not {@code 1}, {@code 2}, or {@code 3}.
  */
 public class InvalidRowCharacterException extends TicTacToeException {
 
     private final char offendingChar;
 
-    public InvalidRowCharacterException(char x) {
+    InvalidRowCharacterException(char x) {
         super();
         offendingChar = x;
     }

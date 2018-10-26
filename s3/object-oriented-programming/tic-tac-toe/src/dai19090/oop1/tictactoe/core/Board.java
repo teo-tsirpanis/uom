@@ -4,8 +4,11 @@ package dai19090.oop1.tictactoe.core;
  * A Tic-Tac-Toe playing board.
  */
 public final class Board {
-    private CellState[][] _board;
+    private final CellState[][] _board;
 
+    /**
+     * Creates an empty {@link Board}.
+     */
     public Board() {
         super();
         _board = new CellState[3][3];
@@ -16,37 +19,46 @@ public final class Board {
         }
     }
 
-    private static int CheckAndFixBounds(int coord) throws IndexOutOfBoundsException {
-        if (coord >= 1 && coord <= 3) return coord - 1;
-        else throw new IndexOutOfBoundsException(coord);
-
-    }
-
+    /**
+     * Creates a {@link Board} from another one.
+     *
+     * @param b The {@link Board} to copy.
+     * @return The new {@link Board}.
+     */
     public Board(Board b) {
         this();
         for (int i = 0; i < _board.length; i++) {
-            for (int j = 0; j < _board[i].length; j++) {
-                _board[i][j] = b._board[i][j];
-            }
+            if (_board[i].length >= 0)
+                System.arraycopy(b._board[i], 0, _board[i], 0, _board[i].length);
         }
     }
 
     /**
-     * Sets the specified place at the board to the specified one.
-     * @param x The row; the first is number 1.
-     * @param y The column; the first is number 1.
-     * @param state The state to set this cell.
+     * Gets the specified state of the cell at the given position.
+     *
+     * @param position The {@link Position} we are asking about.
+     * @return The {@link CellState} at {@code position}, or null if it is not yet set.
      */
-    void changeCell(int x, int y, CellState state) throws IndexOutOfBoundsException, CellAlreadySetException, NullPointerException {
+    public CellState getCell(Position position) {
+        return _board[position.getRowIndex()][position.getColumnIndex()];
+    }
+
+    /**
+     * Sets the specified place at the board to the specified one.
+     *
+     * @param position The {@link Position} of the board to change.
+     * @param state    The {@link CellState} to set this cell.
+     * @throws CellAlreadySetException The cell in the given position is already set.
+     * @throws NullPointerException    {@code state} is {@code null}.
+     */
+    void setCell(Position position, CellState state) throws CellAlreadySetException {
         Board result = new Board(this);
         if (state == null) {
             throw new NullPointerException("state");
         }
-        x = CheckAndFixBounds(x);
-        y = CheckAndFixBounds(y);
-        if (result._board[x][y] != null) {
+        if (getCell(position) != null) {
             throw new CellAlreadySetException();
         }
-        result._board[x][y] = state;
+        result._board[position.getRowIndex()][position.getColumnIndex()] = state;
     }
 }

@@ -6,7 +6,7 @@ public final class Position {
 
     private static int CheckAndFixBounds(int coordinate) {
         if (coordinate >= 1 && coordinate <= 3) return coordinate - 1;
-        else throw new IndexOutOfBoundsException(coordinate);
+        else throw new IndexOutOfBoundsException(Integer.toString(coordinate));
     }
 
     /**
@@ -24,11 +24,11 @@ public final class Position {
      * Creates a {@link Position} from the given textually encoded coordinates.
      * @param positionCode The coordinates in the form of ([ABC][123]), where the letters signify the column
      *                     (left-to-right), and the number signify the row (top-to-bottom).
-     * @throws InvalidColumnCharacterException
-     * @throws InvalidRowCharacterException
-     * @throws PositionLengthMismatchException
+     * @throws InvalidColumnCharacterException The column letter is invalid.
+     * @throws InvalidRowCharacterException The row number is invalid.
+     * @throws PositionLengthMismatchException The position code is not two characters long.
      */
-    public Position(String positionCode) throws InvalidColumnCharacterException, InvalidRowCharacterException, PositionLengthMismatchException {
+    public Position(String positionCode) {
         if (positionCode.length() == 2) {
             switch (positionCode.charAt(0)) {
                 case 'A':
@@ -46,7 +46,7 @@ public final class Position {
             try {
                 this.rowIndex = CheckAndFixBounds(Integer.parseInt(positionCode.substring(1)));
             } catch (NumberFormatException e) {
-                //noinspection RedundantExplicitVariableType
+                //noinspection UnnecessaryLocalVariable
                 InvalidRowCharacterException up = new InvalidRowCharacterException(positionCode.charAt(1));
                 throw up;
             }

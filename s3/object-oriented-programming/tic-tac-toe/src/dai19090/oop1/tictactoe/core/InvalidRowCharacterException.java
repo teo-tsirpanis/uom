@@ -22,6 +22,6 @@ public class InvalidRowCharacterException extends TicTacToeException {
 
     @Override
     public String toString() {
-        return "Invalid row character: \'" + offendingChar + "\'. Valid row characters are \'1\', \'2\', and \'3\'.";
+        return "Invalid row character: \'" + getOffendingChar() + "\'. Valid row characters are \'1\', \'2\', and \'3\'.";
     }
 }

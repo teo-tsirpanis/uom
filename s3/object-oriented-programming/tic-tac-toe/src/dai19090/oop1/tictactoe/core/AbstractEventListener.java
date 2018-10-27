@@ -11,13 +11,13 @@ public abstract class AbstractEventListener {
      * @param e The exception in question.
      * @return Whether to re-attempt trying to play, or keep the {@link Game}'s state unchanged.
      */
-    public abstract Boolean exceptionDuringPlay(CellState player, Exception e);
+    public abstract Boolean exceptionDuringPlay(PlayerMark player, Exception e);
 
     /**
      * A player has won.
      * @param player The winner.
      */
-    public abstract void playerWon(CellState player);
+    public abstract void playerWon(PlayerMark player);
 
     /**
      * The game ended in a draw.

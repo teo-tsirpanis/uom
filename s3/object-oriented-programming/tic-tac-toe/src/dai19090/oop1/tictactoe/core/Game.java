@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Game {
     private final Board board = new Board();
     private final AbstractPlayer playerX, playerO;
-    private CellState currentPlayer = CellState.X;
+    private PlayerMark currentPlayer = PlayerMark.X;
 
     /**
      * Creates a {@link Game} of two specified {@link AbstractPlayer}s.
@@ -21,7 +21,7 @@ public class Game {
     }
 
     private AbstractPlayer getCurrentPlayer() {
-        if (currentPlayer == CellState.X) return playerX;
+        if (currentPlayer == PlayerMark.X) return playerX;
         return playerO;
     }
 
@@ -42,7 +42,7 @@ public class Game {
      */
     public Boolean stepGame(AbstractEventListener listener) {
         // First check if the game is won.
-        CellState winnerMaybe = board.tryGetWinner();
+        PlayerMark winnerMaybe = WinnerChecker.didAnybodyWon(board);
         if (winnerMaybe != null) {
             listener.playerWon(winnerMaybe);
             return false;
@@ -71,10 +71,10 @@ public class Game {
             board.setCell(positionToPlay, currentPlayer);
             switch (currentPlayer) {
                 case X:
-                    currentPlayer = CellState.O;
+                    currentPlayer = PlayerMark.O;
                     break;
                 case O:
-                    currentPlayer = CellState.X;
+                    currentPlayer = PlayerMark.X;
                     break;
             }
         } catch (Exception e) {

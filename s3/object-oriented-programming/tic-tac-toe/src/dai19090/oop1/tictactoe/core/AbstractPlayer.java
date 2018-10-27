@@ -7,11 +7,6 @@ import java.util.ArrayList;
  */
 public abstract class AbstractPlayer {
     /**
-     * @return The player's corresponding {@link CellState}.
-     */
-    public abstract CellState getCellState();
-
-    /**
      * Gets the best move out of a list of available ones.
      * @param positions The available moves, ie. the places on the board that have not yet been played.
      * @param boardViewer A read-only view of the playing board.

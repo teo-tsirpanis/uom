@@ -1,9 +1,9 @@
 package dai19090.oop1.tictactoe.core;
 
 /**
- * The state of a Tic-Tac-Toe cell.
+ * The mark of a Tic-Tac-Toe cell.
  */
-public enum CellState {
+public enum PlayerMark {
     /**
      * Marked by Player X.
      */
@@ -13,7 +13,7 @@ public enum CellState {
      */
     O;
 
-    public static char format(CellState state) {
+    public static char format(PlayerMark state) {
         if (state != null)
             switch (state) {
                 case X:

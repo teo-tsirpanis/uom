@@ -33,12 +33,14 @@ public class Game {
     }
 
     /**
-     * Performs a move of the game. The {@link AbstractPlayer} who is playing, is given a list of available moves and chooses the best one.
+     * Performs a move of the game. The {@link AbstractPlayer} who is playing,
+     * is given a list of available moves and chooses the best one.
      * Console applications should just call this method until it returns {@code false}.
      * GUI applications should first check for the status of the board, ask the user for
      * his next move, and then call this method when it is ready to be given.
      * @param listener An {@link AbstractEventListener} to respond to game events.
-     * @return Whether to continue calling this method. Returns {@code false} if the game has ended, {@code true} otherwise.
+     * @return Whether to continue calling this method.
+     *         {@code false} if the game has ended, {@code true} otherwise.
      */
     public Boolean stepGame(AbstractEventListener listener) {
         // First check if the game is won.
@@ -56,7 +58,7 @@ public class Game {
         Position positionToPlay = null;
         // Try to get a next move from the player.
         while (positionToPlay == null) try {
-            int posIdx = getCurrentPlayer().play(availablePositions, viewBoard());
+            int posIdx = getCurrentPlayer().play(availablePositions, viewBoard(), currentPlayer);
             positionToPlay = availablePositions.get(posIdx);
         } catch (Exception e) {
             if (!listener.exceptionDuringPlay(currentPlayer, e))

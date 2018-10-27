@@ -41,7 +41,8 @@ final class Board implements BoardViewer {
         _board[position.getRowIndex()][position.getColumnIndex()] = state;
     }
 
-    ArrayList<Position> getAvailablePositions() {
+    @Override
+    public ArrayList<Position> getAvailablePositions() {
         ArrayList<Position> positions = new ArrayList<>(9);
         for (int i = 0; i < _board.length; i++) {
             for (int j = 0; j < _board[i].length; j++) {

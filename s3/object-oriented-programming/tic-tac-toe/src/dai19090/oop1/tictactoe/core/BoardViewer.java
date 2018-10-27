@@ -1,5 +1,7 @@
 package dai19090.oop1.tictactoe.core;
 
+import java.util.ArrayList;
+
 /**
  * An interface providing read-only access to a tic-tac-toe playing board.
  */
@@ -15,4 +17,9 @@ public interface BoardViewer {
     default PlayerMark getCell(int row, int column) {
         return getCell(new Position(row + 1, column + 1));
     }
+
+    /**
+     * @return An {@link ArrayList} of the unclaimed positions in the board.
+     */
+    ArrayList<Position> getAvailablePositions();
 }

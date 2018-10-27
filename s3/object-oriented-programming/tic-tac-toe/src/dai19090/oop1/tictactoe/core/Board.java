@@ -1,9 +1,23 @@
 package dai19090.oop1.tictactoe.core;
 
+import java.util.ArrayList;
+
 /**
  * A Tic-Tac-Toe playing board.
  */
 public final class Board implements BoardViewer {
+    private static final int[][][] winningPositions =
+            {
+                    {{0, 0}, {0, 1}, {0, 2}},
+                    {{1, 0}, {1, 1}, {1, 2}},
+                    {{2, 0}, {2, 1}, {2, 2}},
+                    {{0, 0}, {1, 0}, {2, 0}},
+                    {{0, 1}, {1, 1}, {2, 1}},
+                    {{0, 2}, {1, 2}, {2, 2}},
+                    {{0, 0}, {1, 1}, {2, 2}},
+                    {{0, 2}, {1, 1}, {2, 0}}
+            };
+
     private final CellState[][] _board;
 
     /**
@@ -51,6 +65,29 @@ public final class Board implements BoardViewer {
         if (state == null) throw new NullPointerException("state");
         if (getCell(position) != null) throw new CellAlreadySetException(position);
         result._board[position.getRowIndex()][position.getColumnIndex()] = state;
+    }
+
+    CellState tryGetWinner() {
+        for (int[][] winPos: winningPositions) {
+            CellState[] positions = new CellState[3];
+            for (int i = 0; i < winPos.length; i++) {
+                positions[i] = _board[winPos[i][0]][winPos[i][1]];
+            }
+            if (positions[0] == positions[1] && positions[1] == positions[2])
+                return positions[0];
+        }
+        return null;
+    }
+
+    ArrayList<Position> getAvailablePositions() {
+        ArrayList<Position> positions = new ArrayList<>(9);
+        for (int i = 0; i < _board.length; i++) {
+            for (int j = 0; j < _board[i].length; j++) {
+                if (_board[i][j] == null)
+                    positions.add(new Position(i + 1, j + 1));
+            }
+        }
+        return positions;
     }
 
     @Override

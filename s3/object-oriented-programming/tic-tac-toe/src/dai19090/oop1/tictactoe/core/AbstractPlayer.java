@@ -11,7 +11,7 @@ public abstract class AbstractPlayer {
      * @param positions The available moves, ie. the places on the board that have not yet been played.
      * @param boardViewer A read-only view of the playing board.
      * @param player The player that is playing now.
-     * @return The index of the best move for the player to make.
+     * @return The best move for the player to make.
      */
-    public abstract int play(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player);
+    public abstract Position play(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player);
 }

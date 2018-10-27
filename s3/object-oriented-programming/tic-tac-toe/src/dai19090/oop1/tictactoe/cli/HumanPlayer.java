@@ -16,10 +16,9 @@ public class HumanPlayer extends AbstractPlayer {
      * Asks the user for a move.
      */
     @Override
-    public int play(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player) {
+    public Position play(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player) {
         System.out.print("Player Move (" + player + "): ");
-        Position pos = new Position(in.next());
-        // The core library covers for us in case of an invalid pattern.
-        return positions.indexOf(pos);
+        // The core library covers for us in case of an invalid pattern and an already taken position.
+        return new Position(in.next());
     }
 }

@@ -58,8 +58,7 @@ public class Game {
         Position positionToPlay = null;
         // Try to get a next move from the player.
         while (positionToPlay == null) try {
-            int posIdx = getCurrentPlayer().play(availablePositions, viewBoard(), currentPlayer);
-            positionToPlay = availablePositions.get(posIdx);
+            positionToPlay = getCurrentPlayer().play(availablePositions, viewBoard(), currentPlayer);
         } catch (Exception e) {
             if (!listener.exceptionDuringPlay(currentPlayer, e))
                 // For console applications that have a linear lifetime, the play method would ask the

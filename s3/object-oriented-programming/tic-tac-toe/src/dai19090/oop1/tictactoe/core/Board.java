@@ -62,8 +62,11 @@ final class Board implements BoardViewer {
         for (int i = 0; i < _board.length; i++) {
             sb.append(i + 1);
             sb.append(" |");
-            for (int j = 0; j < _board[i].length; j++) sb.append(PlayerMark.format(_board[i][j]));
-            sb.append("|'n");
+            for (int j = 0; j < _board[i].length; j++) {
+                sb.append(PlayerMark.format(_board[i][j]));
+                sb.append("|");
+            }
+            sb.append("\n");
         }
         return sb.toString();
     }

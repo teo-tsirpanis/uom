@@ -77,6 +77,23 @@ public final class Position {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Position)) {
+            return false;
+        }
+        Position pos2 = (Position) o;
+        return this.rowIndex == pos2.rowIndex && this.columnIndex == pos2.columnIndex;
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.rowIndex << 2) + (this.rowIndex); // These two numbers don't take more than 2 bits.
+    }
+
+    @Override
     public String toString() {
         return "Row: " + getRow() + " Column: " + getColumn();
     }

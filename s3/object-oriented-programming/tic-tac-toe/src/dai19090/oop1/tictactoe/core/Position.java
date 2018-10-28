@@ -96,7 +96,7 @@ public final class Position {
     @Override
     public String toString() {
         String col = "";
-        switch (getRow()) {
+        switch (getColumn()) {
             case 1: col = "A"; break;
             case 2: col = "B"; break;
             case 3: col = "C"; break;

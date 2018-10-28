@@ -3,7 +3,7 @@ package dai19090.oop1.tictactoe.core;
 /**
  * Utilities to check whether a player has won.
  */
-public class WinnerChecker {
+class WinnerChecker {
 
     private static final int[][][] winningPositions =
             {

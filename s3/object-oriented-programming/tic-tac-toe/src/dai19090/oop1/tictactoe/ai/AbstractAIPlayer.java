@@ -13,8 +13,6 @@ public abstract class AbstractAIPlayer extends AbstractPlayer {
 
     private final AbstractAIPlayerEventListener listener;
 
-    protected abstract Position think(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player);
-
     /**
      * Creates an {@link AbstractAIPlayer} that broadcasts his moves to the given event {@link AbstractAIPlayerEventListener}.
      * @param listener The player's event listener.
@@ -22,6 +20,8 @@ public abstract class AbstractAIPlayer extends AbstractPlayer {
     public AbstractAIPlayer(AbstractAIPlayerEventListener listener) {
         this.listener = listener;
     }
+
+    protected abstract Position think(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player);
 
     @Override
     public Position play(ArrayList<Position> positions, BoardViewer boardViewer, PlayerMark player) {

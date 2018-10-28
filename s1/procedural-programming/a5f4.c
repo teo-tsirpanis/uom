@@ -38,7 +38,7 @@ int isArmstrong(unsigned int x)
 int main()
 {
     unsigned int i;
-    for (i = 1; i < 999; i++)
+    for (i = 1; i < MAX_NUMBER; i++)
         if (isArmstrong(i))
             printf("%u\n", i);
 

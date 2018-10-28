@@ -15,7 +15,10 @@ public class ConsoleEventListener extends AbstractEventListener {
 
     @Override
     public void playerWon(PlayerMark player) {
-        System.out.println("Player " + player + " won!");
+        if (player == PlayerMark.X)
+            System.out.println("You win!");
+        else
+            System.out.println("You lost... :-(");
     }
 
     @Override

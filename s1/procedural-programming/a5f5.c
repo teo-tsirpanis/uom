@@ -6,6 +6,7 @@ long GetLong(void);
 
 #define DATA_ARRAY(i, j) (*(data + (i * columns + j)))
 #define DATA DATA_ARRAY(i, j)
+#define FREE(x) {free(x); x = NULL;}
 
 int main()
 {
@@ -41,6 +42,7 @@ int main()
     printf("\n");
     for (int i = 0; i < columns; i++)
         printf("%4ld", columnSum[i]);
+    
     if (rows == columns)
     {
         long sumDiag1 = 0;
@@ -53,5 +55,7 @@ int main()
         printf("\nSum Diag 1: %4ld,   Diag 2: %4ld\n", sumDiag1, sumDiag2);
     }
 
+    FREE(data);
+    FREE(columnSum);
     return 0;
 }

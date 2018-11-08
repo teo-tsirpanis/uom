@@ -2,29 +2,29 @@
 #include "simpio.h"
 #include <stdio.h>
 
-void readData(unsigned int cities, unsigned int samplesPerDay, double[cities][samplesPerDay] data)
+void readData(unsigned int cities, unsigned int samplesPerDay, double data[cities][samplesPerDay])
 {
     for (unsigned int i = 0; i < cities; i++)
         for (unsigned int j = 0; j < samplesPerDay; j++)
             data[i][j] = GetReal();
 }
 
-double average(unsigned int count, double[count] data)
+double average(unsigned int count, double data[count])
 {
     double result = 0.0;
     for (unsigned int i = 0; i < count; i++)
     {
         result += data[i];
     }
-    return result / (double) count;
+    return result / (double)count;
 }
 
-double getMaxDeviation(unsigned int samplesPerDay, double[samplesPerDay] cityTemps, double nationalAvg)
+double getMaxDeviation(unsigned int samplesPerDay, double cityTemps[samplesPerDay], double nationalAvg)
 {
-    double maxDeviation = abs(data[0] - nationalAvg);
-    for (j = 1; j < samplesPerDay; j++)
+    double maxDeviation = abs(cityTemps[0] - nationalAvg);
+    for (unsigned int i = 1; i < samplesPerDay; i++)
     {
-        double d = abs(data[j] - nationalAvg);
+        double d = abs(cityTemps[i] - nationalAvg);
         if (d > maxDeviation)
             maxDeviation = d;
     }

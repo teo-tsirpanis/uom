@@ -2,7 +2,7 @@
 
 int GetInteger();
 
-#define PROMPT() printf("? "), GetInteger()
+#define PROMPT() (printf("? "), GetInteger())
 #define MAX_ELEMENTS 100
 
 int inputArray(int data[MAX_ELEMENTS])
@@ -10,14 +10,15 @@ int inputArray(int data[MAX_ELEMENTS])
     int i = 0;
     do
     {
-        data[i++] = PROMPT();
-    } while (data[i] != -1 && i < MAX_ELEMENTS)
+        int f = PROMPT();
+        data[i] = f;
+    } while (data[i++] != -1 && i < MAX_ELEMENTS);
     return --i;
 }
 
 void minMax(int length, int data[length], int *min, int *max)
 {
-    *min = *max = data[0]
+    *min = *max = data[0];
     for (int i = 1; i < length; i++)
     {
         *min = data[i] < *min ? data[i]: *min;

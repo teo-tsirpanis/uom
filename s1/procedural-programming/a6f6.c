@@ -3,14 +3,13 @@
 int GetInteger(void);
 
 #define N 5
-// The author understands that the following line of code might be controversial.
 #define GENDERS 2
 #define FIELDS 4
 
 #define FOR(i, count) for (int i = 0; i < count; i++)
 #define PROMPT(fieldName, fieldPos)       \
     {                                     \
-        printf("Dwse " #fieldName ": ");  \
+        printf("Dwse %s: ", fieldName);   \
         data[i][fieldPos] = GetInteger(); \
     }
 
@@ -18,10 +17,10 @@ void readData(int data[N][FIELDS])
 {
     FOR(i, N)
     {
-        PROMPT(fylo, 0);
-        PROMPT(baros, 1);
-        PROMPT(ypsos, 2);
-        PROMPT(ilikia, 3);
+        PROMPT("fylo", 0);
+        PROMPT("baros", 1);
+        PROMPT("ypsos", 2);
+        PROMPT("ilikia", 3);
         printf("-----\n");
     }
 }

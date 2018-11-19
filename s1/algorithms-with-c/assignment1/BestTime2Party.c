@@ -12,63 +12,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SWAP(type, x1, x2) {type temp = x1; (x1) = x2; (x2) = temp;}
+#define HOURS 24
 
-typedef enum {
-    LEAVING = -1,
-    COMING = +1
-} scheduleEvent_t;
-
-typedef struct {
-    /* The assignment statement's hours are all whole, with no minutes. */
-    unsigned int startingHour;
-    scheduleEvent_t event;
-} scheduleEntry_t;
-
-typedef scheduleEntry_t *scheduleEntry_p;
-
-int compareScheduleEntries(const void *x1, const void *x2) {
-    unsigned int hour1 = ((scheduleEntry_p) x1)->startingHour;
-    unsigned int hour2 = ((scheduleEntry_p) x2)->startingHour;
-    if (hour1 < hour2)
-        return -1;
-    else if (hour1 > hour2)
-        return 1;
-    else
-        return 0;
+#define VALIDATE_24H(x) { \
+    if (x < 1 || x > HOURS) { \
+        fprintf(stderr, "The hours number must be between 1 and HOURS, inclusive, but it is %u", x); \
+        exit(1); \
+    } \
 }
 
 unsigned int getBestHour(const size_t length, const unsigned int data[length][2]) {
-    int entriesLength = length * 2;
-    scheduleEntry_t entries[entriesLength];
-    for (int i = 0; i < length; i++) {
-        entries[i * 2].startingHour = data[i][0];
-        entries[i * 2].event = COMING;
+    int hours[HOURS];
 
-        entries[i * 2 + 1].startingHour = data[i][1];
-        entries[i * 2 + 1].event = LEAVING;
+    for (int i = 0; i < HOURS; i++)
+        hours[i] = 0;
+
+    for (int i = 0; i < length; i++) {
+        VALIDATE_24H(data[i][0])
+        hours[data[i][0] - 1] += 1;
+
+        VALIDATE_24H(data[i][1])
+        hours[data[i][1] - 1] -= 1;
     }
 
-    /*
-     * To avoid a quicksort worst-case scenario, the first element of
-     * the list (the quicksort's pivot) will be swapped with a random element.
-     * In the announcement, the starting hour of the first performer (18:00) is indeed the earliest one.
-     * There's no reason to become fully rigorous by shuffling the entire array with the Fisher-Yates algorithm.
-     * The modulo operator in the rand() function is not perfectly equidistributed, but it doesn't matter that much.
-     */
-    SWAP(scheduleEntry_t, entries[0], entries[rand() % (entriesLength - 1) + 1]); // NOLINT(cert-msc50-cpp)
-    qsort((void *) data, length, sizeof(scheduleEntry_t), compareScheduleEntries);
-
-    int currentMetalArtists = 1, maxMetalArtists = 1;
-    unsigned int maxMetalArtistsHour = entries[0].startingHour;
-    for (int i = 1; i < entriesLength; i++) {
-        currentMetalArtists += (int) entries[i].event;
+    unsigned int maxMetalArtistsHour = 0;
+    int currentMetalArtists = hours[maxMetalArtistsHour], maxMetalArtists = currentMetalArtists;
+    for (unsigned int i = 1; i < HOURS; i++) {
+        currentMetalArtists += hours[i];
         if (currentMetalArtists > maxMetalArtists) {
             maxMetalArtists = currentMetalArtists;
-            maxMetalArtistsHour = entries[i].startingHour;
+            maxMetalArtistsHour = i;
         }
     }
-    return maxMetalArtistsHour;
+    return maxMetalArtistsHour + 1;
 }
 
 #define SAMPLE_DATA_SIZE 15

@@ -1,15 +1,13 @@
 #include "simpio.h"
 #include <stdio.h>
 
-#define UL unsigned long
-
-void decompose(UL x, UL *digitsCount, double *digitsAvg, UL *maxDigit)
+void decompose(long x, long *digitsCount, double *digitsAvg, long *maxDigit)
 {
-    UL dc = 0, md = 0;
+    long dc = 0, md = 0;
     double da = 0;
     while (x != 0)
     {
-        UL digit = x % 10;
+        long digit = x % 10;
         dc++;
         da += (double)digit;
         if (digit > md)
@@ -25,12 +23,12 @@ void decompose(UL x, UL *digitsCount, double *digitsAvg, UL *maxDigit)
 int main()
 {
     printf("Please insert non-negative number:");
-    UL x = (unsigned long)GetLong();
+    long x = GetLong();
 
-    UL digitsCount, maxDigit;
+    long digitsCount, maxDigit;
     double digitsAvg;
     decompose(x, &digitsCount, &digitsAvg, &maxDigit);
 
-    printf("Digits: %lu, Average: %.3f, Max: %lu\n", digitsCount, digitsAvg, maxDigit);
+    printf("Digits: %ld, Average: %.3f, Max: %ld\n", digitsCount, digitsAvg, maxDigit);
     return 0;
 }

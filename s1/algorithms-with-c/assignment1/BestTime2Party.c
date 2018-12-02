@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HOURS 24
 
@@ -24,8 +25,7 @@
 unsigned int getBestHour(const size_t length, const unsigned int data[length][2]) {
     int hours[HOURS];
 
-    for (int i = 0; i < HOURS; i++)
-        hours[i] = 0;
+    memset(hours, 0, HOURS * sizeof(int));
 
     for (int i = 0; i < length; i++) {
         VALIDATE_24H(data[i][0])

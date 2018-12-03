@@ -27,11 +27,12 @@ void readCarRental(carRentalT *cr)
     cr->rentDays = GetInteger();
     printf("Dose timi ana imera: ");
     cr->dailyRate = GetReal();
+    printf("\n");
 }
 
 void printCarRental(const carRentalT *cr, double totalPrice)
 {
-    printf("%-8d%-*s%-*s%-5d%-6d%-5.2lf%-5.2lf\n", cr->id, NAME_LENGTH, cr->customerName, BRAND_LENGTH, cr->brand, cr->cc, cr->rentDays, cr->dailyRate, totalPrice);
+    printf("%-8d%-*s%-*s%-6d%-6d%-6.2f%-6.2f\n", cr->id, NAME_LENGTH - 1, cr->customerName, BRAND_LENGTH + 1, cr->brand, cr->cc, cr->rentDays, cr->dailyRate, totalPrice);
 }
 
 int findBestRentalPriceIndex(int len, const double rentalPrices[len])
@@ -65,6 +66,7 @@ int main()
         rentalPrices[i] = (double) carRentals[i].rentDays * carRentals[i].dailyRate;
         priceSum += rentalPrices[i];
     }
+    printf("\n");
 
     int bestRentalIdx = findBestRentalPriceIndex(len, rentalPrices);
     carRentalT *bestRental = &carRentals[bestRentalIdx];
@@ -75,5 +77,5 @@ int main()
         printCarRental(&carRentals[i], rentalPrices[i]);
     printf("-------------------------------------------------------------------------\n");
     printf("                                                    Total  %-5.2lf        \n", priceSum);
-    printf("Best car: %s %d rented for %.2lf Euros.\n", bestRental->brand, bestRental->cc, rentalPrices[bestRentalIdx]);
+    printf("Best car: %s %d rented for %.2f Euros.\n", bestRental->brand, bestRental->cc, rentalPrices[bestRentalIdx]);
 }

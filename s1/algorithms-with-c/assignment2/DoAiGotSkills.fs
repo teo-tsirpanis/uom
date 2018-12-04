@@ -1,33 +1,43 @@
 // © by Theodore Tsirpanis
 
 open FsCheck
+open LanguagePrimitives
 open System
 open System.Diagnostics
 
 type ProblemDomain = {
     Employees: (int * int Set) list
     AllSkills: int Set
-} 
+}
 
-let tryMax =
+let tryLeast =
     function
     | [] -> None
-    | x -> List.max x |> Some
+    | x -> x |> List.minBy Set.count |> Some
 
 let solveIt {Employees = employees; AllSkills = allSkills} =
+    let mutable minTries = employees.Length
     let rec impl hired skills =
         function
-        | _ when skills = allSkills -> Some hired
+        | _ when Set.count hired > minTries -> None
+        | _ when skills = allSkills ->
+            minTries <- Set.count hired
+            Some hired
         | [] -> None
         | (emp, skill) :: xs ->
-            [
-                impl hired skills xs
-                impl (Set.add emp hired) (Set.union skill skills) xs
-            ]
-            |> List.choose id
-            |> tryMax
+            let fDontHireHim() = impl hired skills xs
+            let fHireHim() = impl (Set.add emp hired) (Set.union skill skills) xs
+            if Set.isSubset skill skills then
+                fDontHireHim()
+            else
+                [
+                    fHireHim()
+                    fDontHireHim()
+                ]
+                |> List.choose id
+                |> tryLeast
     impl Set.empty Set.empty employees
-    
+
 let problemDomainGen employees skills =
     Gen.choose (1, skills)
     |> Gen.nonEmptyListOf
@@ -65,7 +75,7 @@ let main args =
     printfn "%d skills are needed, and there are %d employees available..." skills employees
     let sw = Stopwatch()
     let domain = Gen.eval skills (Random.newSeed()) (problemDomainGen employees skills)
-    printfn "%A" domain
+    printfn "%A" domain.Employees
     sw.Start()
     let result = solveIt domain
     sw.Stop()

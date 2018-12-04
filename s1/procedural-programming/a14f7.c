@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define LEN 282
 
@@ -22,6 +23,8 @@ void shuffle(char* str)
 int main()
 {
     char word[LEN], shuffled[LEN];
+
+    srand(time(NULL));
 
     printf("Word to shuffle :");
     gets(word);

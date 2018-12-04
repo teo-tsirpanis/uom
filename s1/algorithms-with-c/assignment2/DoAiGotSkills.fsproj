@@ -9,4 +9,8 @@
     <Compile Include="DoAiGotSkills.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FsCheck" Version="2.13.0" />
+  </ItemGroup>
+
 </Project>

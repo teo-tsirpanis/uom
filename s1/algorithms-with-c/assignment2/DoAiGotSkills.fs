@@ -4,11 +4,17 @@ open FsCheck
 open LanguagePrimitives
 open System
 open System.Diagnostics
+open System
 
 type ProblemDomain = {
-    Employees: (int * int Set) list
+    Employees: int Set list
     AllSkills: int Set
 }
+with
+    override x.ToString() =
+        x.Employees
+        |> Seq.mapi (fun idx x -> x |> Seq.map string |> String.concat"; " |> sprintf "%d: %s" (idx + 1))
+        |> String.concat Environment.NewLine
 
 let tryLeast =
     function
@@ -17,16 +23,16 @@ let tryLeast =
 
 let solveIt {Employees = employees; AllSkills = allSkills} =
     let mutable minTries = employees.Length
-    let rec impl hired skills =
+    let rec impl currEmployee hired skills =
         function
         | _ when Set.count hired > minTries -> None
         | _ when skills = allSkills ->
             minTries <- Set.count hired
             Some hired
         | [] -> None
-        | (emp, skill) :: xs ->
-            let fDontHireHim() = impl hired skills xs
-            let fHireHim() = impl (Set.add emp hired) (Set.union skill skills) xs
+        | skill :: xs ->
+            let fDontHireHim() = impl (currEmployee + 1u) hired skills xs
+            let fHireHim() = impl (currEmployee + 1u) (Set.add currEmployee hired) (Set.union skill skills) xs
             if Set.isSubset skill skills then
                 fDontHireHim()
             else
@@ -36,14 +42,13 @@ let solveIt {Employees = employees; AllSkills = allSkills} =
                 ]
                 |> List.choose id
                 |> tryLeast
-    impl Set.empty Set.empty employees
+    impl 1u Set.empty Set.empty employees
 
 let problemDomainGen employees skills =
     Gen.choose (1, skills)
     |> Gen.nonEmptyListOf
     |> Gen.map set
     |> Gen.listOfLength employees
-    |> Gen.map (List.mapi (fun idx x -> idx + 1, x))
     |> Gen.map (fun x -> {Employees = x; AllSkills = set [1 .. skills]})
 
 let sample1 =
@@ -75,7 +80,7 @@ let main args =
     printfn "%d skills are needed, and there are %d employees available..." skills employees
     let sw = Stopwatch()
     let domain = Gen.eval skills (Random.newSeed()) (problemDomainGen employees skills)
-    printfn "%A" domain.Employees
+    printfn "%O" domain
     sw.Start()
     let result = solveIt domain
     sw.Stop()

@@ -35,7 +35,7 @@ void calc_salaries(teacher_t *t)
 
 void print_data(const teacher_t *t)
 {
-    printf("%-16s%-21s%8.2lf%12d%7.2lf%9.2lf%5.2lf%5.2lf\n", t->name, t->surname, t->wage, t->hours, t->gross, t->deductions, t->tax, t->net);
+    printf("%-16s%-21s%11.2lf%15d%10.2lf%12.2lf%8.2lf%8.2lf\n", t->name, t->surname, t->wage, t->hours, t->gross, t->deductions, t->tax, t->net);
 }
 
 #define FOR for (int i = 0; i < len; i++)
@@ -51,6 +51,8 @@ int main()
         printf("\n");
         printf("Dose ta stoixeia tou kathigiti %d\n", i);
         get_data(&teachers[i]);
+
+        calc_salaries(&teachers[i]);
     }
 
     printf("\n\n");

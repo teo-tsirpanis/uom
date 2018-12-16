@@ -46,7 +46,7 @@ void readInput(FILE *infile, studentT students[], int *pApousies, int *pStudents
         if (apousies > 100)
         {
             strcpy(students[*pApousies].name, name);
-            students[*pApousies].apousies;
+            students[*pApousies].apousies = apousies;
             (*pApousies)++;
         }
         (*pStudents)++;

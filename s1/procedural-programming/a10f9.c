@@ -10,13 +10,6 @@
         exit(1);            \
     }
 
-typedef enum
-{
-    SAW_NOTHING,
-    SAW_DOT,
-    SAW_COMMA
-} state_t;
-
 int main()
 {
     FILE *infile = fopen("i10f9.dat", "r");

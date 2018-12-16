@@ -15,7 +15,7 @@ FILE *getFile (char *purpose, char *mode)
     char fn[282];
     while(f == NULL)
     {
-        printf("Dwse to onoma gia to arxeio %s", purpose);
+        printf("Dwse to onoma gia to arxeio %s: ", purpose);
         gets(fn);
 
         f = fopen(fn, mode);
@@ -53,19 +53,19 @@ void readInput(FILE *infile, studentT students[], int *pApousies, int *pStudents
     }
 }
 
-void writeOutput(FILE* outfile, int size, studentT students[size], int total)
+void writeOutput(FILE* outfile, int size, studentT absentStudents[size], int totalStudents)
 {
     int i;
     fprintf(outfile, "%-30s%-9s\n", "ONOMATEPWNYMO", "APOUSIES");
     fprintf(outfile, "---------------------------------------\n");
 
     for(int i = 0; i < size; i++)
-        fprintf(outfile, "%-30s%-9d\n", students[i].name, students[i].apousies);
-    
+        fprintf(outfile, "%-30s%-9d\n", absentStudents[i].name, absentStudents[i].apousies);
+
     fprintf(outfile, "---------------------------------------\n");
 
-    sprintf(outfile, "%-30s%-9d\n", "SYNOLO MATHITWN:", total);
-    sprintf(outfile, "%-30s%-9d\n", "SYNOLO APONTWN:", size);
+    fprintf(outfile, "%-30s%-9d\n", "SYNOLO MATHITWN:", totalStudents);
+    fprintf(outfile, "%-30s%-9d\n", "SYNOLO APONTWN:", size);
 }
 
 int main()
@@ -77,5 +77,9 @@ int main()
 
     readInput(inFile, students, &numOfApousies, &numOfStudents);
 
-    writeOutput(outfile, numOfStudents, students)
+    writeOutput(outFile, numOfApousies, students, numOfStudents);
+
+    fclose(inFile);
+    fclose(outFile);
+    return 0;
 }

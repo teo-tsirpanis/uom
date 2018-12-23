@@ -8,7 +8,7 @@ open System
 
 type ProblemDomain = {
     Employees: int Set list
-    AllSkills: int Set
+    SkillsCount: int
 }
 with
     override x.ToString() =
@@ -16,40 +16,51 @@ with
         |> Seq.mapi (fun idx x -> x |> Seq.map string |> String.concat"; " |> sprintf "%d: %s" (idx + 1))
         |> String.concat Environment.NewLine
 
-let tryLeast =
-    function
-    | [] -> None
-    | x -> x |> List.minBy Set.count |> Some
-
-let solveIt {Employees = employees; AllSkills = allSkills} =
-    let mutable minTries = employees.Length
-    let rec impl currEmployee hired skills =
-        function
-        | _ when Set.count hired > minTries -> None
-        | _ when skills = allSkills ->
-            minTries <- Set.count hired
-            Some hired
-        | [] -> None
-        | skill :: xs ->
-            let fDontHireHim() = impl (currEmployee + 1u) hired skills xs
-            let fHireHim() = impl (currEmployee + 1u) (Set.add currEmployee hired) (Set.union skill skills) xs
-            if Set.isSubset skill skills then
-                fDontHireHim()
+let solveIt {Employees = allEmployees; SkillsCount = skillsCount} =
+    let approximateBest =
+        let rec impl employees forHire skills =
+            if Set.count skills = skillsCount then
+                forHire
+            else
+                let bestEmployee = employees |> Seq.maxBy (fun x -> Set.difference x skills)
+                impl (Set.remove bestEmployee employees) (Set.add bestEmployee forHire) (Set.union bestEmployee skills)
+        impl (set allEmployees) Set.empty Set.empty |> Set.count
+    // List length is expensive.
+    let employeesCount = uint32 <| List.length allEmployees
+    let rec backTrackIt employees forHire skills idx limit =
+        match employees with
+        | _ when Set.count skills = skillsCount -> forHire
+        | [] -> set [1u .. employeesCount]
+        | _ when Set.count forHire = limit -> set [1u .. employeesCount]
+        | employeeForHire :: employees ->
+            let notHired = backTrackIt employees forHire skills (idx + 1u) limit
+            let limit =
+                if Set.count notHired < limit then
+                    Set.count notHired
+                else
+                    limit
+            if Set.isSubset employeeForHire skills then
+                notHired
             else
                 [
-                    fHireHim()
-                    fDontHireHim()
-                ]
-                |> List.choose id
-                |> tryLeast
-    impl 1u Set.empty Set.empty employees
+                    notHired
+
+                    backTrackIt
+                        employees
+                        (Set.add idx forHire)
+                        (Set.union employeeForHire skills)
+                        (idx + 1u)
+                        limit
+                ] |> List.minBy Set.count
+    backTrackIt allEmployees Set.empty Set.empty 1u approximateBest
+
 
 let problemDomainGen employees skills =
     Gen.choose (1, skills)
     |> Gen.nonEmptyListOf
     |> Gen.map set
     |> Gen.listOfLength employees
-    |> Gen.map (fun x -> {Employees = x; AllSkills = set [1 .. skills]})
+    |> Gen.map (fun x -> {Employees = x; SkillsCount = skills})
 
 let sample1 =
     [

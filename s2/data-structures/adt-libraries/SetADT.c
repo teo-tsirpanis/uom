@@ -2,7 +2,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SetADT.h"
+
+#define megisto_plithos 255          //μέγιστο πλήθος στοιχείων συνόλου
+
+
+typedef enum {
+    FALSE, TRUE
+} boolean;
+
+typedef boolean typos_synolou[megisto_plithos];
+typedef int stoixeio_synolou;
 
 
 void Dimiourgia(typos_synolou synolo)

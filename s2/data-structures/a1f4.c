@@ -8,15 +8,19 @@ void Search(ListPointer freePtr, // UNUSED
             boolean *found,
             ListPointer *prevPtr)
 {
-    *prevPtr = NilValue;
-    ListPointer n = nodes[*prevPtr].Next;
-    while (n != NilValue) {
-        if (nodes[n].Data == itemToFind)
-        {
-            *found = TRUE;
-            return;
-        }
-        *prevPtr = n;
-        n = nodes[*prevPtr].Next;
+  *found = FALSE;
+  if (EmptyLList(list))
+    return;
+  *prevPtr = NilValue;
+  ListPointer n = nodes[*prevPtr].Next;
+  while (n != NilValue)
+  {
+    if (nodes[n].Data >= itemToFind)
+    {
+      *found = nodes[n].Data == itemToFind;
+      return;
     }
+    *prevPtr = n;
+    n = nodes[*prevPtr].Next;
+  }
 }

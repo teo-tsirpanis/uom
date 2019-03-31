@@ -10,3 +10,4 @@ s1/procedural-programming/main.c
 **/bin
 **/obj
 s1/procedural-programming/o*.dat
+.vscode/

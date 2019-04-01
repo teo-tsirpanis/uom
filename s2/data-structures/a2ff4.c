@@ -9,7 +9,7 @@ void DeleteLastLL(ListPointer *List)
     ListPointer prev = *List;
     ListPointer curr = prev->Next;
 
-    while (curr != NULL)
+    while (curr->Next != NULL)
     {
         prev = curr;
         curr = prev->Next;

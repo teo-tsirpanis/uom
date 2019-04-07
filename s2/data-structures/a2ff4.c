@@ -6,8 +6,8 @@ void DeleteLastLL(ListPointer *List)
     if (EmptyList(*List))
         return;
 
-    ListPointer prev = *List;
-    ListPointer curr = prev->Next;
+    ListPointer prev = NULL;
+    ListPointer curr = *List;
 
     while (curr->Next != NULL)
     {

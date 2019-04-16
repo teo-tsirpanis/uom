@@ -38,6 +38,15 @@ boolean EmptyBST(BinTreePointer Root)
 {   return (Root==NULL);
 }
 
+int CompareElementTypes(const BinTreeElementType *x1, const BinTreeElementType *x2)
+{
+    #ifdef USE_BST_EMPLOYEE
+    return strcmp(x1->name, x2->name);
+    #else
+    return *x1 - *x2;
+    #endif
+}
+
 void BSTInsert(BinTreePointer *Root, BinTreeElementType Item) 
 /* Δέχεται:     Ένα ΔΔΑ με το δείκτη Root να δείχνει στη ρίζα του και ένα στοιχείο Item. 
    Λειτουργία:  Εισάγει το στοιχείο Item στο ΔΔΑ. 
@@ -52,9 +61,10 @@ void BSTInsert(BinTreePointer *Root, BinTreeElementType Item)
     Found = FALSE;
     while (!Found && LocPtr != NULL) {
         Parent = LocPtr;
-        if (Item < LocPtr->Data)
+        int cmp = CompareElementTypes(&Item, &LocPtr->Data);
+        if (cmp < 0)
             LocPtr = LocPtr ->LChild;
-        else if (Item > LocPtr ->Data)
+        else if (cmp > 0)
             LocPtr = LocPtr ->RChild;
         else
             Found = TRUE;
@@ -68,34 +78,11 @@ void BSTInsert(BinTreePointer *Root, BinTreeElementType Item)
         LocPtr ->RChild = NULL;
         if (Parent == NULL)
             *Root = LocPtr;
-        else if (Item < Parent ->Data)
+        else if (CompareElementTypes(&Item, &Parent->Data) < 0)
             Parent ->LChild = LocPtr;
         else
             Parent ->RChild = LocPtr;
     }
-}
-
-void BSTSearch(BinTreePointer Root, BinTreeElementType KeyValue, boolean *Found, 
-                BinTreePointer *LocPtr)
-/* Δέχεται:    Ένα ΔΔΑ με το δείκτη Root να δείχνει στη ρίζα του και μια τιμή KeyValue. 
-   Λειτουργία: Αναζητά στο ΔΔΑ έναν κόμβο με τιμή KeyValue στο πεδίο κλειδί του.  
-   Επιστρέφει: Η Found έχει τιμή TRUE και ο δείκτης LocPtr δείχνει στον κόμβο που 
-                περιέχει την τιμή KeyValue, αν η αναζήτηση είναι επιτυχής. 
-                Διαφορετικά η Found έχει τιμή FALSE 
-*/
-{
-  
-    (*LocPtr) = Root;
-    (*Found) = FALSE;
-    while (!(*Found) && (*LocPtr) != NULL)
-    {
-        if (KeyValue < (*LocPtr)->Data)
-            (*LocPtr) = (*LocPtr)->LChild;
-        else
-            if (KeyValue > (*LocPtr)->Data)
-                (*LocPtr) = (*LocPtr)->RChild;
-            else (*Found) = TRUE;
-    } 
 }
 
 void BSTSearch2(BinTreePointer Root, BinTreeElementType KeyValue, boolean *Found, 
@@ -114,18 +101,32 @@ void BSTSearch2(BinTreePointer Root, BinTreeElementType KeyValue, boolean *Found
     *Found = FALSE;
     while (!(*Found) && *LocPtr != NULL)
     {
-        if (KeyValue < (*LocPtr)->Data) {
+        int cmp = CompareElementTypes(&KeyValue, &(*LocPtr)->Data);
+        if (cmp < 0) {
             *Parent=*LocPtr;
             *LocPtr = (*LocPtr)->LChild;
         }
         else
-            if (KeyValue > (*LocPtr)->Data) {
+            if (cmp > 0) {
                 *Parent=*LocPtr;
                 *LocPtr = (*LocPtr)->RChild;
             }
             else *Found = TRUE;
     }
 
+}
+
+void BSTSearch(BinTreePointer Root, BinTreeElementType KeyValue, boolean *Found, 
+                BinTreePointer *LocPtr)
+/* Δέχεται:    Ένα ΔΔΑ με το δείκτη Root να δείχνει στη ρίζα του και μια τιμή KeyValue. 
+   Λειτουργία: Αναζητά στο ΔΔΑ έναν κόμβο με τιμή KeyValue στο πεδίο κλειδί του.  
+   Επιστρέφει: Η Found έχει τιμή TRUE και ο δείκτης LocPtr δείχνει στον κόμβο που 
+                περιέχει την τιμή KeyValue, αν η αναζήτηση είναι επιτυχής. 
+                Διαφορετικά η Found έχει τιμή FALSE 
+*/
+{
+    BinTreePointer _unused;
+    BSTSearch2(Root, KeyValue, Found, LocPtr, &_unused);
 }
 
 void BSTDelete(BinTreePointer *Root, BinTreeElementType KeyValue)

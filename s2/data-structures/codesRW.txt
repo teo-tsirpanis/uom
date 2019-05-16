@@ -1,0 +1,10 @@
+begin
+10
+end
+11
+for
+000
+if
+01
+while
+001

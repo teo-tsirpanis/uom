@@ -13,3 +13,4 @@ s1/procedural-programming/o*.dat
 .vscode/
 .ionide/
 *.user
+.ipynb_checkpoints/

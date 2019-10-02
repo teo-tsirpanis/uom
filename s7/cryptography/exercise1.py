@@ -71,13 +71,17 @@ def crackSubstitutionCipher(dictionary, ciphertextWords):
     return result
 
 
+def loadUrl(url, path):
+    try:
+        with open(path, "r") as f:
+            return f.read()
+    except object:
+        return urllib2.urlopen(url).read()
+
+
 def loadWords():
     d = {}
-    try:
-        with open("words_alpha.txt", "r") as f:
-            words = f.read()
-    except object:
-        words = urllib2.urlopen("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt").read()
+    words = loadUrl("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt", "words_alpha.txt")
     for w in words.splitlines():
         w = w.upper()
         uCode = calculateUniquenessCode(w)
@@ -88,14 +92,46 @@ def loadWords():
     return d
 
 
-englishWords = loadWords()
-print len(englishWords)
+def calculateLetterFrequency():
+    d = {}
+    text = loadUrl("http://www.gutenberg.org/cache/epub/1404/pg1404.txt", "pg1404.txt")
+    for x in text:
+        x = x.upper()
+        if x.isalpha():
+            if x in d:
+                d[x] = d[x] + 1
+            else:
+                d[x] = 1
+    return d
 
 
-def crack(sentence):
-    ciphertext_words = sentence.split(" ")
-    return crackSubstitutionCipher(englishWords, ciphertext_words)
+def crack(dictionary, sentence):
+    words = filter(lambda c: c.isalpha(), sentence).split(" ")
+    return crackSubstitutionCipher(dictionary, words)
 
 
-for x in crack("HUOOPUOHH DT HOBQQUO FOOQ FO BQ QSO BDRPMRQ"):
-    print x
+if __name__ == '__main__':
+    print "This is a cracker of Substitution Ciphers."
+    print "Written by Theodore Tsirpanis (dai19090)."
+    englishWords = loadWords()
+    print "Powered by a dictionary of {0} English words.".format(len(englishWords))
+    print "\nBut first, let's talk about letter frequencies in English text."
+    print "As an example, we will take the 85 Federalist Papers."
+    letterFrequency = calculateLetterFrequency()
+    for x in range(ord("A"), ord("Z") + 1):
+        c = chr(x)
+        print "{0} appears {1} time(s)".format(c, letterFrequency[c] if c in letterFrequency else 0)
+    print ""
+    while True:
+        sentence = raw_input("Please enter your encrypted English sentence to crack (only ASCII letters): ")
+        if not sentence:
+            break
+        words = sentence.split(" ")
+        possiblePlaintext = crackSubstitutionCipher(englishWords, words)
+
+        if possiblePlaintext:
+            print "'{0}' can be decoded into something of these:".format(sentence)
+            for p in possiblePlaintext:
+                print "* {0}".format(p)
+        else:
+            print "Unfortunately, '{0}' cannot be decoded".format(sentence)

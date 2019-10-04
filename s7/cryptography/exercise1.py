@@ -114,7 +114,7 @@ def calculateLetterFrequency():
 
 
 def crack(dictionary, sentence):
-    words = filter(lambda c: c.isalpha(), sentence).split(" ")
+    words = filter(lambda w: w.isalpha() or w == " ", sentence).split(" ")
     return crackSubstitutionCipher(dictionary, words)
 
 
@@ -146,8 +146,7 @@ if __name__ == '__main__':
         sentence = raw_input("Please enter your encrypted English sentence to crack (only ASCII letters): ")
         if not sentence:
             break
-        words = sentence.split(" ")
-        possiblePlaintext = crackSubstitutionCipher(englishWords, words)
+        possiblePlaintext = crack(englishWords, sentence)
 
         if possiblePlaintext:
             if sentence[0] == " ":

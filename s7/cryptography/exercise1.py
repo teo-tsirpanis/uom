@@ -1,3 +1,13 @@
+# University of Macedonia,
+# Department of Applied Informatics,
+# Semester 7,
+# Cryptography,
+# Assignment 1
+
+# Created by: Theodore Tsirpanis
+# Professor: Sofia Petridou
+
+import math
 import urllib2
 
 numberOfLetters = 26
@@ -34,8 +44,6 @@ def couldHaveBeen(subMap, possiblePlaintext, ciphertext):
         else:
             if c in subMap.viewvalues():
                 return False
-        # if (p in subMap and subMap[p] != c) or c in subMap.viewvalues():
-            # return False
     return True
 
 
@@ -110,10 +118,22 @@ def crack(dictionary, sentence):
     return crackSubstitutionCipher(dictionary, words)
 
 
+def pickMostLikely(letterFrequency, lengthOfResults, sentences):
+    def getFrequencyScore(sentence):
+        i = 0
+        for c in sentence:
+            if c in letterFrequency:
+                i += letterFrequency[c]
+        return i
+    sortedSentences = sorted(sentences, key=getFrequencyScore)
+    return sortedSentences[-lengthOfResults:]
+
+
 if __name__ == '__main__':
     print "This is a cracker of Substitution Ciphers."
     print "Written by Theodore Tsirpanis (dai19090)."
     englishWords = loadWords()
+    lengthOfResults = int(math.ceil(math.sqrt(len(englishWords))))
     print "Powered by a dictionary of {0} English words.".format(len(englishWords))
     print "\nBut first, let's talk about letter frequencies in English text."
     print "As an example, we will take the 85 Federalist Papers."
@@ -130,8 +150,15 @@ if __name__ == '__main__':
         possiblePlaintext = crackSubstitutionCipher(englishWords, words)
 
         if possiblePlaintext:
+            if sentence[0] == " ":
+                possiblePlaintextFiltered = possiblePlaintext
+            else:
+                possiblePlaintextFiltered = pickMostLikely(letterFrequency, lengthOfResults, possiblePlaintext)
             print "'{0}' can be decoded into something of these:".format(sentence)
-            for p in possiblePlaintext:
+            for p in possiblePlaintextFiltered:
                 print "* {0}".format(p)
+            if len(possiblePlaintextFiltered) != len(possiblePlaintext):
+                print "Some results are omitted. Only the {0} sentences with the most common letters are shown".format(lengthOfResults)
+                print "If you want to display all results, add a space before yor ciphertext."
         else:
             print "Unfortunately, '{0}' cannot be decoded".format(sentence)

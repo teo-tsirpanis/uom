@@ -61,12 +61,14 @@ def mergeDictionaries(dest, source):
 
 
 def crackSubstitutionCipher(dictionary, ciphertextWords):
+    uCodes = map(calculateUniquenessCode, ciphertextWords)
+
     def impl(subMap, plaintextWords, i):
         if i == len(ciphertextWords):
             yield plaintextWords
             return
         c = ciphertextWords[i]
-        uCode = calculateUniquenessCode(c)
+        uCode = uCodes[i]
         possiblePlaintextWords = filter(lambda p: couldHaveBeen(subMap, p, c),
                                         dictionary[uCode] if uCode in dictionary else [])
         for pNew in possiblePlaintextWords:

@@ -91,16 +91,18 @@ def loadUrl(url, cachedPath):
 
 
 def loadWords():
+    count = 0
     d = {}
     words = loadUrl("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt", "words_alpha.txt")
     for w in words.splitlines():
+        count += 1
         w = w.upper()
         uCode = calculateUniquenessCode(w)
         if uCode in d:
             d[uCode].append(w)
         else:
             d[uCode] = [w]
-    return d
+    return d, count
 
 
 def calculateLetterFrequency():
@@ -137,9 +139,9 @@ def pickMostLikely(letterFrequency, lengthOfResults, sentences):
 if __name__ == '__main__':
     print "This is a cracker of Substitution Ciphers."
     print "Written by Theodore Tsirpanis (dai19090)."
-    englishWords = loadWords()
+    englishWords, wordCount = loadWords()
     lengthOfResults = 75
-    print "Powered by a dictionary of {0} English words.".format(len(englishWords))
+    print "Powered by a dictionary of {0} English words.".format(wordCount)
     print "\nBut first, let's talk about letter frequencies in English text."
     print "As an example, we will take the 85 Federalist Papers."
     letterFrequency = calculateLetterFrequency()

@@ -7,7 +7,6 @@
 # Created by: Theodore Tsirpanis
 # Professor: Sofia Petridou
 
-import math
 import urllib2
 
 numberOfLetters = 26
@@ -81,9 +80,11 @@ def crackSubstitutionCipher(dictionary, ciphertextWords):
     return result
 
 
-def loadUrl(url, path):
+def loadUrl(url, cachedPath):
+    # These files are big, so we can save
+    # bandwidth by caching them in a file.
     try:
-        with open(path, "r") as f:
+        with open(cachedPath, "r") as f:
             return f.read()
     except object:
         return urllib2.urlopen(url).read()
@@ -121,6 +122,8 @@ def crack(dictionary, sentence):
 
 
 def pickMostLikely(letterFrequency, lengthOfResults, sentences):
+    # We will sort them so that the most likely plaintext comes last.
+    # This way, the user will see it without scrolling up.
     def getFrequencyScore(sentence):
         i = 0
         for c in sentence:
@@ -135,7 +138,7 @@ if __name__ == '__main__':
     print "This is a cracker of Substitution Ciphers."
     print "Written by Theodore Tsirpanis (dai19090)."
     englishWords = loadWords()
-    lengthOfResults = int(math.ceil(math.sqrt(len(englishWords))))
+    lengthOfResults = 75
     print "Powered by a dictionary of {0} English words.".format(len(englishWords))
     print "\nBut first, let's talk about letter frequencies in English text."
     print "As an example, we will take the 85 Federalist Papers."

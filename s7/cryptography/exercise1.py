@@ -153,13 +153,12 @@ if __name__ == '__main__':
         sentence = raw_input("Please enter your encrypted English sentence to crack (only ASCII letters): ")
         if not sentence:
             break
-        possiblePlaintext = crack(englishWords, sentence)
+        possiblePlaintext = crack(englishWords, sentence.strip())
 
         if possiblePlaintext:
             if sentence[0] == " ":
-                possiblePlaintextFiltered = possiblePlaintext
-            else:
-                possiblePlaintextFiltered = pickMostLikely(letterFrequency, lengthOfResults, possiblePlaintext)
+                lengthOfResults = len(possiblePlaintext)
+            possiblePlaintextFiltered = pickMostLikely(letterFrequency, lengthOfResults, possiblePlaintext)
             print "'{0}' can be decoded into something of these:".format(sentence)
             for p in possiblePlaintextFiltered:
                 print "* {0}".format(p)

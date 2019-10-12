@@ -20,7 +20,7 @@ def denormalizeChar(x):
     return chr(x + ord('A'))
 
 
-def calculateUniquenessCode(s):
+def calculateFirstIncidenceCode(s):
     xs = []
     d = {}
     for c in s:
@@ -60,16 +60,16 @@ def mergeDictionaries(dest, source):
 
 
 def crackSubstitutionCipher(dictionary, ciphertextWords):
-    uCodes = map(calculateUniquenessCode, ciphertextWords)
+    fiCodes = map(calculateFirstIncidenceCode, ciphertextWords)
 
     def impl(subMap, plaintextWords, i):
         if i == len(ciphertextWords):
             yield plaintextWords
             return
         c = ciphertextWords[i]
-        uCode = uCodes[i]
+        fiCode = fiCodes[i]
         possiblePlaintextWords = filter(lambda p: couldHaveBeen(subMap, p, c),
-                                        dictionary[uCode] if uCode in dictionary else [])
+                                        dictionary[fiCode] if fiCode in dictionary else [])
         for pNew in possiblePlaintextWords:
             possibleSubMap = mergeDictionaries(subMap, generateSubMap(pNew, c))
             for x in impl(possibleSubMap, plaintextWords + (pNew,), i + 1):
@@ -97,7 +97,7 @@ def loadWords():
     for w in words.splitlines():
         count += 1
         w = w.upper()
-        uCode = calculateUniquenessCode(w)
+        uCode = calculateFirstIncidenceCode(w)
         if uCode in d:
             d[uCode].append(w)
         else:

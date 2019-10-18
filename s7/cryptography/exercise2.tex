@@ -1,0 +1,74 @@
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{listings}
+\lstloadlanguages{Python}
+\lstset{
+    language=Python,
+    basicstyle=\small\ttfamily,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    numbers=left,
+    numbersep=5pt,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=2}
+
+\setmainfont{Ubuntu}
+\setmonofont{Ubuntu Mono}
+
+\title{Κρυπτογραφία ~ Άσκηση 2: Επίθεση μόνο Κρυπτοκειμένου}
+\author{Τσιρπάνης Θεόδωρος\\ \texttt{dai19090}}
+\date{Οκτώβριος 2019}
+
+\begin{document}
+
+\maketitle
+
+\section{Ερώτημα 1}
+
+Για να χρησιμοποιήσουμε τους δακτυλίους του SageMath στον ομοπαραλληλικό αλγόριθμο, αρκεί:
+
+\begin{itemize}
+\item να μετατρέψουμε τους αριθμούς στην συνάρτηση \lstinline|str2lst| ώστε να ανήκουν στον δακτύλιο $Z_n$.
+
+\item να γυρίσουμε τους άκεραίους στην συνάρτηση \lstinline|lst2str| πίσω στον $Z_n$.
+
+\item να αφαιρέσουμε τον τελεστή modulo στις συναρτήσεις κρυπτογράφισης και αποκρυπτογράφισης.
+\end{itemize}
+
+
+Με τις παραπάνω αλλαγές, ο κώδικας θα γίνει ως εξής:
+
+\begin{lstlisting}[caption=Ο κώδικας στο SageMath]
+n = 26
+Zn = IntegerModRing(n)
+
+a=11
+b=4
+
+def str2lst(s):
+    return [Zn(ord(x)-ord(``A'')) for x in s]
+
+def lst2str(lst):
+    return ''.join([chr(int(x)+ord(``A'')) for x in lst])
+
+def affine_enc(m,k1,k2):
+    plaintextList = str2lst(m)
+    ciphertextList = [k1*x + k2 for x in plaintextList]
+    ciphertext = lst2str(ciphertextList)
+    return ciphertext
+
+def affine_dec(c,k1,k2):
+    k1_inverse=inverse_mod(k1,26)
+    ciphertextList = str2lst(c)
+    plaintextList = [k1_inverse * (x-k2) for x in ciphertextList]
+    plaintext = lst2str(plaintextList)
+    return plaintext
+\end{lstlisting}
+
+Ένα άλλο πλεονέκτημα στην μετατροπή αυτή είναι ότι οι συναρτήσεις \lstinline|affine_enc| και \lstinline|affine_dec| λειτουργούν ανεξάρτητα από την τάξη του δακτυλίου. Η αρμοδιότητα αυτή βρίσκεται μόνο στην \lstinline|str2lst|.
+
+
+
+\end{document}

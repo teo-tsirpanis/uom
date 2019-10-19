@@ -89,7 +89,7 @@ $$c \equiv am + b \pmod n$$
 \begin{cases}
 c_1 \equiv a m_1 + b \pmod n \\
 c_2 \equiv a m_2 + b \pmod n
-\end{cases} &\Rightarrow (-) \\
+\end{cases} (-) &\Rightarrow \\
 c_1 - c_2 \equiv a(m_1 - m_2) \pmod n &\Rightarrow \\
 a \equiv (m_1 - m_2)^{-1} (c_1 - c_2) \pmod n
 \end{split}
@@ -99,7 +99,7 @@ a \equiv (m_1 - m_2)^{-1} (c_1 - c_2) \pmod n
 
 \begin{align*}
 c &\equiv am + b \pmod n \Rightarrow \\
-b &\equiv c - am \pmod n
+\Rightarrow b &\equiv c - am \pmod n
 \end{align*}
 
 Για να υπολογιστεί το $(m_1 - m_2)^{-1} \pmod n$, θα πρέπει το $m_1 - m_2$ να είναι σχετικά πρώτος με το $n$. Σε μια \emph{Επίθεση Επιλεγμένου Απλού Κειμένου (Chosen Plaintext Attack)}, μπορούμε να επιλέξουμε τα δύο απλά κείμενα ώστε να πληρούν την παραπάνω ιδιότητα. Αν δεν μπορούμε να τα επιλέξουμε όμως, θα πρέπει να περιμένουμε να μας τύχουν δύο τέτοια. Στο παράδειγμά μας με τα λατινικά γράμματα, υπάρχουν $\phi(26) = \phi(13)\phi(2) = (13-1)(2-1) = 12$ άριθμοί σχετικά πρώτοι με το 26. Άρα, η πιθανότητα της διαφοράς δύο αριθμών στο $\mathbb{Z}_{26}$ να είναι σχετικά πρώτη με το 26 είναι $\frac{12}{26} \approx 46\%$. Σε συνηθισμένο αγγλικό κείμενο --όπως η λέξη \texttt{UNIVERSITY} του παραδείγματος-- οι πιθανότητες αυξάνονται περισσότερο.
@@ -107,10 +107,38 @@ b &\equiv c - am \pmod n
 Ας δούμε κι' ένα παράδειγμα. Με $n = 26$, έχουμε το απλό κείμενο $\texttt{WE} \equiv (23, 5)$, που κρυπτογραφείται σε $\texttt{MW} \equiv (13, 23)$. Αντικαθιστώντας τις τιμές στην (\ref{crack_a}), έχουμε:
 
 \begin{align*}
-a &\equiv (23 - 13)^{-1} (5 - 23) \pmod{26} \Rightarrow \\
-a &\equiv 10^{-1} \dot 8 \pmod{26}
+a &\equiv (23 - 13)^{-1} (5 - 23) &\pmod{26} \\
+  &\equiv 10^{-1} \cdot 8 &\pmod{26}
 \end{align*}
 
 Το πρόβλημα είναι ότι δεν υπάρχει το $10^{-1} \pmod{26}$, που σημαίνει ότι δεν μπορούμε να βρούμε το κλειδί μόνο με τις πληροφορίες που έχουμε. Θα πρέπει να αποκτήσουμε περισσότερα ζεύγη απλού κειμένου-κρυπτοκειμένου για να αυξήσουμε τις πιθανότητές μας να ταιριάζουν δύο από αυτά.
+
+Προφανώς αυτή η συνθήκη θα ικανοποιούταν πάντοτε αν το $n$ ήταν πρώτος.
+
+\section*{Ερώτημα 3}
+
+Στο τρίτο ερώτημα, καλούμαστε να τροποποιήσουμε τον κώδικα του εργαστηρίου που επιτίθετο στον ομοπαραλληλικό κρυπταλγόριθμο ώστε να προσπαθεί να βρει μια δυάδα απλών κειμένων που ικανοποιούν την ιδιότητα που περιγράψαμε στο \emph{Ερώτημα 2}. Ο κώδικας θα μετατραπεί ως εξής:
+
+\begin{lstlisting}
+def find_suitable_plaintext_pair(plaintext):
+    for i in range(len(plaintext) - 1):
+        for j in xrange(i + 1, len(plaintext)):
+            if gcd(plaintext[i] - plaintext[j], n) == 1:
+                return (i, j)
+    raise RuntimeError("Cannot crack the given plaintext-ciphertext pair. Please provide a bigger sample")
+
+def affine_analysis(m,c):
+    mList=str2lst(m)
+    cList=str2lst(c)
+
+    idx0, idx1 = find_suitable_plaintext_pair(mList)
+
+    A = matrix(Z26, 2, 2, [mList[idx0], 1, mList[idx1], 1])
+    b = vector(Z26, [cList[idx0], cList[idx1]])
+    key=A.solve_right(b)
+    return key
+\end{lstlisting}
+
+Ας μιλήσουμε για τον κώδικα. Την σταθερά \lstinline|n|, την ορίσαμε στο προηγούμενο τμήμα κώδικα, και μπορούμε να αλλάξουμε. Ομοίως ορίσαμε τις συναρτήσεις \lstinline|str2lst| και \lstinline|lst2str|. Η αφαίρεση στην γραμμή 4 δεν χρειάζεται τον τελεστή modulo να την περιβάλλει, χάρη στην \lstinline|str2lst| που έθεσε τους ακεραίους στο $\mathbb{Z}_n$. Η συνάρτηση \lstinline|find_suitable_plaintext_pair| δοκιμάζει όλους τους χαρακτήρες του απλού κειμένου μεταξύ τους μέχρι να βρει κάποιο ζευγάρι που ταιριάζει. Αν το βρει, το χρησιμοποιεί για να πραγματοποιήσει την επίθεση. Αν δεν το βρει, σημαίνει μια εξαίρεση ζητώντας ένα μεγαλύτερο δείγμα.
 
 \end{document}

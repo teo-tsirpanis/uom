@@ -7,8 +7,7 @@
 // Created by: Theodore Tsirpanis
 // Professor: Ioannis Refanidis
 
-open System
-open System.Collections
+open System.Collections.Generic
 
 /// A strongly typed index of a Finite Automaton (FA) state.
 type FAStateIndex = FAStateIndex of int
@@ -48,7 +47,7 @@ let getState {States = fsStates} (FAStateIndex stateIdx) =
 // It accepts _a sequence of states_ to avoid wasteful computations.
 let EClosure fa states =
     let visited = HashSet()
-    let q = Queue(states)
+    let q = Queue(seq states)
     while q.Count <> 0 do
         let state = q.Dequeue()
         if visited.Add(state) then
@@ -59,10 +58,10 @@ let EClosure fa states =
 /// Gets the next FA states when encountering the given character.
 let faAdvance fa states c =
     states
+    |> EClosure fa
+    |> Seq.collect (fun state -> state.GetNextStates(c))
     |> Seq.map (getState fa)
-    |> EClosure
-    |> Seq.map (fun state -> state.GetNextStates(c))
-    |> Set.unionMany
+    |> set
 
 /// Decides whether the given `FA` recognizes the given string.
 let faMatch fa str =
@@ -85,4 +84,5 @@ let faMatch fa str =
                     newStates
             // This tail-recursive call is compiled into a while loop.
             impl newStates (i + 1)
-    impl (Set.singleton fa.InitialState) 0
+    let initialState = getState fa fa.InitialState |> Set.singleton
+    impl initialState 0

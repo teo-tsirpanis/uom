@@ -18,10 +18,10 @@ type FAState = {
     IsAccept: bool
     /// A tree map matching a character to a set of possible state indices.
     // Because types in F# are immutable, we have to store the state index.
-    Edges: Map<char, FAStateIndex Set>
+    Edges: Map<char, FAStateIndex list>
     /// The indices of all the states that are connected to this one via
     /// an ε (epsilon) transition.
-    EpsilonTransitions: FAStateIndex Set
+    EpsilonTransitions: FAStateIndex list
 }
 with
     /// A wrapper for the `Edges` field, but returns an
@@ -29,7 +29,7 @@ with
     member x.GetNextStates c =
         match x.Edges.TryGetValue(c) with
         | true, states -> states
-        | false, _ -> Set.empty
+        | false, _ -> []
 
 /// A Finite Automaton.
 type FA = {
@@ -52,8 +52,8 @@ let EClosure fa states =
         let state = q.Dequeue()
         if visited.Add(state) then
             state.EpsilonTransitions
-            |> Set.iter (getState fa >> q.Enqueue)
-    set visited
+            |> List.iter (getState fa >> q.Enqueue)
+    Seq.readonly visited
 
 /// Gets the next FA states when encountering the given character.
 let faAdvance fa states c =

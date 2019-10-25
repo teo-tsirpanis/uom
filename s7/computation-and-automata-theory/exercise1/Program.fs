@@ -7,10 +7,8 @@
 // Created by: Theodore Tsirpanis
 // Professor: Ioannis Refanidis
 
+open System
 open System.Collections.Generic
-
-/// A strongly typed index of a Finite Automaton (FA) state.
-type FAStateIndex = FAStateIndex of int
 
 /// The state of an FA.
 type FAState = {
@@ -18,10 +16,10 @@ type FAState = {
     IsAccept: bool
     /// A tree map matching a character to a set of possible state indices.
     // Because types in F# are immutable, we have to store the state index.
-    Edges: Map<char, FAStateIndex list>
+    Edges: Map<char, int list>
     /// The indices of all the states that are connected to this one via
     /// an ε (epsilon) transition.
-    EpsilonTransitions: FAStateIndex list
+    EpsilonTransitions: int list
 }
 with
     /// A wrapper for the `Edges` field, but returns an
@@ -34,13 +32,13 @@ with
 /// A Finite Automaton.
 type FA = {
     /// The FA's initial state.
-    InitialState: FAStateIndex
+    InitialState: int
     /// The FA's states.
     States: FAState[]
 }
 
 /// Gets the `FAState` with the given `FAStateIndex`, from the given `FA`.
-let getState {States = fsStates} (FAStateIndex stateIdx) =
+let getState {States = fsStates} stateIdx =
     fsStates.[stateIdx]
 
 /// Computes the ε-closure of the given FA states.
@@ -86,3 +84,74 @@ let faMatch fa str =
             impl newStates (i + 1)
     let initialState = getState fa fa.InitialState |> Set.singleton
     impl initialState 0
+
+let readFA() =
+    let readInt() = Console.ReadLine() |> int
+    let (|OneBasedInt|) str = int str - 1
+    let (|Char|) str = char str
+    eprintf "How many states are there in the automaton? "
+    let statesCount = readInt()
+    let transitions = Array.create statesCount []
+    let epsilonTransitions = Array.create statesCount []
+    let acceptingStates = Array.create statesCount false
+    eprintf "Which of them is the initial state? "
+    let (OneBasedInt initialState) = Console.ReadLine()
+    eprintf "How many accepting states are there? "
+    readInt() |> ignore
+    eprintf "Write the accepting state numbers separated by a space: "
+    Console.ReadLine().Split(' ')
+    |> Array.iter(fun (OneBasedInt idx) -> acceptingStates.[idx] <- true)
+    eprintf "How many transitions does are there? "
+    let transitionCount = readInt()
+    eprintfn "Now, write each transition as follows: <state from> <character to encounter> <state to>."
+    eprintfn "For ε-transitions, omit the character to encounter."
+    eprintfn "The indices are one-based."
+    for _ = 1 to transitionCount do
+        match Console.ReadLine().Split(' ') with
+        | [|OneBasedInt sFrom; Char c; OneBasedInt sTo|] ->
+            transitions.[sFrom]<- (c, sTo) :: transitions.[sFrom]
+        | [|OneBasedInt sFrom; OneBasedInt sTo|] ->
+            epsilonTransitions.[sFrom] <- sTo :: epsilonTransitions.[sFrom]
+        | _ -> failwith "Invalid input"
+    let states = Array.init statesCount (fun idx ->
+        let transitions =
+            transitions.[idx]
+            |> List.groupBy fst
+            |> Seq.map (fun (c, states) -> c, List.map snd states)
+            |> Map.ofSeq
+        {IsAccept = acceptingStates.[idx]; Edges = transitions; EpsilonTransitions = epsilonTransitions.[idx]})
+    {InitialState = initialState; States = states}
+
+let printColor color fmt =
+    let oldColor = Console.ForegroundColor
+    try
+        Console.ForegroundColor <- color
+        printf fmt
+    finally
+        Console.ForegroundColor <- oldColor
+
+let faInteractive fa =
+    let rec loop() =
+        match Console.ReadLine() with
+        | null -> ()
+        | str ->
+            let isMatch = faMatch fa str
+            printf "%s: " str
+            if isMatch then
+                printColor ConsoleColor.Green "SUCCESS\n"
+            else
+                printColor ConsoleColor.Red "FAILURE\n"
+            loop()
+    eprintfn "Write the string you want to check against your Finite Automator, each per line."
+    // https://stackoverflow.com/questions/11968558/
+    let eofCharacter = if Environment.OSVersion.Platform = PlatformID.Win32NT then 'Z' else 'D'
+    eprintfn "To stop, press Ctrl+%c." eofCharacter
+    loop()
+
+[<EntryPoint>]
+let main _args =
+    eprintfn "This is a simulator for Finite Automata."
+    eprintfn "Created by Theodore Tsirpanis (dai19090)."
+    let fa = readFA()
+    faInteractive fa
+    0

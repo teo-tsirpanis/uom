@@ -85,32 +85,40 @@ let faMatch fa str =
     let initialState = getState fa fa.InitialState |> Set.singleton
     impl initialState 0
 
-let readFA() =
+/// Reads a Finite Automaton from the console.
+let faRead() =
     let readInt() = Console.ReadLine() |> int
     let (|OneBasedInt|) str = int str - 1
-    let (|Char|) str = char str
+
     eprintf "How many states are there in the automaton? "
     let statesCount = readInt()
     let transitions = Array.create statesCount []
     let epsilonTransitions = Array.create statesCount []
     let acceptingStates = Array.create statesCount false
+
     eprintf "Which of them is the initial state? "
     let (OneBasedInt initialState) = Console.ReadLine()
+
     eprintf "How many accepting states are there? "
     readInt() |> ignore
+
     eprintf "Write the accepting state numbers separated by a space: "
     Console.ReadLine().Split(' ')
     |> Array.iter(fun (OneBasedInt idx) -> acceptingStates.[idx] <- true)
+
     eprintf "How many transitions does are there? "
     let transitionCount = readInt()
+
     eprintfn "Now, write each transition as follows: <state from> <character to encounter> <state to>."
     eprintfn "For ε-transitions, omit the character to encounter."
     eprintfn "The indices are one-based."
     for _ = 1 to transitionCount do
         match Console.ReadLine().Split(' ') with
-        | [|OneBasedInt sFrom; Char c; OneBasedInt sTo|] ->
-            transitions.[sFrom]<- (c, sTo) :: transitions.[sFrom]
+        | [|OneBasedInt sFrom; c; OneBasedInt sTo|] ->
+            // The transition is a normal one with a symbol.
+            transitions.[sFrom]<- (char c, sTo) :: transitions.[sFrom]
         | [|OneBasedInt sFrom; OneBasedInt sTo|] ->
+            // The transition lacks a symbol, therefore it is an ε-transition.
             epsilonTransitions.[sFrom] <- sTo :: epsilonTransitions.[sFrom]
         | _ -> failwith "Invalid input"
     let states = Array.init statesCount (fun idx ->
@@ -122,6 +130,7 @@ let readFA() =
         {IsAccept = acceptingStates.[idx]; Edges = transitions; EpsilonTransitions = epsilonTransitions.[idx]})
     {InitialState = initialState; States = states}
 
+/// A little helper that writes colored text to the console.
 let printColor color fmt =
     let oldColor = Console.ForegroundColor
     try
@@ -130,6 +139,8 @@ let printColor color fmt =
     finally
         Console.ForegroundColor <- oldColor
 
+/// Interactively asks strings from the user and
+/// checks whether they are recognized by the given `FA`.
 let faInteractive fa =
     let rec loop() =
         match Console.ReadLine() with
@@ -152,6 +163,8 @@ let faInteractive fa =
 let main _args =
     eprintfn "This is a simulator for Finite Automata."
     eprintfn "Created by Theodore Tsirpanis (dai19090)."
-    let fa = readFA()
+    eprintfn ""
+    let fa = faRead()
+    eprintfn ""
     faInteractive fa
     0

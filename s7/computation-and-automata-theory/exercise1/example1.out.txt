@@ -1,0 +1,3 @@
+abba: SUCCESS
+baabbabababa: SUCCESS
+ababababababbbababab: FAILURE

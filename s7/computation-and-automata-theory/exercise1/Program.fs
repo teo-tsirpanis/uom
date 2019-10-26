@@ -62,9 +62,14 @@ let faAdvance fa states c =
     |> set
 
 /// Decides whether the given `FA` recognizes the given string.
-let faMatch fa str =
+let faMatch fa =
+    // A dictionary is created only once per `FA`.
+    // This allows memoization to persist past the
+    // recognition of a string. But we have to pertially
+    // apply this function, as we will see later.
+    // Also, the dictionary is not thread-safe, but we don't care.
     let dict = Dictionary()
-    let rec impl states i =
+    let rec impl states str i =
         if i = String.length str then
             // An NFA has accepted a string if it
             // is in at least one accepting state.
@@ -81,13 +86,15 @@ let faMatch fa str =
                     dict.Add((states, c), newStates)
                     newStates
             // This tail-recursive call is compiled into a while loop.
-            impl newStates (i + 1)
+            impl newStates str (i + 1)
     let initialState = getState fa fa.InitialState |> Set.singleton
-    impl initialState 0
+    fun str -> impl initialState str 0
 
 /// Reads a Finite Automaton from the console.
 let faRead() =
     let readInt() = Console.ReadLine() |> int
+    // This active pattern converts the one-based string indices
+    // from the input to zero-based integers for the program.
     let (|OneBasedInt|) str = int str - 1
 
     eprintf "How many states are there in the automaton? "
@@ -142,11 +149,14 @@ let printColor color fmt =
 /// Interactively asks strings from the user and
 /// checks whether they are recognized by the given `FA`.
 let faInteractive fa =
+    // We pass only the `FA` object to `faMatch`.
+    // We got a function that gets a string.
+    let fMatch = faMatch fa
     let rec loop() =
         match Console.ReadLine() with
         | null -> ()
         | str ->
-            let isMatch = faMatch fa str
+            let isMatch = fMatch str
             printf "%s: " str
             if isMatch then
                 printColor ConsoleColor.Green "SUCCESS\n"

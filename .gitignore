@@ -14,3 +14,4 @@ s1/procedural-programming/o*.dat
 .ionide/
 *.user
 .ipynb_checkpoints/
+out/

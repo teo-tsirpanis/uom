@@ -42,7 +42,7 @@ public class Game {
      * @return Whether to continue calling this method.
      *         {@code false} if the game has ended, {@code true} otherwise.
      */
-    public Boolean stepGame(AbstractEventListener listener) {
+    public boolean stepGame(AbstractEventListener listener) {
         // First check if the game is won.
         PlayerMark winnerMaybe = WinnerChecker.didAnybodyWon(board);
         if (winnerMaybe != null) {

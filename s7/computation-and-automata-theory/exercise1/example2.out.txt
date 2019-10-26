@@ -1,0 +1,5 @@
+aa: FAILURE
+aba: SUCCESS
+abb: FAILURE
+ab: SUCCESS
+abab: SUCCESS

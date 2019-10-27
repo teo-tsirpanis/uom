@@ -1,8 +1,9 @@
 package dai19090.oop1.hangman.core;
 
 /**
- * A class that reports the outcome of a game to the {@link GameManager}.
+ * An interface that reports the outcome of a game.
  * Only one of any methods must be called.
+ * This interface is not public to prevent its abuse.
  */
 interface IGameEventListener {
     /**

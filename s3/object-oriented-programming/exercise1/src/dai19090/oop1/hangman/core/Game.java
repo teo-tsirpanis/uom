@@ -16,7 +16,8 @@ public final class Game {
     private int failedGuesses = 0;
 
     /**
-     * Creates a {@link Game}. This method is intended for internal use only.
+     * Creates a {@link Game}. This constructor is intended for internal use only.
+     * Consumers should use {@link GameManager#createGame()} instead.
      * @param trueWord The word the player has to guess.
      * @param eventListener The {@link IGameEventListener} to report the outcome to.
      */
@@ -26,14 +27,6 @@ public final class Game {
         this.distinctCharacters = Utilities.getDistinctCharacters(this.trueWord);
         // Giving eight attempts for a word with nine distinct characters is futile.
         this.guessesLeft = distinctCharacters > DEFAULT_ATTEMPTS ? distinctCharacters + 5 : DEFAULT_ATTEMPTS;
-    }
-
-    /**
-     * Creates a {@link Game}.
-     * @param trueWord The word the player has to guess.
-     */
-    public Game(String trueWord) {
-        this(trueWord, null);
     }
 
     /**
@@ -66,7 +59,7 @@ public final class Game {
     /**
      * @return How many {@link Game#attempt}s the player can do before he loses.
      */
-    public long getGuessesLeft() {
+    public int getGuessesLeft() {
         return guessesLeft;
     }
 

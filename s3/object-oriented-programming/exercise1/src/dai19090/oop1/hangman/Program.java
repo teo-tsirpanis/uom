@@ -4,12 +4,7 @@ import dai19090.oop1.hangman.core.*;
 
 import java.util.Scanner;
 
-public class Program {
-
-    private static void printStats(Game game) {
-        System.out.printf("You made %d correct guesses and %d wrong guesses.\n",
-                game.getSuccessfulGuesses(), game.getFailedGuesses());
-    }
+class Program {
 
     private static char getCharacterGuess(Scanner in) {
         String s = "";
@@ -46,13 +41,13 @@ public class Program {
 
             if (game.isWon()) {
                 System.out.printf("Congratulations! You guessed the word: %s\n", game.getWord());
-                printStats(game);
+                // There is no reason to display the number of successful and unsuccessful guesses.
+                // The player already knows them.
                 break;
             }
 
             if (game.isLost()) {
                 System.out.printf("Too bad. :-( You didn't guess the word (it was %s).\n", game.getWord());
-                printStats(game);
                 break;
             }
         }

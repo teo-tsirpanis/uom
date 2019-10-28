@@ -6,14 +6,12 @@ import java.util.HashSet;
  * A game of Hangman. It can be associated with a {@link GameManager}.
  */
 public final class Game {
-    private static final int DEFAULT_ATTEMPTS = 8;
     private final String trueWord;
     private final IGameEventListener eventListener;
     private final HashSet<Character> charactersTried = new HashSet<>(26);
     private final int distinctCharacters;
-    private int guessesLeft;
+    private int guessesLeft = 5;
     private int successfulGuesses = 0;
-    private int failedGuesses = 0;
 
     /**
      * Creates a {@link Game}. This constructor is intended for internal use only.
@@ -25,8 +23,6 @@ public final class Game {
         this.trueWord = trueWord.toUpperCase();
         this.eventListener = eventListener;
         this.distinctCharacters = Utilities.getDistinctCharacters(this.trueWord);
-        // Giving eight attempts for a word with nine distinct characters is futile.
-        this.guessesLeft = distinctCharacters > DEFAULT_ATTEMPTS ? distinctCharacters + 5 : DEFAULT_ATTEMPTS;
     }
 
     /**
@@ -41,7 +37,6 @@ public final class Game {
         else if (!charactersTried.add(c))
             return AttemptResult.ALREADY_SUBMITTED;
         else if (trueWord.indexOf(c) != -1) {
-            guessesLeft--;
             successfulGuesses++;
             if (isWon() && eventListener != null)
                 eventListener.won();
@@ -49,7 +44,6 @@ public final class Game {
         }
         else {
             guessesLeft--;
-            failedGuesses++;
             if (isLost() && eventListener != null)
                 eventListener.lost();
             return AttemptResult.INCORRECT_ANSWER;
@@ -61,20 +55,6 @@ public final class Game {
      */
     public int getGuessesLeft() {
         return guessesLeft;
-    }
-
-    /**
-     * @return How many successful guesses the player has done.
-     */
-    public int getSuccessfulGuesses() {
-        return successfulGuesses;
-    }
-
-    /**
-     * @return How many unsuccessful guesses the player has done.
-     */
-    public int getFailedGuesses() {
-        return failedGuesses;
     }
 
     /**
@@ -95,6 +75,8 @@ public final class Game {
      * @return The word to find, but with the undiscovered characters obscured.
      */
     public String getWord() {
+        if (isWon() || isLost())
+            return trueWord;
         StringBuilder sb = new StringBuilder(trueWord.length());
         for (int i = 0; i < trueWord.length(); i++)
             if (charactersTried.contains(trueWord.charAt(i)))

@@ -13,7 +13,7 @@ import java.util.Random;
  */
 public final class WordFactory extends AbstractWordFactory {
     // Powered by https://www.wordfrequency.info.
-    private static final String WORDS_FILE = "words5000.txt";
+    private static final String WORDS_FILE = "words.txt";
     // Capitalization of the words does not matter.
     private static String[] englishWords = {
             "UNIVERSITY",

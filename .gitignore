@@ -7,11 +7,13 @@
 s1/procedural-programming/main.c
 
 **/cmake-build-*/
-**/bin
-**/obj
+bin/
+obj/
 s1/procedural-programming/o*.dat
 .vscode/
 .ionide/
 *.user
 .ipynb_checkpoints/
 out/
+*.synctex.gz
+*.dia~

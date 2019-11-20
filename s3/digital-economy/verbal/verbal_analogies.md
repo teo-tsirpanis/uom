@@ -63,17 +63,17 @@
    6. friend
 
 9.  Sunscreen is to sunburn, as `_____` is to `_____`:
-   7. __umbrella, wet__
-   8. umbrella, sun
-   9. sunscreen, sun
-   10. sun, rain,
-   11. sun, sea
-   12. flowers, spring
+   1. __umbrella, wet__
+   2. umbrella, sun
+   3. sunscreen, sun
+   4. sun, rain,
+   5. sun, sea
+   6. flowers, spring
 
 10. Cloud is to rain, as `_____` is to `_____`:
-   13. sun, snow
-   14. __egg, chicken__
-   15. rainbow, rain
-   16. sand, desert
-   17. sunscreen, tan
-   18. volcano, magma
+   1. sun, snow
+   2. __egg, chicken__
+   3. rainbow, rain
+   4. sand, desert
+   5. sunscreen, tan
+   6. volcano, magma

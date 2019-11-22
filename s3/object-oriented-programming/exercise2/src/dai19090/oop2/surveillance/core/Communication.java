@@ -44,4 +44,25 @@ public abstract class Communication {
         // Descendant classes must override toString().
         System.out.println(this);
     }
+
+	/**
+	 * Checks whether a particular phone number was involved in the communication.
+	 * @param number The number in question.
+	 * @return {@code true}, if {@code number} was wither the caller or the callee
+	 * of this communication, and {@code false} otherwise.
+	 */
+	public final boolean involves(String number) {
+    	return origin.equals(number) || destination.equals(number);
+	}
+
+	/**
+	 * Checks whether two phone numbers communicated in this communication.
+	 * @param number1 The first number.
+	 * @param number2 The second number.
+	 * @return {@code true} if the first number called the second number
+	 * or the opposite, and {@code false} otherwise.
+	 */
+	public final boolean involves(String number1, String number2) {
+		return involves(number1) && involves(number2);
+	}
 }

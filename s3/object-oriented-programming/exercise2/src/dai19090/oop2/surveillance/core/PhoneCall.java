@@ -23,6 +23,9 @@ public final class PhoneCall extends Communication {
         return duration;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "On " + getDate() + ", " + getOrigin() + " phoned " +

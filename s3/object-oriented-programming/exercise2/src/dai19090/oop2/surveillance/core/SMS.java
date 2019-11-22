@@ -1,9 +1,17 @@
 package dai19090.oop2.surveillance.core;
 
+import java.util.Arrays;
+
 /**
  * A communication that was performed via a text message.
  */
 public final class SMS extends Communication {
+    private static final String[] suspiciousWords = {
+            "bomb",
+            "attack",
+            "explosives",
+            "gun"
+    };
     private final String text;
 
     public SMS(String origin, String destination, Date date, String text) {
@@ -18,10 +26,21 @@ public final class SMS extends Communication {
     /**
      * @return The text of the message.
      */
-    public final String getText() {
+    public String getText() {
         return text;
     }
 
+    /**
+     * @return Whether the message contains any suspicious words.
+     */
+    public boolean isSuspicious() {
+        String text = this.text;
+        return Arrays.stream(suspiciousWords).anyMatch(text::contains);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "On " + getDate() + ", " + getOrigin() + " sent a text message to " +

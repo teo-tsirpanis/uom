@@ -19,7 +19,7 @@ public final class SMS extends Communication {
         this.text = text;
     }
 
-    public SMS(String origin, String destination, int year, int month, int day, String text) {
+    public SMS(String origin, String destination, int day, int month, int year, String text) {
         this(origin, destination, new Date(year, month, day), text);
     }
 

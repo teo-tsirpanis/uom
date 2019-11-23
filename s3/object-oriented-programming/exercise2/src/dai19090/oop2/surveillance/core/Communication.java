@@ -45,24 +45,49 @@ public abstract class Communication {
         System.out.println(this);
     }
 
-	/**
-	 * Checks whether a particular phone number was involved in the communication.
-	 * @param number The number in question.
-	 * @return {@code true}, if {@code number} was wither the caller or the callee
-	 * of this communication, and {@code false} otherwise.
-	 */
-	public final boolean involves(String number) {
-    	return origin.equals(number) || destination.equals(number);
-	}
+    /**
+     * Checks whether a particular phone number was involved in the communication.
+     *
+     * @param number The number in question.
+     * @return {@code true}, if {@code number} was either the caller or the callee
+     * of this communication, and {@code false} otherwise.
+     */
+    public final boolean involves(String number) {
+        return origin.equals(number) || destination.equals(number);
+    }
 
-	/**
-	 * Checks whether two phone numbers communicated in this communication.
-	 * @param number1 The first number.
-	 * @param number2 The second number.
-	 * @return {@code true} if the first number called the second number
-	 * or the opposite, and {@code false} otherwise.
-	 */
-	public final boolean involves(String number1, String number2) {
-		return involves(number1) && involves(number2);
-	}
+    /**
+     * Checks whether two phone numbers communicated in this communication.
+     *
+     * @param number1 The first number.
+     * @param number2 The second number.
+     * @return {@code true} if the first number called the second number
+     * or the opposite, and {@code false} otherwise.
+     */
+    public final boolean involves(String number1, String number2) {
+        return involves(number1) && involves(number2);
+    }
+
+    /**
+     * Checks whether a particular {@link Suspect} was involved in the communication.
+     *
+     * @param suspect The {@link Suspect} in question.
+     * @return {@code true}, if {@code suspect} was either the caller or the callee
+     * of this communication, and {@code false} otherwise.
+     */
+    public final boolean involves(Suspect suspect) {
+        return suspect.getNumbersUsed().anyMatch(this::involves);
+    }
+
+    /**
+     * Checks whether two {@link Suspect}s communicated in this communication.
+     *
+     * @param suspect1 The first number.
+     * @param suspect2 The second number.
+     * @return {@code true} if the first {@link Suspect} called the second
+     * {@link Suspect} or the opposite, and {@code false} otherwise.
+     */
+    public final boolean involves(Suspect suspect1, Suspect suspect2) {
+        return involves(suspect1) && involves(suspect2);
+    }
 }

@@ -41,7 +41,8 @@ public class Main {
         comms[13] = new SMS("00478484666666", "00446999888888", 16, 10, 2017, "Explosives downtown have been placed");
 
         //Creation of Registry object
-        AbstractRegistry registry = null;
+		//I had to make a small naming change...
+        AbstractRegistry registry = new InMemoryRegistry();
 
         registry.addSuspect(s1);
         registry.addSuspect(s2);
@@ -53,6 +54,8 @@ public class Main {
 
         //-------------TESTS----------------------
         //Test 1. Suspect With MostPartners
+        //The suspect printed here is different than the exercise's statement.
+        //But that's OK, since all suspects have the same number of partners.
         Suspect topSuspect = registry.getSuspectWithMostPartners();
         System.out.println("Test1 – Suspect with most partners: " + topSuspect.getName() + ", " + topSuspect.getCodeName());
 

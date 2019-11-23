@@ -13,7 +13,7 @@ public final class PhoneCall extends Communication {
     }
 
     public PhoneCall(String origin, String destination, int day, int month, int year, int duration) {
-        this(origin, destination, new Date(year, month, day), duration);
+        this(origin, destination, new Date(day, month, year), duration);
     }
 
     /**

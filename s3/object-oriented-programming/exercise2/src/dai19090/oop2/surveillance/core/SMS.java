@@ -20,7 +20,7 @@ public final class SMS extends Communication {
     }
 
     public SMS(String origin, String destination, int day, int month, int year, String text) {
-        this(origin, destination, new Date(year, month, day), text);
+        this(origin, destination, new Date(day, month, year), text);
     }
 
     /**
@@ -34,7 +34,7 @@ public final class SMS extends Communication {
      * @return Whether the message contains any suspicious words.
      */
     public boolean isSuspicious() {
-        String text = this.text;
+        String text = this.text.toLowerCase();
         return Arrays.stream(suspiciousWords).anyMatch(text::contains);
     }
 

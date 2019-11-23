@@ -26,9 +26,14 @@ public abstract class AbstractRegistry {
     public abstract Stream<Suspect> suspects();
 
     /**
-     * @return The {@link Suspect} with the most partners.
+     * @return The {@link Suspect} with the most partners,
+     * or {@code null} if there aren't any.
      */
-    public abstract Suspect getSuspectWithMostPartners();
+    public Suspect getSuspectWithMostPartners() {
+        return suspects()
+                .max(Comparator.comparingLong(suspect -> suspect.getPartners().count()))
+                .orElse(null);
+    };
 
     /**
      * Adds a new {@link Communication} to the system.

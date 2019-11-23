@@ -91,7 +91,8 @@ public final class Suspect {
         // But since performance of a program is not a criterion in its evaluation,
         // this is OK. In real life, a DBMS would have been more suitable of efficiently
         // answering such queries.
-        return getOwner().communications()
+        return x != this &&
+                getOwner().communications()
                 .anyMatch(comm -> comm.involves(this, x));
     }
 

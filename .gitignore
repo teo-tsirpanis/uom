@@ -16,4 +16,5 @@ s1/procedural-programming/o*.dat
 .ipynb_checkpoints/
 out/
 *.synctex.gz
+*.log
 *.dia~

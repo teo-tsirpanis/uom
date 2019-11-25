@@ -13,6 +13,7 @@ public final class Suspect {
     private final String city;
 
     private final HashSet<String> numbersUsed = new HashSet<>();
+    private final HashSet<Suspect> partners = new HashSet<>();
     private AbstractRegistry owner;
 
     public Suspect(String name, String codeName, String country, String city) {
@@ -22,25 +23,36 @@ public final class Suspect {
         this.city = city;
     }
 
-    private AbstractRegistry getOwner() {
-        if (owner != null)
-            return owner;
-        else
-            throw new RuntimeException("This suspect object is not added in any registry.");
-    }
-
+    /**
+     * An internal method which sets the {@link AbstractRegistry}
+     * which "owns" this suspect. It must be called only once,
+     * at {@link AbstractRegistry#addSuspect}.
+     *
+     * @param owner The {@link AbstractRegistry} in question.
+     */
     void setOwner(AbstractRegistry owner) {
-        if (owner != null)
+        if (this.owner == null)
             this.owner = owner;
         else {
             //noinspection UnnecessaryLocalVariable
-            RuntimeException up = new RuntimeException("A suspect cannot be added to different registries.");
+            RuntimeException up = new RuntimeException("The suspect's owning registry cannot be set twice.");
             throw up;
         }
     }
 
+    void addPartner(Suspect partner) {
+        partners.add(partner);
+    }
+
+    /**
+     * Adds a phone number to the numbers this suspect uses.
+     *
+     * @param number The phone number in question.
+     */
     public void addNumber(String number) {
         numbersUsed.add(number);
+        if (owner != null)
+            owner.addPhoneNumberToSuspect(number, this);
     }
 
     /**
@@ -86,14 +98,10 @@ public final class Suspect {
      * numbers known to belong to the two {@link Suspect}s.
      */
     public boolean isConnectedTo(Suspect x) {
-        // This function sadly takes O(n²) time.
-        // Impressive how two lines of the Java 8 streams can hide so much complexity.
-        // But since performance of a program is not a criterion in its evaluation,
-        // this is OK. In real life, a DBMS would have been more suitable of efficiently
-        // answering such queries.
-        return x != this &&
-                getOwner().communications()
-                .anyMatch(comm -> comm.involves(this, x));
+        return x != this // A suspect cannot be a partner with himself.
+                // Normally, both sides of the OR should be true,
+                // but we are taking precautions.
+                && (this.partners.contains(x) || x.partners.contains(this));
     }
 
     /**
@@ -104,10 +112,10 @@ public final class Suspect {
      * {@link Suspect}s.
      */
     public ArrayList<Suspect> getCommonPartners(Suspect aSuspect) {
-        // Oh boy! That's O(n³)!
-        return getOwner().suspects()
-                .filter(suspect -> suspect.isConnectedTo(this) && suspect.isConnectedTo(aSuspect))
-                .collect(Collectors.toCollection(ArrayList::new));
+        // https://stackoverflow.com/a/8882126
+        HashSet<Suspect> intersection = new HashSet<>(partners);
+        intersection.retainAll(aSuspect.partners);
+        return new ArrayList<>(intersection);
     }
 
     /**
@@ -116,7 +124,7 @@ public final class Suspect {
      * @return All the {@link Suspect}s that have communicated to this one.
      */
     public Stream<Suspect> getPartners() {
-        return getOwner().suspects().filter(this::isConnectedTo);
+        return partners.stream();
     }
 
     /**

@@ -2,7 +2,7 @@ package dai19090.oop2.surveillance;
 
 import dai19090.oop2.surveillance.core.*;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 public class InMemoryRegistry extends AbstractRegistry {
     private ArrayList<Suspect> _suspects = new ArrayList<>();
     private ArrayList<Communication> _communications = new ArrayList<>();
+    private HashMap<String, Suspect> _numbers = new HashMap<>();
 
     /**
      * {@inheritDoc}
@@ -39,6 +40,7 @@ public class InMemoryRegistry extends AbstractRegistry {
     @Override
     public void addCommunication(Communication communication) {
         _communications.add(communication);
+        super.addCommunication(communication);
     }
 
     /**
@@ -47,5 +49,21 @@ public class InMemoryRegistry extends AbstractRegistry {
     @Override
     public Stream<Communication> communications() {
         return _communications.stream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void addPhoneNumberToSuspect(String number, Suspect suspect) {
+        _numbers.put(number, suspect);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Suspect getPhoneOwner(String number) {
+        return _numbers.getOrDefault(number, null);
     }
 }

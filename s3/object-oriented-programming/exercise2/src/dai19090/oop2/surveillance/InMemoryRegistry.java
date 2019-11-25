@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * which is the reason more serious alternatives should have
  * been considered in real life.
  */
-public class InMemoryRegistry extends AbstractRegistry {
+public final class InMemoryRegistry extends AbstractRegistry {
     private ArrayList<Suspect> _suspects = new ArrayList<>();
     private ArrayList<Communication> _communications = new ArrayList<>();
     private HashMap<String, Suspect> _numbers = new HashMap<>();

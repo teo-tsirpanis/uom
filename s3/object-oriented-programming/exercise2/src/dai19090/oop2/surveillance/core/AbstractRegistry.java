@@ -41,33 +41,6 @@ public abstract class AbstractRegistry {
     public abstract Stream<Suspect> suspects();
 
     /**
-     * Associates a phone number to a {@link Suspect}.
-     * This method should only be called inside {@link Suspect#addNumber}.
-     *
-     * @param number  The phone number.
-     * @param suspect The {@link Suspect} that uses {@code number}.
-     */
-    protected void addPhoneNumberToSuspect(String number, Suspect suspect) {
-        // Optimized implementations will implement it.
-    }
-
-    /**
-     * @param number The phone number
-     * @returns The {@link Suspect} that uses {@code number},
-     * or {@code null} if there isn't any.
-     */
-    public Suspect getPhoneOwner(String number) {
-        // This algorithm runs in O(n²) time, but can be optimized by
-        // a look-up table in descendant classes that also override
-        // addPhoneNumberToSuspect.
-        return suspects()
-                .filter(suspect ->
-                        suspect.getNumbersUsed()
-                                .anyMatch(number::equals)).findAny()
-                .orElse(null);
-    }
-
-    /**
      * Adds a new {@link Communication} to the system.
      *
      * @param communication The {@link Communication} in question.
@@ -106,6 +79,33 @@ public abstract class AbstractRegistry {
      * @return All the {@link Communication}s stored in the system.
      */
     public abstract Stream<Communication> communications();
+
+    /**
+     * Associates a phone number to a {@link Suspect}.
+     * This method should only be called inside {@link Suspect#addNumber}.
+     *
+     * @param number  The phone number.
+     * @param suspect The {@link Suspect} that uses {@code number}.
+     */
+    protected void addPhoneNumberToSuspect(String number, Suspect suspect) {
+        // Optimized implementations will implement it.
+    }
+
+    /**
+     * @param number The phone number
+     * @returns The {@link Suspect} that uses {@code number},
+     * or {@code null} if there isn't any.
+     */
+    public Suspect getPhoneOwner(String number) {
+        // This algorithm runs in O(n²) time, but can be optimized by
+        // a look-up table in descendant classes that also override
+        // addPhoneNumberToSuspect.
+        return suspects()
+                .filter(suspect ->
+                        suspect.getNumbersUsed()
+                                .anyMatch(number::equals)).findAny()
+                .orElse(null);
+    }
 
     /**
      * @return The {@link Suspect} with the most partners,

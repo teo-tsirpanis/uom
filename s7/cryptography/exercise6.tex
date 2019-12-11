@@ -1,0 +1,142 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{hyperref}
+\usepackage{fontspec}
+\usepackage[greek,english]{babel}
+
+\setmainfont{Ubuntu}
+\setmonofont{Ubuntu Mono}
+
+\title{Κρυπτογραφία--Άσκηση 7: Το Κρυπτοσυστήματα RSA}
+\author{Τσιρπάνης Θεόδωρος\\ \texttt{dai19090}}
+\date{Δεκέμβριος 2019}
+
+\begin{document}
+
+\selectlanguage{greek}
+
+\maketitle
+
+\section*{Ερώτημα 1}
+
+Στο πρώτο ερώτημα έχουμε δύο πρώτους αριθμούς $p = 41$ και $q = 17$ για να χρησιμοποιηθούν στην δημιουργία κλειδιών του RSA. Για να διευκολύνουμε τις πράξεις μας, θα χρησιμοποιήσουμε αντί της συνάρτησης $\phi$ του Euler, την συνάρτηση $\lambda(n) = \lambda(p, q) = lcm(p - 1, q - 1)$ \href{https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Key_generation}{του Carmichael}. Οπότε έχουμε $\lambda(n) = lcm(40, 16) = 80$.
+
+Όσον αφορά το $e$, η μόνη απαίτηση που έχουμε από αυτό είναι να είναι σχετικά πρώτο με το $\lambda(n)$. Αυτό αποκλείει αμέσως το $e_1 = 32$, που σημαίνει ότι $e = e_2 = 49$.
+
+Ας βρούμε το $d$. Θα χρησιμοποιήσουμε τον διευρυμένο αλγόριθμο του Ευκλείδη για το αντίστροφο του $49 \pmod {80}$:
+
+\begin{align*}
+80 &= 49 \cdot 1 + 31 \\
+49 &= 31 \cdot 1 + 18 \\
+31 &= 18 \cdot 1 + 13 \\
+18 &= 13 \cdot 1 + 5 \\
+13 &= 5 \cdot 2 + 3 \\
+5 &= 3 \cdot 1 + 2 \\
+3 &= 2 \cdot 1 + 1
+\end{align*}
+\begin{align*}
+\gcd(80, 49) = 1
+&= 3 \cdot 1 + 2 \cdot (-1) \\
+&= 3 \cdot 1 + (5 + 3 \cdot (-1)) \cdot (-1) &= 5 \cdot (-1) + 3 \cdot 2 \\
+&= 5 \cdot (-1) + (13 + 5 \cdot (-2)) \cdot 2 &= 13 \cdot 2 + 5 \cdot (-5) \\
+&= 13 \cdot 2 + (18 + 13 \cdot (-1)) \cdot (-5) &= 18 \cdot (-5) + 13 \cdot 7 \\
+&= 18 \cdot (-5) + (31 + 18 \cdot (-1)) \cdot 7 &= 31 \cdot 7 + 18 \cdot (-12) \\
+&= 31 \cdot 7 + (49 + 31 \cdot (-1)) \cdot (-12) &= 49 \cdot (-12) + 31 \cdot 19 \\
+&= 49 \cdot (-12) + (80 + 49 \cdot (-1)) \cdot 19 &= 80 \cdot 19 + 49 \cdot (-31)
+\end{align*}
+
+Επομένως, ισχύει ότι $d = 49^{-1} \equiv -31 \equiv 49 \pmod {80}$. Περιέργως, $d = e$.
+
+\section*{Ερώτημα 2}
+
+Το δεύτερο ερώτημα μας ζητά να υπολογίσουμε αποδοτικά δύο δυνάμεις στον $\mathtt{Z}_{101}$.
+
+\begin{itemize}
+    \item {Έχουμε $m = 2$, και $e = 79$. Ισχύει:
+        \begin{align*}
+        2^{79}
+        & \equiv 2 \cdot 2^{78} \\
+        & \equiv 2 \cdot (2^{39})^2 \\
+        & \equiv 2 \cdot (2 \cdot 2^{38})^2 \\
+        & \equiv 2 \cdot (2 \cdot (2^{19})^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot 2^{18})^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2^9)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot 2^8)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot (2^4)^2)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot ((2^2)^2)^2)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot ((2 \cdot 2)^2)^2)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot (4^2)^2)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot 16^2)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot (2 \cdot 54)^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot 7^2)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot (2 \cdot 49)^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot 98^2)^2 \\
+        & \equiv 2 \cdot (2 \cdot 9)^2 \\
+        & \equiv 2 \cdot 18^2 \\
+        & \equiv 2 \cdot 21 \\
+        & \equiv 42 \pmod{101}
+        \end{align*}}
+    
+    \item {Έχουμε $m = 3$ και $e = 197$. Ισχύει:
+        \begin{align*}
+        3^{197}
+        & \equiv 3 \cdot 3^{196} \\
+        & \equiv 3 \cdot (3^{98})^2 \\
+        & \equiv 3 \cdot ((3^{49})^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot 3^{48})^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot (3^{24})^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((3^{12})^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot (((3^6)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((((3^3)^2)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((((3 \cdot 3^2)^2)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((((3 \cdot (3 \cdot 3))^2)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((((3 \cdot 9)^2)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot (((27^2)^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot ((22^2)^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot (80^2)^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot 37^2)^2)^2 \\
+        & \equiv 3 \cdot ((3 \cdot 56)^2)^2 \\
+        & \equiv 3 \cdot (67^2)^2 \\
+        & \equiv 3 \cdot 45^2 \\
+        & \equiv 3 \cdot 5 \\
+        & \equiv 15 \pmod{101}
+        \end{align*}}
+\end{itemize}
+
+\section*{Ερώτημα 3}
+
+\begin{itemize}
+    \item Έχουμε $n = 3 \cdot 11 = 33$, $\lambda(n) = lcm(2, 10) = 10$, $e \equiv 7^{-1} \equiv 3 \pmod {\lambda(n)}$. Άρα $c \equiv m^e \equiv 5^3 \equiv 26 \pmod n$.
+
+    \item Έχουμε $n = 5 \cdot 11 = 55$, $\lambda(n) = lcm(4, 10) = 20$, $d \equiv 3^{-1} \equiv 7 \pmod {\lambda(n)}$. Άρα $m \equiv c^d \equiv 9^7 \equiv 4 \pmod n$.
+\end{itemize}
+
+\section*{Ερώτημα 4}
+
+Σε αυτό το ερώτημα, θα χρησιμοποιήσουμε το Κινέζικο Θεώρημα Υπολοίπων για να αποκρυπτογραφήσουμε το κρυπτοκείμενο $c = 2$ με τον RSA, όπου $p = 31$, $q = 37$, $e = 17$ και $c = 2$:
+
+\begin{gather*}
+n = pq = 1147 \\
+\lambda(n) = lcm(30, 36) = 180 \\
+d \equiv e^{-1} \equiv 53 \pmod{\lambda(n)} \\
+d_p \equiv d \equiv 23 \pmod {p - 1} \\
+d_q \equiv d \equiv 17 \pmod {q - 1} \\
+t_p \equiv q^{-1} \equiv 26 \pmod p \\
+t_q \equiv p^{-1} \equiv 6 \pmod q \\
+c_p \equiv c \equiv 2 \pmod p \\
+c_q \equiv c \equiv 2 \pmod q \\
+m_p \equiv c_p^{d_p} \equiv 8 \pmod p \\
+m_q \equiv c_q^{d_q} \equiv 18 \pmod q \\
+m = qt_pm_p + pt_qm_q = 721 \pmod n \\
+\end{gather*}
+
+Αποκρυπτογραφώντας το με την συμβατική μέθοδο της εκθετοποίησης, καταλήγουμε στο ίδιο αποτέλεσμα, μιας και $c^d \equiv 721 \pmod n$.
+
+\section*{Ερώτημα 5}
+
+Το τελευταίο ερώτημα μας ζητάει να περιγράψουμε ένα πρωτόκολλο επικοινωνίας μεταξύ της Alice και του Bob με τους κρυπταλγορίθμους RSA και AES. Η υλοποίησή του είναι εκπληκτικά απλή. Η κάθε πλευρά διατηρεί το ιδιωτικό κλειδί της και το δημόσιο κλειδί της άλλης, και όταν θέλει να επικοινωνήσει με την άλλη, θα στείλει πρώτα ένα τυχαίο \emph{εφήμερο} κλειδί του AES το οποίο θα κρυπτογραφήσει την υπόλοιπη συνομιλία. Αυτό σημαίνει	ότι το κλειδί καθορίζεται από την πλευρά που ξεκινάει τη συνεδρεία.
+
+\end{document}

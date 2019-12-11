@@ -16,7 +16,7 @@ To sum up, climate change is a phenomenon that should worry all of us because it
 
     a. Cars and Humans
     b. Nature's Revenge
-    c. __Changing Climate__
+    c. __The Changing Climate__
     d. Chemical Chaos
     e. The end draws near
     f. Amazon Alert

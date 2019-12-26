@@ -18,13 +18,21 @@ To sum up, the younger generation made the news services change the way they pro
     e. The preferences of young readers.
     f. News and Elder Generations.
 
-2.In the first paragraph, the phrase “So it is clear [...] the way of informing” means that:
+2. In the first paragraph, the phrase “So it is clear [...] the way of informing” means that:
 	a. Technology is the only reason that these changes happened.
 	b. __The younger generation and the evolution of technology brought these changes.__
 	c. These changes would have happened anyway.
 	d. The way information spreads has changed a lot.
 	e. Changes haven’t occurred.
 	f. The new generation has brought the evolution of technology.
+
+3. Younger audience is referred to:
+    a. Teenagers who have at least finished primary school.
+    b. Teenagers over the age of 17.
+    c. People over the age of 25.
+    d. __The generation with no memories of the pre-internet age.__
+    e. People who attended University.
+    f. Teenagers who have the ability to browse the Internet.
 
 4. Which is the reason for the rise of misinformation over the last decade?
     a. Young people are very gulible.
@@ -33,3 +41,11 @@ To sum up, the younger generation made the news services change the way they pro
     d. Information is being misunderstood as it propagates from mouth to mouth.
     e. The older people's opinions are more easily manipulated.
     f. Social media do nothing to combat fake news.
+
+5. Do you consider that the rise of fake news is caused by the way that the younger audience consume news nowadays?
+    a. Yes, because they only read what they already believe.
+    b. __Yes, because the news services are constantly trying to keep their attention.__
+    c. No, because fake news only affect the Elder people.
+    d. Yes, because if teenagers aren’t educated they believe everything.
+    e. No, because the news services can’t reach the younger audience anyways.
+    f. No, because teenagers don’t find news interesting.

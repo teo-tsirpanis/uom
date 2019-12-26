@@ -23,36 +23,36 @@ To sum up, climate change is a phenomenon that should worry all of us because it
 
 2. In the last paragraph, the phrase "we should all act towards that great and crucial goal" means that:
 
-    a.People should not worry about the climate change.
-    b.Climate change is a misunderstanding.
-    c.We should stop using cars.
-    d.Some people have to take care of the destruction.
-    e.__Everyone should act to prevent any further damage.__
-    f.Only individuals with power should try and reverse the damage.
+    a. People should not worry about the climate change.
+    b. Climate change is a misunderstanding.
+    c. We should stop using cars.
+    d. Some people have to take care of the destruction.
+    e. __Everyone should act to prevent any further damage.__
+    f. Only individuals with power should try and reverse the damage.
 
 3. What is deforestation?
 
-    a.__The destruction of forest areas.__
-    b.The planting of trees.
-    c.The protection of forests.
-    d.A physical process of trees.
-    e.Arson.
-    f.Process of oxygen production by trees.
+    a. __The destruction of forest areas.__
+    b. The planting of trees.
+    c. The protection of forests.
+    d. A physical process of trees.
+    e. Arson.
+    f. Process of oxygen production by trees.
 
 4. How does deforestation impact climate change?
 
-    a.__By adding up to the greenhouse effect.__
-    b.By producing smaller amounts of CO2.
-    c.By freeing up space for human activities.
-    d.By emitting more oxygen.
-    e.By habitat destruction for many animal species.
-    f.By creating fertile grounds for agriculture.
+    a. __By adding up to the greenhouse effect.__
+    b. By producing smaller amounts of CO2.
+    c. By freeing up space for human activities.
+    d. By emitting more oxygen.
+    e. By habitat destruction for many animal species.
+    f. By creating fertile grounds for agriculture.
 
 5. Eventually, are deniers of human induced climate change right?
 
-    a.Yes, because climate change is a natural cycle of earth's climate.
-    b.No, because the ozone layer hasn't properly recover.
-    c.Yes, because high temperature isn't a hazard.
-    d.No, because the amazon wildfire this year destroyed a wide part of the forest.
-    e.__No, because data prove that human activity is the main source of climate change.__
-    f.Yes, because the average temperature of the planet hasn't increased very much.
+    a. Yes, because climate change is a natural cycle of earth's climate.
+    b. No, because the ozone layer hasn't properly recover.
+    c. Yes, because high temperature isn't a hazard.
+    d. No, because the amazon wildfire this year destroyed a wide part of the forest.
+    e. __No, because data prove that human activity is the main source of climate change.__
+    f. Yes, because the average temperature of the planet hasn't increased very much.

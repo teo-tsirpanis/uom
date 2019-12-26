@@ -61,27 +61,27 @@
 
 ---
 
-* War
-* Conflict
-* Fight
-* Battle
-* __Argument__
-* Combat
+* Siege
+* Invasion
+* Charge
+* __Battle__
+* Shelling
+* Bombing
 
 ---
 
 * Sheep
 * Goat
-* __Lamp__
+* __Boar__
 * Cattle
-* Ruminant
-* Antilope
+* Pig
+* Hen
 
 ---
 
 * Airplane
 * Ship
-* Train
-* __Car__
+* __Train__
+* Car
 * Bus
-* Subway
+* Taxi

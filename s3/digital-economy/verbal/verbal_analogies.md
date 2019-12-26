@@ -46,12 +46,12 @@
    5. Shaving
    6. Razor
 
-7. Chlorofluorocarbon is to the ozon layer, as `_____` is to crater:
-   1. earthquake
-   2. __explosion__
+7. Carbon dioxide is to the atmosphere, as `_____` is to ocean:
+   1. plastic bags
+   2. __garbege__
    3. flood
-   4. ozon hole
-   5. hurricane
+   4. fish
+   5. salt
    6. tsunami
 
 8. Pollution is to climate change, as `_____` is to divorce:
@@ -63,12 +63,12 @@
    6. friend
 
 9.  Sunscreen is to sunburn, as `_____` is to `_____`:
-   1. __umbrella, wet__
+   1. __sweater, cold__
    2. umbrella, sun
    3. sunscreen, sun
-   4. sun, rain,
+   4. sun, rain
    5. sun, sea
-   6. flowers, spring
+   6. freeze, frostbite
 
 10. Cloud is to rain, as `_____` is to `_____`:
    1. sun, snow

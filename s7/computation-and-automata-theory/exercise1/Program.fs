@@ -67,10 +67,16 @@ let faMatch fa =
     // This allows memoization to persist past the
     // recognition of a string. But we have to pertially
     // apply this function, as we will see later.
-    // Also, the dictionary is not thread-safe, but we don't care.
+    // Also, the dictionary is not thread-safe,
+    // but we don't care for such a small program.
     let dict = Dictionary()
     let rec impl states str i =
-        if i = String.length str then
+        // We can terminate prematurely when the
+        // set of the states is empty; we will
+        // never recover from it.
+        if Set.isEmpty states then
+            false
+        elif i = String.length str then
             // An NFA has accepted a string if it
             // is in at least one accepting state.
             states |> Set.exists (fun state -> state.IsAccept)
@@ -95,7 +101,7 @@ let faRead() =
     let readInt() = Console.ReadLine() |> int
     // This active pattern converts the one-based string indices
     // from the input to zero-based integers for the program.
-    let (|OneBasedInt|) str = int str - 1
+    let inline (|OneBasedInt|) str = int str - 1
 
     eprintf "How many states are there in the automaton? "
     let statesCount = readInt()
@@ -104,7 +110,10 @@ let faRead() =
     let acceptingStates = Array.create statesCount false
 
     eprintf "Which of them is the initial state? "
-    let (OneBasedInt initialState) = Console.ReadLine()
+    let (OneBasedInt initialState) = readInt() - 1
+
+    if initialState < 0 || initialState >= statesCount then
+        failwithf "The state number must be between 1 and %d" statesCount
 
     eprintf "How many accepting states are there? "
     readInt() |> ignore
@@ -113,13 +122,13 @@ let faRead() =
     Console.ReadLine().Split(' ')
     |> Array.iter(fun (OneBasedInt idx) -> acceptingStates.[idx] <- true)
 
-    eprintf "How many transitions does are there? "
+    eprintf "How many transitions are there? "
     let transitionCount = readInt()
 
     eprintfn "Now, write each transition as follows: <state from> <character to encounter> <state to>."
     eprintfn "For ε-transitions, omit the character to encounter."
     eprintfn "The indices are one-based."
-    for _ = 1 to transitionCount do
+    for __ = 1 to transitionCount do
         match Console.ReadLine().Split(' ') with
         | [|OneBasedInt sFrom; c; OneBasedInt sTo|] ->
             // The transition is a normal one with a symbol.
@@ -138,11 +147,11 @@ let faRead() =
     {InitialState = initialState; States = states}
 
 /// A little helper that writes colored text to the console.
-let printColor color fmt =
+let printColor color str =
     let oldColor = Console.ForegroundColor
     try
         Console.ForegroundColor <- color
-        printf fmt
+        printf "%s" str
     finally
         Console.ForegroundColor <- oldColor
 
@@ -163,7 +172,7 @@ let faInteractive fa =
             else
                 printColor ConsoleColor.Red "FAILURE\n"
             loop()
-    eprintfn "Write the string you want to check against your Finite Automator, each per line."
+    eprintfn "Write the strings you want to check against your Finite Automaton, each per line."
     // https://stackoverflow.com/questions/11968558/
     let eofCharacter = if Environment.OSVersion.Platform = PlatformID.Win32NT then 'Z' else 'D'
     eprintfn "To stop, press Ctrl+%c." eofCharacter

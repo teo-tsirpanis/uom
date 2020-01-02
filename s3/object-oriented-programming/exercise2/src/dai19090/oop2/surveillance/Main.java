@@ -3,6 +3,7 @@ package dai19090.oop2.surveillance;
 import java.util.ArrayList;
 
 import dai19090.oop2.surveillance.core.*;
+import dai19090.oop2.surveillance.gui.*;
 
 public class Main {
 
@@ -21,8 +22,12 @@ public class Main {
         s3.addNumber("00478484666666");
         s3.addNumber("00478484222222");
 
+        //Addition for ASSIGNMENT 3
+        Suspect s4 = new Suspect("John Papas", "Quick knife", "Greece", "Athens");
+        s4.addNumber("0030210567888");
+
         //Creation of communication objects
-        Communication[] comms = new Communication[14];
+        Communication[] comms = new Communication[15];
 
         comms[0] = new PhoneCall("00496955444444", "00478484777777", 15, 10, 2017, 127);
         comms[1] = new PhoneCall("00496955444444", "00478484777777", 16, 10, 2017, 240);
@@ -40,6 +45,9 @@ public class Main {
         comms[12] = new SMS("00478484777777", "00446999888888", 15, 10, 2017, "Metro Attack ready");
         comms[13] = new SMS("00478484666666", "00446999888888", 16, 10, 2017, "Explosives downtown have been placed");
 
+        //Addition for ASSIGNMENT 3
+        comms[14] = new SMS("0030210567888", "00478484222222", 22, 10, 2019, "Meet you at Oslo");
+
         //Creation of Registry object
 		//I had to make a small naming change...
         AbstractRegistry registry = new InMemoryRegistry();
@@ -47,6 +55,7 @@ public class Main {
         registry.addSuspect(s1);
         registry.addSuspect(s2);
         registry.addSuspect(s3);
+        registry.addSuspect(s4);
 
         for (int i = 0; i < 14; i++)
             registry.addCommunication(comms[i]);
@@ -84,6 +93,9 @@ public class Main {
         //Test 6. print suspects originating from a country
         System.out.print("\nTest6 – ");
         registry.printSuspectsFromCountry("Spain");
+
+        SuspectWindow sw = new SuspectWindow();
+        sw.setVisible(true);
     }
 
 }

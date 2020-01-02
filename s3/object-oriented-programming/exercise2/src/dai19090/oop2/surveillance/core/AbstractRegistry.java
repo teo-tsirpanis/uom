@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * method which will help them to provide a more optimized implementation of
  * {@link AbstractRegistry#getPhoneOwner} with some sort of lookup tables.
  * Of course they are free to override any other method they want, maybe
- * to fetch data from a DBMS</p>\
+ * to fetch data from a DBMS</p>
  */
 public abstract class AbstractRegistry {
     /**

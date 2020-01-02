@@ -128,6 +128,19 @@ public final class Suspect {
     }
 
     /**
+     * Suggests some suspects that are close to this one,
+     * but not directly associated.
+     *
+     * @return The suggested partners of this suspect.
+     */
+    public Stream<Suspect> getSuggestedPartners() {
+        return getPartners()
+                .flatMap(Suspect::getPartners)
+                .filter(p -> !partners.contains(p))
+                .distinct();
+    }
+
+    /**
      * Prints the partners of this suspect to the console.
      * An asterisk is also printed if their country is the
      * same with this {@link Suspect}.

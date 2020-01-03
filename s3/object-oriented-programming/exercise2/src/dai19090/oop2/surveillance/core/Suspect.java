@@ -136,7 +136,7 @@ public final class Suspect {
     public Stream<Suspect> getSuggestedPartners() {
         return getPartners()
                 .flatMap(Suspect::getPartners)
-                .filter(p -> !partners.contains(p))
+                .filter(p -> !partners.contains(p) && p != this)
                 .distinct();
     }
 

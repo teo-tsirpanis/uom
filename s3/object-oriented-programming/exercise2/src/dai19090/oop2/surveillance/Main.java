@@ -57,8 +57,7 @@ public class Main {
         registry.addSuspect(s3);
         registry.addSuspect(s4);
 
-        for (int i = 0; i < 14; i++)
-            registry.addCommunication(comms[i]);
+        for (Communication comm : comms) registry.addCommunication(comm);
 
 
         //-------------TESTS----------------------
@@ -94,7 +93,7 @@ public class Main {
         System.out.print("\nTest6 – ");
         registry.printSuspectsFromCountry("Spain");
 
-        SuspectWindow sw = new SuspectWindow();
+        SuspectWindow sw = new SuspectWindow(registry);
         sw.setVisible(true);
     }
 

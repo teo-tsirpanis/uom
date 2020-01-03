@@ -153,12 +153,9 @@ public abstract class AbstractRegistry {
      * @param number2 The number of the second party.
      * @return An {@link ArrayList} of suspicious {@link SMS}es between the two parties.
      */
-    // This function should have been called "getSuspiciousMessagesBetween"
-    public ArrayList<SMS> getMessagesBetween(String number1, String number2) {
+    public Stream<SMS> getSuspiciousMessagesBetween(String number1, String number2) {
         return communications()
                 .filter(comm -> comm instanceof SMS && ((SMS) comm).isSuspicious() && comm.involves(number1, number2))
-                .map(comm -> (SMS) comm)
-                // Demanding an ArrayList is a problem...
-                .collect(Collectors.toCollection(ArrayList::new));
+                .map(comm -> (SMS) comm);
     }
 }

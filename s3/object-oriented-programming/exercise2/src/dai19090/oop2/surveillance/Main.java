@@ -73,10 +73,8 @@ public class Main {
         longestCall.printInfo();
 
         //Test 3. get Suspicious Messages Between
-        ArrayList<SMS> listOfMessages = registry.getMessagesBetween("00478484777777", "00446999888888");
         System.out.println("\nTest3 – Suspicious messages between 2 numbers: ");
-        for (SMS sms : listOfMessages)
-            sms.printInfo();
+        registry.getSuspiciousMessagesBetween("00478484777777", "00446999888888").forEach(Communication::printInfo);
 
         //Test 4. check whether suspects are connected
         System.out.println("\nTest4 – Checking connection between 2 suspects: ");
@@ -95,6 +93,6 @@ public class Main {
 
         SuspectWindow sw = new SuspectWindow(registry);
         sw.setVisible(true);
+        sw.promptToFindSuspect();
     }
-
 }

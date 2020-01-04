@@ -5,23 +5,23 @@
 	<tapes>3</tapes>
 	<automaton>
 		<!--The list of states.-->
-		<block id="0" name="q1">
+		<block id="0" name="qAdd">
 			<tag>Machine0</tag>
 			<x>543.0</x>
 			<y>459.0</y>
 		</block>
-		<block id="1" name="q2">
+		<block id="1" name="qAddC">
 			<tag>Machine1</tag>
 			<x>978.0</x>
 			<y>464.0</y>
 		</block>
 		<block id="2" name="h">
 			<tag>Machine2</tag>
-			<x>789.0</x>
-			<y>612.0</y>
+			<x>764.0</x>
+			<y>629.0</y>
 			<final/>
 		</block>
-		<block id="3" name="q0">
+		<block id="3" name="qLeft">
 			<tag>Machine3</tag>
 			<x>294.0</x>
 			<y>461.0</y>
@@ -137,13 +137,13 @@
 			<to>2</to>
 			<read tape="1"/>
 			<write tape="1"/>
-			<move tape="1">S</move>
+			<move tape="1">R</move>
 			<read tape="2"/>
 			<write tape="2"/>
-			<move tape="2">S</move>
+			<move tape="2">R</move>
 			<read tape="3"/>
 			<write tape="3">0</write>
-			<move tape="3">L</move>
+			<move tape="3">S</move>
 		</transition>
 		<transition>
 			<from>0</from>
@@ -189,13 +189,13 @@
 			<to>2</to>
 			<read tape="1"/>
 			<write tape="1"/>
-			<move tape="1">S</move>
+			<move tape="1">R</move>
 			<read tape="2"/>
 			<write tape="2"/>
-			<move tape="2">S</move>
+			<move tape="2">R</move>
 			<read tape="3"/>
 			<write tape="3">1</write>
-			<move tape="3">L</move>
+			<move tape="3">S</move>
 		</transition>
 		<transition>
 			<from>1</from>
@@ -384,10 +384,5 @@
 		<Machine2/>
 		<Machine1/>
 		<Machine3/>
-		<note>
-			<text/>
-			<x>1109.0</x>
-			<y>680.0</y>
-		</note>
 	</automaton>
 </structure>

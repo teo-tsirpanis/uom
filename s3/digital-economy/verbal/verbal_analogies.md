@@ -47,8 +47,8 @@
    6. Razor
 
 7. Carbon dioxide is to the atmosphere, as `_____` is to ocean:
-   1. plastic bags
-   2. __garbege__
+   1. __plastic bags__
+   2. garbage
    3. flood
    4. fish
    5. salt

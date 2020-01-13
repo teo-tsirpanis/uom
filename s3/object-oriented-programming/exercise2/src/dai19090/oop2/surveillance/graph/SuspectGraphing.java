@@ -3,8 +3,6 @@ package dai19090.oop2.surveillance.graph;
 import dai19090.oop2.surveillance.core.*;
 import edu.uci.ics.jung.graph.*;
 
-import java.util.stream.Stream;
-
 public final class SuspectGraphing {
     private SuspectGraphing() {
         // You can't create me!

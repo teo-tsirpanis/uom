@@ -14,6 +14,7 @@ import java.util.stream.*;
 import java.awt.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class SuspectWindow extends JFrame {
     private static final String APP_NAME = "SurveillanceNet v2";
 

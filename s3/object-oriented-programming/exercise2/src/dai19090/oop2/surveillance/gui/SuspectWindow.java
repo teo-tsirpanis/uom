@@ -1,6 +1,13 @@
 package dai19090.oop2.surveillance.gui;
 
 import dai19090.oop2.surveillance.core.*;
+import dai19090.oop2.surveillance.graph.*;
+import edu.uci.ics.jung.algorithms.layout.*;
+import edu.uci.ics.jung.algorithms.shortestpath.*;
+import edu.uci.ics.jung.graph.*;
+import edu.uci.ics.jung.visualization.*;
+import edu.uci.ics.jung.visualization.control.*;
+import edu.uci.ics.jung.visualization.renderers.*;
 
 import java.util.*;
 import java.util.stream.*;
@@ -85,7 +92,34 @@ public class SuspectWindow extends JFrame {
         returnToSearchScreen.addActionListener(__ -> promptToFindSuspect());
         cp.add(createLabelledPanel(null, returnToSearchScreen));
 
+        JButton visualizeNetwork = new JButton("Visualize network");
+        visualizeNetwork.addActionListener(__ -> visualizeNetwork());
+        cp.add(createLabelledPanel(null, visualizeNetwork));
+
         setContentPane(cp);
+    }
+
+    private void visualizeNetwork() {
+        UndirectedGraph<Suspect, Object> graph = SuspectGraphing.createSuspectGraph(registry);
+        JFrame window = new JFrame();
+        window.setTitle("Suspects Network");
+        window.setSize(747, 747);
+        window.setLocationRelativeTo(null);
+        JPanel cp = new JPanel();
+        cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
+
+        VisualizationViewer<Suspect, Object> vv = new VisualizationViewer<>(new CircleLayout<>(graph));
+        vv.setGraphMouse(new DefaultModalGraphMouse<>());
+        vv.getRenderContext().setVertexLabelRenderer(new DefaultVertexLabelRenderer(Color.BLACK));
+        vv.getRenderContext().setVertexLabelTransformer(s -> s == null ? "" : s.getCodeName());
+        cp.add(vv);
+
+        JTextField diameterTextField = createReadOnlyTextField();
+        diameterTextField.setText(String.format("Diameter = %.2f", DistanceStatistics.diameter(graph)));
+        cp.add(diameterTextField);
+
+        window.setContentPane(cp);
+        window.setVisible(true);
     }
 
     public void displaySuspectInfo(Suspect s) {

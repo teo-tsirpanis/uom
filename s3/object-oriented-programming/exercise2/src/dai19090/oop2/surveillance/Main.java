@@ -93,6 +93,5 @@ public class Main {
 
         SuspectWindow sw = new SuspectWindow(registry);
         sw.setVisible(true);
-        sw.promptToFindSuspect();
     }
 }

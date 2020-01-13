@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="net.sf.jung:jung-graph-impl:2.1.1" level="project" />
+    <orderEntry type="library" name="net.sf.jung:jung-algorithms:2.1.1" level="project" />
+    <orderEntry type="library" name="net.sf.jung:jung-visualization:2.1.1" level="project" />
   </component>
 </module>

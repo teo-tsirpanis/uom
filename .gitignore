@@ -8,6 +8,7 @@ s1/procedural-programming/main.c
 
 **/cmake-build-*/
 bin/
+lib/
 obj/
 s1/procedural-programming/o*.dat
 .vscode/

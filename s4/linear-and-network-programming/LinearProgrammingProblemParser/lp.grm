@@ -4,12 +4,10 @@
 "Start Symbol" = <Linear Programming Problem>
 
 Number = {Number}+
-       
+
 ST = 'st'|'s.t.'|'μπ'|'μ.π.'
-       
+
 X = 'x'{Number}+
-  
-ΓΙΟΣΙ = 'δδδ'
 
 <Expression Loop> ::= '+' Number X <Expression Loop>
                    |  '-' Number X <Expression Loop>
@@ -24,13 +22,13 @@ X = 'x'{Number}+
 
 <Objective> ::= 'min' <Expression>
              |  'max' <Expression>
-             
+
 <Subject To> ::= <Expression> '=' Number
               |  <Expression> '<=' Number
               |  <Expression> '>=' Number
 
 <Constraints Loop> ::= <Subject To> <Constraints Loop> | <>
-              
+
 <Constraints> ::= <Subject To> <Constraints Loop>
-              
+
 <Linear Programming Problem> ::= <Objective> ST <Constraints>

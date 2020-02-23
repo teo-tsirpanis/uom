@@ -53,12 +53,12 @@ with
                 |> List.map (fun x -> x.Expression)
             let numberOfUnknowns = expressions |> Seq.concat |> Seq.map (fun (Variable (_, (X x))) -> x) |> Seq.max |> (+) 1
             let A = Array2D.zeroCreate constraints.Length numberOfUnknowns
-            expressions |> List.iteri (fun idx x -> x |> List.iter (fun (Variable(var, X x)) -> Array2D.set A idx x var))
+            expressions |> List.iteri (fun idx x -> x |> List.iter (fun (Variable(var, X x)) -> A.[idx, x] <- A.[idx, x] + var))
             A, numberOfUnknowns
         let b = constraints |> Seq.map (fun x -> x.Value) |> Array.ofSeq
         let c =
             let c = Array.zeroCreate numberOfUnknowns
-            objective.Expression |> List.iter (fun (Variable (var, X x)) -> Array.set c x var)
+            objective.Expression |> List.iter (fun (Variable (var, X x)) -> c.[x] <- c.[x] + var)
             c
         let Eqin =
             constraints

@@ -1,16 +1,25 @@
-﻿open Farkle
+﻿// University of Macedonia,
+// Department of Applied Informatics,
+// Semester 4,
+// Linear & Network Programming,
+// Assignment 1
+//
+// Created by: Theodore Tsirpanis
+// Professor: Nikolaos Samaras
+
+open Farkle
 open LinearProgrammingProblemParser
 open LinearProgrammingProblemParser.DomainTypes
 open System.IO
 
 let readInput argv =
     if Array.length argv >= 1 then
-        let fDebug = if argv.Length > 2 && argv.[1] = "--debug" then eprintfn "PARSER LOG: %O" else ignore
+        let fDebug = if argv.Length >= 2 && argv.[1] = "--debug" then eprintfn "PARSER LOG: %O" else ignore
         Ok(File.ReadAllText(argv.[0]), fDebug)
     else Error "Invalid CLI arguments. Try <program name> filename [--debug]"
 
 let parseIt (input, fDebug) =
-    RuntimeFarkle.parseString Grammar.TheRuntimeFarkle fDebug input
+    RuntimeFarkle.parseString Language.runtime fDebug input
     |> Result.mapError (sprintf "Error while parsing the problem statement: %O")
     |> Result.map (LPOutput.Create)
 

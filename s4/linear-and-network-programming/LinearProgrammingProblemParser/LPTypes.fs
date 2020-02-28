@@ -1,8 +1,15 @@
 namespace LinearProgrammingProblemParser.DomainTypes
 
-type X = X of int
+type Number = int
 
-type Variable = Variable of int * X
+type X = private X of int
+with
+    // Remember that while we the humans count starting from one,
+    // this is a computer that counts starting from zero.
+    static member Create x = X <| x - 1
+    member x.Value = match x with X x -> x
+
+type Variable = Variable of Number * X
 
 type Expression = Expression of Variable list
 with
@@ -19,9 +26,9 @@ type Objective =
 
 [<RequireQualifiedAccess>]
 type Constraint =
-    | LessThanOrEqual of Expression * int
-    | Equal of Expression * int
-    | GreaterThanOrEqual of Expression * int
+    | LessThanOrEqual of Expression * Number
+    | Equal of Expression * Number
+    | GreaterThanOrEqual of Expression * Number
     member x.Expression =
         match x with
         | LessThanOrEqual (x, _)
@@ -34,14 +41,14 @@ type Constraint =
         | GreaterThanOrEqual (_, x) -> x
 
 type LinearProgrammingProblem = {
-        Objective: Objective
-        Constraints: Constraint list
-    }
+    Objective: Objective
+    Constraints: Constraint list
+}
 
 type LPOutput = {
-    A: int [,]
-    b: int []
-    c: int []
+    A: Number [,]
+    b: Number []
+    c: Number []
     Eqin: int []
     MinMax: int
 }

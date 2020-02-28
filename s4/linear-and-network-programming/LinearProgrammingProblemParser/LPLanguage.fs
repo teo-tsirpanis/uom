@@ -9,15 +9,15 @@ open System
 let inline private curry f x1 x2 = f(x1, x2)
 
 let designtime =
-    let number = Terminals.genericUnsigned<int> "Number"
+    let number = Terminals.genericUnsigned<Number> "Number"
     let ST =
         ["st"; "s.t."; "μπ"; "μ.π."]
         |> List.map string
         |> choice
         |> terminal "ST" (T(fun _ _ -> ()))
     let X =
-        char 'x' <&> (atLeast 1 <| chars Number)
-        |> terminal "X" (T(fun _ data -> X <| Int32.Parse(data.Slice(1)) - 1))
+        char 'x' <&> (atLeast 1 <| chars PredefinedSets.Number)
+        |> terminal "X" (T(fun _ data -> Int32.Parse(data.Slice(1)) |> X.Create))
 
     let expression =
         let mkProduction (firstPlus: ProductionBuilder) name =

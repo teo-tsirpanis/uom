@@ -35,12 +35,12 @@ type Constraint =
         |              Equal (_, x)
         | GreaterThanOrEqual (_, x) -> x
 
-type LinearProgrammingProblem = {
+type LPP = {
     Objective: Objective
     Constraints: Constraint list
 }
 
-type LPOutput = {
+type LPPWithMatrices = {
     A: Number [,]
     b: Number []
     c: Number []

@@ -9,19 +9,21 @@
 
 open Farkle
 open LinearProgrammingProblemParser
-open LinearProgrammingProblemParser.DomainTypes
 open System.IO
 
 let readInput argv =
     if Array.length argv >= 1 then
-        let fDebug = if argv.Length >= 2 && argv.[1] = "--debug" then eprintfn "PARSER LOG: %O" else ignore
+        let fDebug msg =
+            if argv.Length >= 2 && argv.[1] = "--debug" then
+                eprintfn "PARSER LOG: %O" msg
         Ok(File.ReadAllText(argv.[0]), fDebug)
-    else Error "Invalid CLI arguments. Try <program name> filename [--debug]"
+    else
+        Error "Invalid CLI arguments. Try <program name> filename [--debug]"
 
 let parseIt (input, fDebug) =
-    RuntimeFarkle.parseString Language.runtime fDebug input
-    |> Result.mapError (sprintf "Error while parsing the problem statement: %O")
-    |> Result.map (LPOutput.Create)
+    match RuntimeFarkle.parseString Language.runtime fDebug input with
+    | Ok x -> Ok <| DomainTypes.LPPWithMatrices.Create x
+    | Error err -> Error <| string err
 
 [<EntryPoint>]
 let main args =
@@ -29,7 +31,7 @@ let main args =
     |> Result.bind parseIt
     |> function
     | Ok x ->
-        printfn "Success."
+        eprintfn "Success."
         printfn "%A" x
         0
     | Error x ->

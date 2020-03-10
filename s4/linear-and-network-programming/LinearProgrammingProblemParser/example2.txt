@@ -1,0 +1,11 @@
+! This is the second example from the second lab course.
+! Expected output:
+
+
+
+max    -2x1 + 3x2 + 6x3 + x4
+s.t.    4x1 + x2 + 2x3 + 3x4  <=  12
+     -x1 - 2x2 +   x3 - 5x4  >=  24
+    2x1 + 7x2 - 3x3  -  x4   <=  8
+    3x1 +  x2 -  6x3 - 2x4  >=  -10
+end

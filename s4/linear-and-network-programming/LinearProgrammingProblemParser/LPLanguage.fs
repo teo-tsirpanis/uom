@@ -24,8 +24,8 @@ let designtime =
             name ||= [
                 !& "+" .>>. number .>>. X => (fun num x -> Variable( num, x))
                 !& "-" .>>. number .>>. X => (fun num x -> Variable(-num, x))
-                !& "+"             .>>. X => (fun     x -> Variable( 1,   x))
-                !& "-"             .>>. X => (fun     x -> Variable(-1,   x))
+                !& "+"             .>>. X => (fun     x -> Variable( 1  , x))
+                !& "-"             .>>. X => (fun     x -> Variable(-1  , x))
                 if allowNoLeadingSign then
                     !@ number .>>. X => (fun num x -> Variable(num, x))
             ]

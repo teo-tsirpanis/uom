@@ -6,7 +6,7 @@ type X = private X of int
 with
     // Remember that while we the humans count starting from one,
     // this is a computer that counts starting from zero.
-    static member Create x = X <| x - 1
+    static member CreateFromOneBasedIndex x = X <| x - 1
     member x.Value = match x with X x -> x
 
 type Variable = Variable of Number * X
@@ -26,18 +26,18 @@ type Objective =
 
 [<RequireQualifiedAccess>]
 type Constraint =
-    | LessThanOrEqual of Expression * Number
-    | Equal of Expression * Number
+    |    LessThanOrEqual of Expression * Number
+    |              Equal of Expression * Number
     | GreaterThanOrEqual of Expression * Number
     member x.Expression =
         match x with
-        | LessThanOrEqual (x, _)
-        | Equal (x, _)
+        |    LessThanOrEqual (x, _)
+        |              Equal (x, _)
         | GreaterThanOrEqual (x, _) -> x.Variables
     member x.Value =
         match x with
-        | LessThanOrEqual (_, x)
-        | Equal (_, x)
+        |    LessThanOrEqual (_, x)
+        |              Equal (_, x)
         | GreaterThanOrEqual (_, x) -> x
 
 type LinearProgrammingProblem = {
@@ -58,26 +58,36 @@ with
             let expressions =
                 constraints
                 |> List.map (fun x -> x.Expression)
-            let numberOfUnknowns = expressions |> Seq.concat |> Seq.map (fun (Variable (_, (X x))) -> x) |> Seq.max |> (+) 1
+            let numberOfUnknowns =
+                expressions
+                |> Seq.concat
+                |> Seq.map (fun (Variable (_, (X x))) -> x)
+                |> Seq.max
+                |> (+) 1
             let A = Array2D.zeroCreate constraints.Length numberOfUnknowns
-            expressions |> List.iteri (fun idx x -> x |> List.iter (fun (Variable(var, X x)) -> A.[idx, x] <- A.[idx, x] + var))
+            expressions
+            |> List.iteri (fun idx x ->
+                x
+                |> List.iter (fun (Variable(var, X x)) -> A.[idx, x] <- A.[idx, x] + var))
             A, numberOfUnknowns
         let b = constraints |> Seq.map (fun x -> x.Value) |> Array.ofSeq
         let c =
             let c = Array.zeroCreate numberOfUnknowns
-            objective.Expression |> List.iter (fun (Variable (var, X x)) -> c.[x] <- c.[x] + var)
+            objective.Expression
+            |> List.iter (fun (Variable (var, X x)) -> c.[x] <- c.[x] + var)
             c
         let Eqin =
             constraints
-            |> Seq.map (function
-            | Constraint.LessThanOrEqual _ -> -1
-            | Constraint.Equal _ -> 0
-            | Constraint.GreaterThanOrEqual _ -> 1)
+            |> Seq.map (
+                function
+                | Constraint.LessThanOrEqual    _ -> -1
+                | Constraint.Equal              _ ->  0
+                | Constraint.GreaterThanOrEqual _ ->  1)
             |> Array.ofSeq
         let MinMax =
             match objective with
             | Objective.Minimize _ -> -1
-            | Objective.Maximize _ -> 1
+            | Objective.Maximize _ ->  1
         {
             A = A
             b = b

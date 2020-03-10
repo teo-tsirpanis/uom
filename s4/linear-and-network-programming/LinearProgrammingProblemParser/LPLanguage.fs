@@ -17,22 +17,21 @@ let designtime =
         |> terminal "ST" (T(fun _ _ -> ()))
     let X =
         char 'x' <&> (atLeast 1 <| chars PredefinedSets.Number)
-        |> terminal "X" (T(fun _ data -> Int32.Parse(data.Slice(1)) |> X.Create))
+        |> terminal "X" (T(fun _ data -> Int32.Parse(data.Slice(1)) |> X.CreateFromOneBasedIndex))
 
     let expression =
         let mkProduction (firstPlus: ProductionBuilder) name =
             name ||= [
                 firstPlus .>>. number .>>. X => (fun num x -> Variable(num, x))
-                !& "-" .>>. number .>>. X => (fun num x -> Variable(-num, x))
-                !& "+" .>>. X  => (fun x -> Variable(1, x))
-                !& "-" .>>. X => (fun x -> Variable(-1, x))
+                !& "-"    .>>. number .>>. X => (fun num x -> Variable(-num, x))
+                !& "+"                .>>. X => (fun     x -> Variable(1, x))
+                !& "-"                .>>. X => (fun     x -> Variable(-1, x))
             ]
         let firstExpression = mkProduction empty "First Expression"
         let moreExpressions = mkProduction (!& "+") "More Expressions"
 
         "Expression" ||= [
-            !@ firstExpression .>>. many moreExpressions => (fun x xs ->
-                x :: xs |> Expression)
+            !@ firstExpression .>>. many moreExpressions => (fun x xs -> x :: xs |> Expression)
         ]
 
     let objective = "Objective" ||= [
@@ -42,12 +41,20 @@ let designtime =
 
     let constraints =
         "Subject To" ||= [
-            !@ expression .>> "=" .>>. number => (curry Constraint.Equal)
+            !@ expression .>> "="  .>>. number => (curry Constraint.Equal)
             !@ expression .>> "<=" .>>. number => (curry Constraint.LessThanOrEqual)
             !@ expression .>> ">=" .>>. number => (curry Constraint.GreaterThanOrEqual)
         ] |> many1
 
-    "Linear Programming Problem" ||= [!@ objective .>> ST .>>. constraints => (fun o c ->
-        {Objective = o; Constraints = c})]
+    let endMaybe =
+        "End Maybe" ||= [
+            !& "end" =% ()
+            empty =% ()
+        ]
+
+    "Linear Programming Problem"
+        ||= [!@ objective .>> ST .>>. constraints .>> endMaybe => (fun o c -> {Objective = o; Constraints = c})]
+    |> DesigntimeFarkle.addLineComment "//"
+    |> DesigntimeFarkle.addBlockComment "/*" "*/"
 
 let runtime = RuntimeFarkle.build designtime

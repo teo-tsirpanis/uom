@@ -1,6 +1,20 @@
-min 4x1 + 3x2 - x3 + 66x4 + 478x5 + 10x5 - x6
+! This is a sample linear programming problem definition file.
+! This comment demonstrates that LINDO's line comments work.
+! Expected output:
+
+! { A = [[8; -5; 0; 1; 0; 0]
+!        [0; 0; 32; 0; 5; 521]
+!        [44; 32; 0; 0; 55; 0]]
+!   b = [|282; 640; 549|]
+!   c = [|4; 3; -1; 66; 488; -1|]
+!   Eqin = [|-1; 0; 1|]
+!   MinMax = -1 }
+
+mIn 4x1 + 3x2 - x3 + 66x4 + 478x5 + 10x5 - x6
 
 st
     8x1 - 5x2 + x4 <= 282
-    32 x3 +5x5+617x6=640
+    32 x3 +5x5+521x6=640
     44              x1 + 32x2 + 55x5 >= 549
+
+end !This can be omitted

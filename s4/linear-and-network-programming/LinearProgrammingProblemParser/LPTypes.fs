@@ -2,12 +2,7 @@ namespace LinearProgrammingProblemParser.DomainTypes
 
 type Number = int
 
-type X = private X of int
-with
-    // Remember that while we the humans count starting from one,
-    // this is a computer that counts starting from zero.
-    static member CreateFromOneBasedIndex x = X <| x - 1
-    member x.Value = match x with X x -> x
+type X = X of int
 
 type Variable = Variable of Number * X
 
@@ -54,6 +49,7 @@ type LPOutput = {
 }
 with
     static member Create {Objective = objective; Constraints = constraints} =
+        let (|XZeroBased|) (X x) = x - 1
         let A, numberOfUnknowns =
             let expressions =
                 constraints
@@ -61,20 +57,20 @@ with
             let numberOfUnknowns =
                 expressions
                 |> Seq.concat
-                |> Seq.map (fun (Variable (_, (X x))) -> x)
+                |> Seq.map (fun (Variable (_, (XZeroBased x))) -> x)
                 |> Seq.max
                 |> (+) 1
             let A = Array2D.zeroCreate constraints.Length numberOfUnknowns
             expressions
             |> List.iteri (fun idx x ->
                 x
-                |> List.iter (fun (Variable(var, X x)) -> A.[idx, x] <- A.[idx, x] + var))
+                |> List.iter (fun (Variable(var, XZeroBased x)) -> A.[idx, x] <- A.[idx, x] + var))
             A, numberOfUnknowns
         let b = constraints |> Seq.map (fun x -> x.Value) |> Array.ofSeq
         let c =
             let c = Array.zeroCreate numberOfUnknowns
             objective.Expression
-            |> List.iter (fun (Variable (var, X x)) -> c.[x] <- c.[x] + var)
+            |> List.iter (fun (Variable (var, XZeroBased x)) -> c.[x] <- c.[x] + var)
             c
         let Eqin =
             constraints

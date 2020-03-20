@@ -20,17 +20,17 @@ let designtime =
         |> terminal "X" (T(fun _ data -> Int32.Parse(data.Slice(1)) |> X))
 
     let expression =
-        let mkProduction allowNoLeadingSign name =
+        let mkVariable isFirstVariable name =
             name ||= [
+                if isFirstVariable then
+                    !@ number .>>. X => (fun num x -> Variable(num, x))
                 !& "+" .>>. number .>>. X => (fun num x -> Variable( num, x))
                 !& "-" .>>. number .>>. X => (fun num x -> Variable(-num, x))
                 !& "+"             .>>. X => (fun     x -> Variable( 1  , x))
                 !& "-"             .>>. X => (fun     x -> Variable(-1  , x))
-                if allowNoLeadingSign then
-                    !@ number .>>. X => (fun num x -> Variable(num, x))
             ]
-        let firstExpression = mkProduction true  "First Expression"
-        let moreExpressions = mkProduction false "More Expressions"
+        let firstExpression = mkVariable true  "First Variable"
+        let moreExpressions = mkVariable false "More Variables"
 
         "Expression" ||= [
             !@ firstExpression .>>. many moreExpressions => (fun x xs -> x :: xs |> Expression)

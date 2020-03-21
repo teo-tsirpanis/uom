@@ -21,8 +21,11 @@ let designtime =
             |> optional
         ] |> terminal "Number" (T(fun _ data -> Double.Parse(data)))
     let ST =
-        ["st"; "s.t."; "μπ"; "μ.π."]
-        |> List.map string
+        [
+            string "st"
+            string "s.t."
+            string "subject" <&> atLeast 1 (chars Whitespace) <&> string "to"
+        ]
         |> choice
         |> terminalU "ST"
     let X =

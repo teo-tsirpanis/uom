@@ -9,12 +9,22 @@ open System
 let inline private curry f x1 x2 = f(x1, x2)
 
 let designtime =
-    let number = Terminals.genericUnsigned<Number> "Number"
+    let number =
+        let atLeastOneNumber = chars PredefinedSets.Number |> atLeast 1
+        concat [
+            atLeastOneNumber
+
+            optional <| (char '.' <&> atLeastOneNumber)
+
+            [chars "e"; chars "+-" |> optional; atLeastOneNumber]
+            |> concat
+            |> optional
+        ] |> terminal "Number" (T(fun _ data -> Double.Parse(data)))
     let ST =
         ["st"; "s.t."; "μπ"; "μ.π."]
         |> List.map string
         |> choice
-        |> terminal "ST" (T(fun _ _ -> ()))
+        |> terminalU "ST"
     let X =
         char 'x' <&> (atLeast 1 <| chars PredefinedSets.Number)
         |> terminal "X" (T(fun _ data -> Int32.Parse(data.Slice(1)) |> X))
@@ -26,8 +36,8 @@ let designtime =
                     !@ number .>>. X => (fun num x -> Variable(num, x))
                 !& "+" .>>. number .>>. X => (fun num x -> Variable( num, x))
                 !& "-" .>>. number .>>. X => (fun num x -> Variable(-num, x))
-                !& "+"             .>>. X => (fun     x -> Variable( 1  , x))
-                !& "-"             .>>. X => (fun     x -> Variable(-1  , x))
+                !& "+"             .>>. X => (fun     x -> Variable( 1.0, x))
+                !& "-"             .>>. X => (fun     x -> Variable(-1.0, x))
             ]
         let firstExpression = mkVariable true  "First Variable"
         let moreExpressions = mkVariable false "More Variables"

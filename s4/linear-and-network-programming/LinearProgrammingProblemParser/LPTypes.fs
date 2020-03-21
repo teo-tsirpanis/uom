@@ -1,6 +1,6 @@
 namespace LinearProgrammingProblemParser.DomainTypes
 
-type Number = int
+type Number = float
 
 type X = X of int
 

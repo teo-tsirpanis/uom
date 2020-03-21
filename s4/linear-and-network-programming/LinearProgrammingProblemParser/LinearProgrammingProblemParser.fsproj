@@ -7,9 +7,8 @@
     <Compile Include="LPTypes.fs" />
     <Compile Include="LPLanguage.fs" />
     <Compile Include="Program.fs" />
-    <None Include="example.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Farkle" Version="5.*" />
+    <PackageReference Include="Farkle" Version="5.4.*" />
   </ItemGroup>
 </Project>

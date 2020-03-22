@@ -17,8 +17,7 @@ type Variable = Variable of coefficient: Number * X
 // Ο τύπος Expression συμβολίζει μια έκφταση. Στην ουσία είναι μια λίστα μεταβλητών,
 // αλλά όπως με το X, δε μπορείς να ενώσεις δύο εκφράσεις. Πρέπει να πεις ρητά ότι
 // ενώνεις τις λίστες των μεταβλητών των εκφράσεων, και παίρνεις μια λίστα μεταβλητών,
-// όχι μια έκφραση. Ο τύπος list είναι συνδεδεμένη λίστα.
-// Στοιχεία στην κορυφή της μπορούν να μπουν σε χρόνο O(1).
+// όχι μια έκφραση.
 type Expression = Expression of Variable list
 with
     member x.Variables = let (Expression x) = x in x
@@ -69,8 +68,8 @@ type LPPWithMatrices = {
     MinMax: int
 }
 with
-    // Αυτή η συνάρτηση μετατρέπει ένα πρόβλημα από τον τύπο LPP στον
-    // τύπο LPPWithMatrices.
+    // Αυτή η συνάρτηση μετατρέπει ένα πρόβλημα από
+    // τον τύπο LPP στον τύπο LPPWithMatrices.
     static member Create {Objective = objective; Constraints = constraints} =
         // Αυτό λέγεται ενεργό μοτίβο (active pattern).
         // Επιστρέφει τον δείκτη ξεκινώντας από το 0.

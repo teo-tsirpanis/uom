@@ -99,8 +99,8 @@ let designtime =
                 !& "+"             .>>. X => (fun     x -> Variable( 1.0, x))
                 !& "-"             .>>. X => (fun     x -> Variable(-1.0, x))
             ]
-        let firstExpression = mkVariable true  "First Variable"
-        let moreExpressions = mkVariable false "More Variables"
+        let firstVariable = mkVariable true  "First Variable"
+        let moreVariables = mkVariable false "More Variables"
 
         "Expression" ||= [
             // Μια έκφραση θσ έχει σίγουρα μια μεταβλητή,
@@ -109,7 +109,7 @@ let designtime =
             // αποτελείται από καμία ή πολλές επαναλήψεις του δοθέντος
             // DesigntimeFarkle. Ο τύπος list είναι συνδεδεμένη λίστα.
             // Στοιχεία στην κορυφή της μπορούν να μπουν σε χρόνο O(1).
-            !@ firstExpression .>>. many moreExpressions => (fun x xs -> x :: xs |> Expression)
+            !@ firstVariable .>>. many moreVariables => (fun x xs -> x :: xs |> Expression)
         ]
 
     let objective = "Objective" ||= [
@@ -171,5 +171,5 @@ let designtime =
 // Η συνάρτηση RuntimeFarkle.build επιτρέπει την μονόδρομη μετατροπή από
 // τον πρώτο στον δεύτερο τύπο όπου χρειάζεται. Αν υπάρχει κάποιο πρόβλημα με
 // τη γραμματική, το RuntimeFarkle θα δημιουργηθεί παρ' όλα αυτά, μόνο
-// που η χρήση του θα αποτυχαίνει κάθε φορά.
+// που η χρήση του θα αποτυχαίνει πάντα.
 let runtime = RuntimeFarkle.build designtime

@@ -29,7 +29,7 @@ type Objective =
     member x.Expression =
         match x with
         | Minimize x
-        | Maximize x -> x.Variables
+        | Maximize x -> x
 
 // Το παρακάτω attribute μας υποχρεώνει να γράψουμε
 // Constraint.Equal αντί για σκέτο Equal. Η λέξη Equal
@@ -44,7 +44,7 @@ type Constraint =
         match x with
         |    LessThanOrEqual (x, _)
         |              Equal (x, _)
-        | GreaterThanOrEqual (x, _) -> x.Variables
+        | GreaterThanOrEqual (x, _) -> x
     member x.Value =
         match x with
         |    LessThanOrEqual (_, x)
@@ -85,14 +85,14 @@ with
                 // Εδώ βάζει σε μια ακολουθία όλες τις μεταβλητές του κάθε περιορισμού.
                 // Χρησιμοποιούμε οκνηρά αποτιμημένες (lazily evaluated)
                 // ακολουθίες για εξοικονόμηση μνήμης.
-                |> Seq.collect (fun x -> x.Expression)
+                |> Seq.collect (fun x -> x.Expression.Variables)
                 // Η map αντιστοιχεί κάθε στοιχείο μιας ακολουθίας σε κάποιο άλλο.
                 // Το x στην παρακάτω γραμμή είναι με βάση το ένα.
                 |> Seq.map (fun (Variable (_, X x)) -> x)
                 |> Seq.max
             // Και στην αντικειμενική συνάρτηση.
             let objMax =
-                objective.Expression
+                objective.Expression.Variables
                 |> Seq.map (fun (Variable (_, X x)) -> x)
                 |> Seq.max
             // Και παίρνουμε το μεγαλύτερο από τα δύο.
@@ -102,13 +102,13 @@ with
         let A =
             // Ξέρουμε τις διαστάσεις του πίνακα. Το μήκος των περιορισμών
             // χρειάζεται χρόνο Ο(n), μιας και είμαστε σε συνδεδεμένη λίστα,
-            // αλλά δε πειράζει και πολύ. Τα στοιχεία του πίνακα είναι μηδέν αρχικά.
+            // αλλά δε πειράζει. Τα στοιχεία του πίνακα είναι μηδέν αρχικά.
             let A = Array2D.zeroCreate constraints.Length numberOfUnknowns
             constraints
             // Η συνάρτηση iteri εφαρμόζει μια συνάρτηση σε κάθε στοιχείο
             // της λίστας, περνώντας και τη θέση του στοιχείου αυτού.
             |> List.iteri (fun idx x ->
-                x.Expression
+                x.Expression.Variables
                 // Η συνάρτηση iter είναι σαν την iteri, αλλά χωρίς να
                 // περνά τη θέση. Βλέπουμε επίσης πώς χρησιμοποιούνται τα
                 // ενεργά μοτίβα. Ανί για X, γράψαμε XZeroBased, και η τιμή
@@ -127,7 +127,7 @@ with
         // Με το c ισχύουν τα ίδια που είχαμε πει και για το A.
         let c =
             let c = Array.zeroCreate numberOfUnknowns
-            objective.Expression
+            objective.Expression.Variables
             |> List.iter (fun (Variable (var, XZeroBased x)) -> c.[x] <- c.[x] + var)
             c
 

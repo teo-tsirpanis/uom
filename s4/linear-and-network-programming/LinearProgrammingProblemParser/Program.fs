@@ -11,36 +11,44 @@ open Farkle
 open LinearProgrammingProblemParser
 open System.IO
 
-let readInput argv =
-    if Array.length argv >= 1 then
-        let fDebug =
-            if argv.Length >= 2 && argv.[1] = "--debug" then
-                eprintfn "PARSER LOG: %O"
-            else
-                ignore
-        let fileName = argv.[0]
-        if File.Exists fileName then
-            Ok(argv.[0], fDebug)
-        else
-            Error <| sprintf "File %s does not exist." fileName
-    else
-        Error "Invalid CLI arguments. Try <program name> filename [--debug]"
+type CommandLineArguments = {
+    InputFile: string
+    OutputFile: string option
+    DebugMode: bool
+}
 
-let parseIt (input, fDebug) =
-    match RuntimeFarkle.parseFile Language.runtime fDebug input with
-    | Ok x -> Ok <| DomainTypes.LPPWithMatrices.Create x
-    | Error err -> Error <| string err
+let readInput argv =
+    match argv with
+    | [| input |] -> Ok {InputFile = input; OutputFile = None; DebugMode = false}
+    | [| input; "--debug" |] -> Ok {InputFile = input; OutputFile = None; DebugMode = true}
+    | [| input; output |] -> Ok {InputFile = input; OutputFile = Some output; DebugMode = false}
+    | [| input; output; "--debug" |] -> Ok {InputFile = input; OutputFile = Some output; DebugMode = true}
+    | _ -> Error "Invalid command-line arguments. Try <program name> input [output] [--debug]"
+
+let parseIt args =
+    let fDebug = if args.DebugMode then eprintfn "%O" else ignore
+    RuntimeFarkle.parseFile Language.runtime fDebug args.InputFile
+    |> Result.mapError string
 
 [<EntryPoint>]
 let main args =
     args
     |> readInput
-    |> Result.bind parseIt
+    |> Result.bind (fun args ->
+        args
+        |> parseIt
+        |> Result.map (fun lpp ->
+            let lppStr =
+                lpp
+                |> DomainTypes.LPPWithMatrices.Create
+                |> sprintf "%A"
+            match args.OutputFile with
+            | Some path -> File.WriteAllText(path, lppStr)
+            | None -> printfn "%s" lppStr))
     |> function
-    | Ok x ->
+    | Ok () ->
         eprintfn "Success."
-        printfn "%A" x
         0
     | Error x ->
-        printfn "%s" x
+        eprintfn "%s" x
         1

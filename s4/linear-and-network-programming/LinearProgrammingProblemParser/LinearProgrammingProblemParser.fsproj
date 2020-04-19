@@ -7,6 +7,8 @@
     <Compile Include="LPTypes.fs" />
     <Compile Include="LPLanguage.fs" />
     <Compile Include="Program.fs" />
+    <!-- Με την παρακάτω γραμμή, τα παραδείγματα θα εμφανίζονται στα IDE -->
+    <None Include="example*.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Farkle" Version="5.4.*" />

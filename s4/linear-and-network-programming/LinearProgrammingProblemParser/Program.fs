@@ -38,10 +38,7 @@ let main args =
         args
         |> parseIt
         |> Result.map (fun lpp ->
-            let lppStr =
-                lpp
-                |> DomainTypes.LPPWithMatrices.Create
-                |> sprintf "%A"
+            let lppStr = DomainTypes.LPPWithMatrices.Create(lpp).Format()
             match args.OutputFile with
             | Some path -> File.WriteAllText(path, lppStr)
             | None -> printfn "%s" lppStr))

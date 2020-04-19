@@ -1,5 +1,6 @@
 ﻿module LinearProgrammingProblemParser.Language
 
+open System.Globalization
 open Farkle
 open Farkle.Builder
 open Farkle.Builder.Regex
@@ -42,7 +43,9 @@ let designtime =
         // Στην συγκεκριμένη περίπτωση, όπου συναντήσει ένα τερματικό τύπου
         // Number, θα μετατρέψει τους χαρακτήρες του σε έναν δεκαδικό αριθμό.
         // Το T χρειάζεται για λόγους που οφείλονται σε περιορισμούς του συστήματος.
-        ] |> terminal "Number" (T(fun _ data -> Double.Parse(data)))
+        // Χωρίς τη δεύτερη παράμετρο στην Number.Parse, οι τελείες δε θα διαχώριζαν
+        // το κλασματικό μέρος στους υπολογιστές που είναι στα Ελληνικά.
+        ] |> terminal "Number" (T(fun _ data -> Number.Parse(data, provider = NumberFormatInfo.InvariantInfo)))
     // Το ST είναι τύπου DesigntimeFarkle, χωρίς κάποια παράμετρο.
     // Δε μας ενδιαφέρει ποια ακριβώς λέξη χρησιμοποιήθηκε, οπότε
     // το αντικείμενο αυτό δε "δίνει" τίποτα.

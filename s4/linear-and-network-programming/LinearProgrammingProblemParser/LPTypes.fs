@@ -1,5 +1,7 @@
 namespace LinearProgrammingProblemParser.DomainTypes
 
+open System.Text
+
 // Ο τύπος Number είναι συνώνυμο του τύπου float.
 // Μπορούμε έτσι να αλλάξουμε εύκολα τον τύπο των αριθμών στα γραμμικά προβλήματα.
 // Στην F# ο τύπος float είναι διπλής ακρίβειας.
@@ -156,3 +158,24 @@ with
             Eqin = Eqin
             MinMax = MinMax
         }
+    // Η συνάρτηση αυτή μορφοποιεί τους πίνακες
+    // του γραμμικού προβλήματος σε μια συμβολοσειρά.
+    // Η συνάρτηση sprintf "%A" είναι καλή αλλά παραλείπει
+    // τους συντελεστές σε πολύ μεγάλα προβλήματα με πάνω
+    // από εκατό μεταβλητές.
+    member this.Format() =
+        // Μια σειρά του πίνακα ανά γραμμή, με τους αριθμούς να διαχωρίζονται με έναν κενό χαρακτήρα.
+        let A =
+            let sb = StringBuilder()
+            for i = 0 to Array2D.length1 this.A - 1 do
+                sb.Append(' ', 4) |> ignore
+                for j = 0 to Array2D.length2 this.A - 2 do
+                    Printf.bprintf sb "%g " this.A.[i, j]
+                Printf.bprintf sb "%g" this.A.[i, Array2D.length2 this.A - 1]
+                sb.AppendLine() |> ignore
+            sb.ToString()
+        let formatArray1D x = x |> Seq.map (sprintf "%g") |> String.concat " "
+        let b = formatArray1D this.b
+        let c = formatArray1D this.c
+        let eqin = this.Eqin |> Seq.map (sprintf "%d") |> String.concat " "
+        sprintf "A = [\n%s]\nB = [%s]\nc = [%s]\nEqin = [%s]\nMinMax = %d" A b c eqin this.MinMax

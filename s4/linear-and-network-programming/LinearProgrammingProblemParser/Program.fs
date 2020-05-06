@@ -9,6 +9,7 @@
 
 open Farkle
 open LinearProgrammingProblemParser
+open System
 open System.IO
 
 type CommandLineArguments = {
@@ -38,10 +39,18 @@ let main args =
         args
         |> parseIt
         |> Result.map (fun lpp ->
-            let lppStr = DomainTypes.LPPWithMatrices.Create(lpp).Format()
-            match args.OutputFile with
-            | Some path -> File.WriteAllText(path, lppStr)
-            | None -> printfn "%s" lppStr))
+            let out =
+                match args.OutputFile with
+                | Some path -> new StreamWriter(path) :> TextWriter
+                | None -> Console.Out
+            try
+                let lppStr = DomainTypes.LPPWithMatrices.Create(lpp).Format()
+                fprintfn out "%s" lppStr
+            finally
+                if args.OutputFile.IsSome then
+                    out.Dispose()
+        )
+    )
     |> function
     | Ok () ->
         eprintfn "Success."

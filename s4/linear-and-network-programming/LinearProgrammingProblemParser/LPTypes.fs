@@ -68,6 +68,10 @@ type LPPWithMatrices = {
     c: Number []
     Eqin: int []
     MinMax: int
+    /// Οι φυσικοί περιορισμοί της κάθε μεταβλητής.
+    /// 0 σημαίνει ελεύθερη μεταβλητή,
+    /// αρνητική τιμή σημαίνει αρνητική μεταβλητή κοκ.
+    NatConstrs: int []
 }
 with
     // Αυτή η συνάρτηση μετατρέπει ένα πρόβλημα από
@@ -148,6 +152,9 @@ with
             match objective with
             | Minimize _ -> -1
             | Maximize _ ->  1
+        // Στα προβλήματα του χρήστη, οι μεταβλητές
+        // θα θεωρούνται πάντα ότι είναι θετικές.
+        let NatConstrs = Array.create numberOfUnknowns 1
 
         // Φτιάξαμε όλα τα συστατικά του γραμμικού προβλήματος,
         // και τώρα θα τα ενώσουμε στον τελικό τύπο που θα επιστρέψουμε.
@@ -157,9 +164,10 @@ with
             c = c
             Eqin = Eqin
             MinMax = MinMax
+            NatConstrs = NatConstrs
         }
-    // Η συνάρτηση αυτή μορφοποιεί τους πίνακες
-    // του γραμμικού προβλήματος σε μια συμβολοσειρά.
+    /// Η συνάρτηση αυτή μορφοποιεί τους πίνακες
+    /// του γραμμικού προβλήματος σε μια συμβολοσειρά.
     // Η συνάρτηση sprintf "%A" είναι καλή αλλά παραλείπει
     // τους συντελεστές σε πολύ μεγάλα προβλήματα με πάνω
     // από εκατό μεταβλητές.
@@ -178,4 +186,33 @@ with
         let b = formatArray1D this.b
         let c = formatArray1D this.c
         let eqin = this.Eqin |> Seq.map (sprintf "%d") |> String.concat " "
-        sprintf "A = [\n%s]\nB = [%s]\nc = [%s]\nEqin = [%s]\nMinMax = %d" A b c eqin this.MinMax
+        let NatConstrs = this.NatConstrs |> Seq.map (sprintf "%d") |> String.concat " "
+        sprintf "A = [
+%s]
+b = [%s]
+c = [%s]
+Εqin = [%s]
+MinMax = %d
+NatConstrs = [%s]" A b c eqin this.MinMax NatConstrs
+    /// Η συνάρτηση αυτή επιστρέφει το δυικό αυτού του προβλήματος.
+    member this.Dual() =
+        let AT =
+            let A = this.A
+            Array2D.init (Array2D.length2 A) (Array2D.length1 A) (fun j i -> A.[i, j])
+        {
+            A = AT
+            // Καλύτερα να μην γράψουμε b = c. Ο ίδιος πίνακας θα υπήρχε
+            // σε πολλά αντικείμενα και θα μπορούσε να τροποποιηθεί απρόβλεπτα.
+            // Επίσης, το ότι ο ένας πίνακας είναι πίνακας γραμμή
+            b = Array.copy this.c
+            c = Array.copy this.b
+            // Πολλαπλασιάζουμε το κάθε στοιχείο με το -MinMax.
+            // Δηλαδή οι τιμές αλλάζουν πρόσημο στο δυικό ενός
+            // προβλήματος μεγιστοποίησης.
+            Eqin = Array.map ((*) -this.MinMax) this.NatConstrs
+            MinMax = -this.MinMax
+            // Πολλαπλασιάζουμε το κάθε στοιχείο με το MinMax.
+            // Δηλαδή οι τιμές αλλάζουν πρόσημο στο δυικό ενός
+            // προβλήματος ελαχιστοποίησης.
+            NatConstrs = Array.map ((*) this.MinMax) this.Eqin
+        }

@@ -38,14 +38,24 @@ let main args =
     |> Result.bind (fun args ->
         args
         |> parseIt
-        |> Result.map (fun lpp ->
-            let out =
+        |> Result.bind (fun lpp ->
+            let out = 
                 match args.OutputFile with
                 | Some path -> new StreamWriter(path) :> TextWriter
                 | None -> Console.Out
             try
-                let lppStr = DomainTypes.LPPWithMatrices.Create(lpp).Format()
-                fprintfn out "%s" lppStr
+                let primal = DomainTypes.LPPWithMatrices.Create lpp
+                fprintfn out "The primal problem is:"
+                fprintfn out "%s" (primal.Format())
+                let dual = primal.Dual()
+                fprintfn out "\nIts dual is:"
+                fprintfn out "%s" (dual.Format())
+                let dualDual = dual.Dual()
+                if dualDual = primal then
+                    eprintfn "\nThe dual's dual is equal to the primal as expected."
+                    Ok ()
+                else
+                    Error "Error: The dual's dual is not equal to the primal."
             finally
                 if args.OutputFile.IsSome then
                     out.Dispose()

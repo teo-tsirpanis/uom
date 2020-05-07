@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LPTypes.fs" />
+    <Compile Include="LPFormatter.fs" />
     <Compile Include="LPLanguage.fs" />
     <Compile Include="Program.fs" />
     <!-- Με την παρακάτω γραμμή, τα παραδείγματα θα εμφανίζονται στα IDE -->

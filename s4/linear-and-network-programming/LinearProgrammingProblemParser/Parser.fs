@@ -160,13 +160,19 @@ let designtime =
     // Παίρνουμε την αντικειμενική συνάρτηση και τους περιορισμούς,
     // και δημιουργούμε το αντικείμενο τύπου LPP.
     "Linear Programming Problem" ||= [
-        !@ objective .>> ST .>>. constraints .>> endMaybe => (fun o c -> {Objective = o; Constraints = c})
+        !@ objective .>> ST .>>. constraints .>> endMaybe => (fun o c ->
+            {Objective = o; Constraints = c})
     ]
     // Προσθέτουμε και τα σχόλια, και επιστρέφουμε το τελικό DesigntimeFarkle.
     // Από προεπιλογή, η γραμματική είναι case-insensitive και αγνωεί τους
     // χαρακτήρες διαστήματος (κενό, tab, carriage return και line feed)
     // μεταξύ των τερματικών.
     |> DesigntimeFarkle.addLineComment "!"
+    // Η παρακάτω συνάρτηση μαρκάρει το DesigntimeFarkle ότι μπορεί να
+    // προμεταγλωττιστεί. Ο compiler θα το ανακαλύψει κατά τη μεταγλώττιση
+    // του προγράμματος, και η κατασκευή του RuntimeFarkle από κάτω θα πάρει
+    // σημαντικά λιγότερο χρόνο.
+    |> RuntimeFarkle.markForPrecompile
 
 // Το runtime είναι τύπου RuntimeFarkle<LPP>.
 // Περιέχει τους πίνακες για την λεκτική και τη συντακτική ανάλυση

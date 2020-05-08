@@ -4,9 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LPTypes.fs" />
-    <Compile Include="LPFormatter.fs" />
-    <Compile Include="LPLanguage.fs" />
+    <Compile Include="DomainTypes.fs" />
+    <Compile Include="Formatter.fs" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Program.fs" />
     <!-- Με την παρακάτω γραμμή, τα παραδείγματα θα εμφανίζονται στα IDE -->
     <None Include="example*.txt" />

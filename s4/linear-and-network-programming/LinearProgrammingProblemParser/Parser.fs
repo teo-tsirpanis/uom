@@ -1,4 +1,4 @@
-﻿module LinearProgrammingProblemParser.Language
+﻿module LinearProgrammingProblemParser.Parser
 
 open System.Globalization
 open Farkle

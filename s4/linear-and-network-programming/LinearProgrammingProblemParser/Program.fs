@@ -28,7 +28,7 @@ let readInput argv =
 
 let parseIt args =
     let fDebug = if args.DebugMode then eprintfn "%O" else ignore
-    RuntimeFarkle.parseFile Language.runtime fDebug args.InputFile
+    RuntimeFarkle.parseFile Parser.runtime fDebug args.InputFile
     |> Result.mapError string
 
 [<EntryPoint>]

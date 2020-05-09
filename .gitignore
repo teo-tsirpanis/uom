@@ -20,3 +20,4 @@ out/
 *.log
 *.dia~
 .vs/
+*.binlog

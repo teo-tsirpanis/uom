@@ -30,25 +30,22 @@ c = [%s]
 Εqin = [%s]
 MinMax = %d" A b c eqin minMax
 
-let private formatExpression xChar (Expression x) =
-    match x with
-    | x :: xs ->
-        let sb = StringBuilder()
-        let formatVariable x =
-            let (Variable (k, X x)) = x
-            Printf.bprintf sb "%g%c%d" (abs k) xChar x
-        formatVariable x
-        List.iter (fun (Variable (k, _) as v) ->
-            if k < 0.0 then
-                " - "
-            else
-                " + "
-            |> sb.Append |> ignore
-            formatVariable v) xs
-        sb.ToString()
+let private formatExpression xChar (Expression xs) =
+    match xs with
     // Ο parser δε θα αναγνώριζε έναν περιορισμό του
     // τύπου 0 <= 5. Η πρώτη μεταβλητή υπάρχει πάντα άλλωστε.
     | [] -> sprintf "0%c1" xChar
+    | xs ->
+        let sb = StringBuilder()
+        List.iteri (fun i (Variable (k, X x)) ->
+            if k < 0.0 then
+                sb.Append " - " |> ignore
+            // Αν ο πρώτος συντελεστής είναι
+            // θετικός δε χρειάζεται το συν.
+            elif i <> 0 then
+                sb.Append " + " |> ignore
+            Printf.bprintf sb "%g%c%d" (abs k) xChar x) xs
+        sb.ToString()
 
 let private formatConstraint xChar x =
     match x with

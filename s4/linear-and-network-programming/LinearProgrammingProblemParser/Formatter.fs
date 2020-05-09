@@ -102,15 +102,18 @@ let formatLPPWithMatrices xChar {A = a; b = b; c = c; Eqin = eqin; MinMax = minM
     |> makeObjectiveFunction
     |> formatExpression xChar
     |> sb.AppendLine |> ignore
-    sb.AppendLine() |> ignore
 
-    sb.AppendLine "st" |> ignore
+    sb.AppendLine().AppendLine "st" |> ignore
     makeConstraintsFromMatrices a b eqin
     |> List.iter (formatConstraint xChar >> sb.AppendLine >> ignore)
     sb.AppendLine() |> ignore
 
     natConstrs
     |> Seq.mapi (fun i x -> i + 1, x)
+    // Αντί να γράφουμε x1 >= 0, x2 >= 0, x3 >= 0,
+    // μπορούμε να γράψουμε x1, x2, x3 >= 0.
+    // Η συνάρτηση snd παίρνει το δεύτερο στοιχείο
+    // ενός ζεύγους (η fst το πρώτο).
     |> Seq.groupBy snd
     |> Seq.iter (fun (constraintType, xs) ->
         xs

@@ -166,34 +166,6 @@ with
             MinMax = MinMax
             NatConstrs = NatConstrs
         }
-    /// Η συνάρτηση αυτή μορφοποιεί τους πίνακες
-    /// του γραμμικού προβλήματος σε μια συμβολοσειρά.
-    // Η συνάρτηση sprintf "%A" είναι καλή αλλά παραλείπει
-    // τους συντελεστές σε πολύ μεγάλα προβλήματα με πάνω
-    // από εκατό μεταβλητές.
-    member this.Format() =
-        // Μια σειρά του πίνακα ανά γραμμή, με τους αριθμούς να διαχωρίζονται με έναν κενό χαρακτήρα.
-        let A =
-            let sb = StringBuilder()
-            for i = 0 to Array2D.length1 this.A - 1 do
-                sb.Append(' ', 4) |> ignore
-                for j = 0 to Array2D.length2 this.A - 2 do
-                    Printf.bprintf sb "%g " this.A.[i, j]
-                Printf.bprintf sb "%g" this.A.[i, Array2D.length2 this.A - 1]
-                sb.AppendLine() |> ignore
-            sb.ToString()
-        let formatArray1D x = x |> Seq.map (sprintf "%g") |> String.concat " "
-        let b = formatArray1D this.b
-        let c = formatArray1D this.c
-        let eqin = this.Eqin |> Seq.map (sprintf "%d") |> String.concat " "
-        let NatConstrs = this.NatConstrs |> Seq.map (sprintf "%d") |> String.concat " "
-        sprintf "A = [
-%s]
-b = [%s]
-c = [%s]
-Εqin = [%s]
-MinMax = %d
-NatConstrs = [%s]" A b c eqin this.MinMax NatConstrs
     /// Η συνάρτηση αυτή επιστρέφει το δυικό αυτού του προβλήματος.
     member this.Dual() =
         let AT =

@@ -3,6 +3,33 @@ module LinearProgrammingProblemParser.Formatter
 open System.Text
 open LinearProgrammingProblemParser.DomainTypes
 
+/// Η συνάρτηση αυτή μορφοποιεί τους πίνακες
+/// του γραμμικού προβλήματος σε μια συμβολοσειρά.
+// Η συνάρτηση sprintf "%A" είναι καλή αλλά παραλείπει
+// τους συντελεστές σε πολύ μεγάλα προβλήματα με πάνω
+// από εκατό μεταβλητές.
+let matrixFormat {A = A; b = b; c = c; Eqin = eqin; MinMax = minMax} =
+    // Μια σειρά του πίνακα ανά γραμμή, με τους αριθμούς να διαχωρίζονται με έναν κενό χαρακτήρα.
+    let A =
+        let sb = StringBuilder()
+        for i = 0 to Array2D.length1 A - 1 do
+            sb.Append(' ', 4) |> ignore
+            for j = 0 to Array2D.length2 A - 2 do
+                Printf.bprintf sb "%g " A.[i, j]
+            Printf.bprintf sb "%g" A.[i, Array2D.length2 A - 1]
+            sb.AppendLine() |> ignore
+        sb.ToString()
+    let formatArray1D x = x |> Seq.map (sprintf "%g") |> String.concat " "
+    let b = formatArray1D b
+    let c = formatArray1D c
+    let eqin = eqin |> Seq.map (sprintf "%d") |> String.concat " "
+    sprintf "A = [
+%s]
+b = [%s]
+c = [%s]
+Εqin = [%s]
+MinMax = %d" A b c eqin minMax
+
 let private formatExpression xChar (Expression x) =
     match x with
     | x :: xs ->

@@ -2,9 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Dai19090.Pdp;
 
-namespace pdp_exams
+namespace Dai19090.Pdp
 {
     static class Program
     {

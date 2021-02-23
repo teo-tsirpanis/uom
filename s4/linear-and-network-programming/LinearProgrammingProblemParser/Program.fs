@@ -15,20 +15,16 @@ open System.IO
 type CommandLineArguments = {
     InputFile: string
     OutputFile: string option
-    DebugMode: bool
 }
 
 let readInput argv =
     match argv with
-    | [| input |] -> Ok {InputFile = input; OutputFile = None; DebugMode = false}
-    | [| input; "--debug" |] -> Ok {InputFile = input; OutputFile = None; DebugMode = true}
-    | [| input; output |] -> Ok {InputFile = input; OutputFile = Some output; DebugMode = false}
-    | [| input; output; "--debug" |] -> Ok {InputFile = input; OutputFile = Some output; DebugMode = true}
-    | _ -> Error "Invalid command-line arguments. Try <program name> input [output] [--debug]"
+    | [| input |] -> Ok {InputFile = input; OutputFile = None}
+    | [| input; output |] -> Ok {InputFile = input; OutputFile = Some output}
+    | _ -> Error "Invalid command-line arguments. Try <program name> input [output]"
 
 let parseIt args =
-    let fDebug = if args.DebugMode then eprintfn "%O" else ignore
-    RuntimeFarkle.parseFile Parser.runtime fDebug args.InputFile
+    RuntimeFarkle.parseFile Parser.runtime args.InputFile
     |> Result.mapError string
 
 [<EntryPoint>]

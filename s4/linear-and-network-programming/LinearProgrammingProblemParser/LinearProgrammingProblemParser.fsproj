@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
+    <FarkleGenerateHtml>true</FarkleGenerateHtml>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DomainTypes.fs" />
@@ -12,9 +13,8 @@
     <None Include="example*.txt" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Farkle" Version="6.0.0-alpha.1" />
-    <!-- Αν υπάρξει κάποιο πρόβλημα κατά τη μεταγλώττιση, σβήστε την παρακάτω γραμμή. -->
-    <PackageReference Include="Farkle.Tools.MSBuild" Version="6.0.0-alpha.1" />
-    <PackageReference Update="FSharp.Core" Version="4.7.1" />
+    <PackageReference Include="Farkle" Version="6.0.0" />
+    <PackageReference Include="Farkle.Tools.MSBuild" Version="6.0.0" />
+    <PackageReference Update="FSharp.Core" Version="5.0.1" />
   </ItemGroup>
 </Project>

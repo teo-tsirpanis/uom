@@ -184,4 +184,4 @@ let designtime =
 // τον πρώτο στον δεύτερο τύπο όπου χρειάζεται. Αν υπάρχει κάποιο πρόβλημα με
 // τη γραμματική, το RuntimeFarkle θα δημιουργηθεί παρ' όλα αυτά, μόνο
 // που η χρήση του θα αποτυχαίνει πάντα.
-let runtime = RuntimeFarkle.build designtime
+let runtime = RuntimeFarkle.buildPrecompiled designtime

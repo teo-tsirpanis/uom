@@ -83,3 +83,36 @@ select_flight(Src, Dest, Path, Before, Cost, MinWait) :-
 %%% reduction/2
 %% Add your code here
 
+is_unary_op(abs).
+eval_unary_op(abs, N, Result) :- abs(N, Result).
+
+is_binary_op(+).
+is_binary_op(-).
+is_binary_op(*).
+is_binary_op(//).
+is_binary_op(min).
+is_binary_op(max).
+eval_binary_op(+, N1, N2, Result) :- Result is N1 + N2.
+eval_binary_op(-, N1, N2, Result) :- Result is N1 - N2.
+eval_binary_op(*, N1, N2, Result) :- Result is N1 * N2.
+eval_binary_op(//, N1, N2, Result) :- Result is N1 // N2.
+eval_binary_op(min, N1, N2, Result) :- min(N1, N2, Result).
+eval_binary_op(max, N1, N2, Result) :- max(N1, N2, Result).
+
+extract_number([X|Xs], X, Xs) :-
+    integer(X).
+
+extract_number([UnaryOp|Xs], Result, Rest) :-
+    is_unary_op(UnaryOp),
+    extract_number(Xs, N, Rest),
+    eval_unary_op(UnaryOp, N, Result).
+
+extract_number([BinaryOp|Xs], Result, Rest) :-
+    is_binary_op(BinaryOp),
+    extract_number(Xs, N1, Xs2),
+    extract_number(Xs2, N2, Rest),
+    eval_binary_op(BinaryOp, N1, N2, Result).
+
+reduction(TermsInRPN, Result) :-
+    reverse(TermsInRPN, TermsInPN),
+    extract_number(TermsInPN, Result, []).

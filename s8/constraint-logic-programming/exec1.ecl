@@ -110,8 +110,8 @@ extract_number([UnaryOp|Xs], Result, Rest) :-
 
 extract_number([BinaryOp|Xs], Result, Rest) :-
     is_binary_op(BinaryOp),
-    extract_number(Xs, N1, Xs2),
-    extract_number(Xs2, N2, Rest),
+    extract_number(Xs, N2, Xs2),
+    extract_number(Xs2, N1, Rest),
     eval_binary_op(BinaryOp, N1, N2, Result).
 
 reduction(TermsInRPN, Result) :-

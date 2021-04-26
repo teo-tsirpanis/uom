@@ -53,8 +53,8 @@ find_flight_impl(Src, Dest, Visited, PathAcc, CostAcc, ETALast, Path, Cost, ETAF
 find_flight(Src, Dest, Path, Cost, ETA) :-
     find_flight_impl(Src, Dest, [Src], [], 0, 0, Path, Cost, ETA).
 
-waiting_time_impl([], WTime, WTime) :-!.
-waiting_time_impl([_], WTime, WTime) :-!.
+waiting_time_impl([], WTime, WTime).
+waiting_time_impl([_], WTime, WTime).
 waiting_time_impl([F1|Fs], WTimeAcc, WTime) :-
     Fs = [F2|_],
     flight(F1, _, _, eta(ETA), _),
@@ -76,7 +76,8 @@ select_flight(Src, Dest, Path, Before, Cost, MinWait) :-
     member(flightplan(Path, Cost, ETA), FlightPlans),
     ETA =< Before,
     waiting_time(Path, MinWait),
-    has_min_waiting_time(FlightPlans, MinWait).
+    has_min_waiting_time(FlightPlans, MinWait),
+    !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ΕΧEC 3

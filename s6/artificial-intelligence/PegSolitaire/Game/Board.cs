@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace PegSolitaire
+namespace PegSolitaire.Game
 {
     /// <summary>
     /// The state a square of the board can be in.
@@ -26,11 +26,11 @@ namespace PegSolitaire
     /// <summary>
     /// Represents the initial board of a Peg Solitaire game.
     /// </summary>
-    public class GameBoard
+    public class Board
     {
         private readonly SquareState[,] _board;
 
-        private GameBoard(SquareState[,] board)
+        private Board(SquareState[,] board)
         {
             _board = board;
         }
@@ -62,12 +62,12 @@ namespace PegSolitaire
         public SquareState this[int line, int col] => _board[col, line];
 
         /// <summary>
-        /// Reads a <see cref="GameBoard"/> from the given <see cref="TextReader"/>.
+        /// Reads a <see cref="Board"/> from the given <see cref="TextReader"/>.
         /// </summary>
         /// <returns>The game board, or <see langword="null"/> if the input was invalid.</returns>
         /// <remarks>The input's syntax is specified in the
         /// assignment's statement. Examples of it are provided.</remarks>
-        public static GameBoard? FromTextReader(TextReader reader)
+        public static Board? FromTextReader(TextReader reader)
         {
             var dimensionsLine = reader.ReadLine();
             if (dimensionsLine == null) return null;
@@ -91,21 +91,21 @@ namespace PegSolitaire
                 }
             }
 
-            return new GameBoard(board);
+            return new Board(board);
         }
 
         /// <summary>
-        /// Reads a <see cref="GameBoard"/> from a string.
+        /// Reads a <see cref="Board"/> from a string.
         /// </summary>
         /// <seealso cref="FromTextReader"/>
-        public static GameBoard? FromString(string str) =>
+        public static Board? FromString(string str) =>
             FromTextReader(new StringReader(str));
 
         /// <summary>
-        /// Reads a <see cref="GameBoard"/> from a file at the fiven path.
+        /// Reads a <see cref="Board"/> from a file at the fiven path.
         /// </summary>
         /// <seealso cref="FromTextReader"/>
-        public static GameBoard? FromFile(string path)
+        public static Board? FromFile(string path)
         {
             using var file = File.OpenText(path);
             return FromTextReader(file);

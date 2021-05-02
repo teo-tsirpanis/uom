@@ -33,33 +33,40 @@ namespace PegSolitaire.Game
         private Board(SquareState[,] board)
         {
             _board = board;
+            Width = _board.GetLength(1);
+            Height = _board.GetLength(0);
         }
 
         /// <summary>
         /// The board's width.
         /// </summary>
-        /// <remarks>If the board is not square, this property will contain the
-        /// distance between the leftmost and the rightmost element.</remarks>
-        public int Width => _board.GetLength(1);
+        /// <remarks>If the board is not square, this property will contain the distance
+        /// between the leftmost and the rightmost square where a piece can be placed.</remarks>
+        public int Width { get; }
 
         /// <summary>
         /// The board's height.
         /// </summary>
-        /// <remarks>If the board is not square, this property will contain the
-        /// distance between the topmost and the bottommost element.</remarks>
-        public int Height => _board.GetLength(0);
+        /// <remarks>If the board is not square, this property will contain the distance
+        /// between the topmost and the bottommost square where a piece can be placed.</remarks>
+        public int Height { get; }
 
         /// <summary>
         /// Returns the <see cref="SquareState"/> of the
-        /// board's square at the given (X,Y) coordinates.
+        /// board's square at the given <see cref="BoardPosition"/>.
         /// </summary>
-        /// <param name="line">The zero-based coordinate of the square's line.</param>
-        /// <param name="col">The zero-based coordinate of the square's column.</param>
-        /// <exception cref="System.IndexOutOfRangeException">
-        /// Either <paramref name="line"/> or <paramref name="col"/> is negative
-        /// or greater than or equal to <see cref="Height"/> or <see cref="Width"/>
-        /// respectively.</exception>
-        public SquareState this[int line, int col] => _board[col, line];
+        /// <param name="position">The square's position.</param>
+        /// <returns>The square's state, or <see cref="SquareState.Invalid"/>
+        /// if <paramref name="position"/> is invalid.</returns>
+        public SquareState this[BoardPosition position]
+        {
+            get
+            {
+                if (position.X < 0 || position.X >= Width || position.Y < 0 || position.Y >= Height)
+                    return SquareState.Invalid;
+                return _board[position.Y, position.X];
+            }
+        }
 
         /// <summary>
         /// Reads a <see cref="Board"/> from the given <see cref="TextReader"/>.

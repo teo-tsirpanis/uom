@@ -45,33 +45,64 @@ namespace PegSolitaire.Game
         public MoveDirection Direction { get; init; }
 
         /// <summary>
-        /// Gets the position the piece will move to.
+        /// Calculates important <see cref="BoardPosition"/>s for this move. 
         /// </summary>
-        /// <remarks>This method may return an invalid position if
-        /// the move is illegal (such as moving up while already
-        /// being at the top-left corner of the board).</remarks>
-        public BoardPosition GetResultingPosition()
+        /// <param name="posOneSquareAway">The position one square away from
+        /// <see cref="Position"/> towards <see cref="Direction"/>. In Peg
+        /// Solitaire this move will be considered legal if the square at
+        /// that position has a piece.</param>
+        /// <param name="posTwoSquaresAway">The position two squares away from
+        /// <see cref="Position"/> towards <see cref="Direction"/>. In Peg
+        /// Solitaire this move will be considered legal if the square at
+        /// that position is empty.</param>
+        /// <remarks>This method may return invalid positions if
+        /// the move itself is invalid (such as moving up while
+        /// already being at the top of the board).</remarks>
+        public void GetAdjacentPositions(out BoardPosition posOneSquareAway, out BoardPosition posTwoSquaresAway)
         {
-            var x = Position.X;
-            var y = Position.Y;
+            int x = Position.X;
+            int y = Position.Y;
+            ref int coordToChange = ref x;
+            int displacement = 0;
 
+            // Depending on the direction, we will decide
+            // which coordinate to change and by how much.
             switch (Direction)
             {
                 case MoveDirection.Up:
-                    y -= 2;
+                    coordToChange = ref y;
+                    displacement = -1;
                     break;
                 case MoveDirection.Down:
-                    y += 2;
+                    coordToChange = ref y;
+                    displacement = 1;
                     break;
                 case MoveDirection.Left:
-                    x -= 2;
+                    displacement = -1;
                     break;
                 case MoveDirection.Right:
-                    x += 2;
+                    displacement = 1;
                     break;
             }
 
-            return new BoardPosition {X = x, Y = y};
+            coordToChange += displacement;
+            // At this point the coordinates will be one square away.
+            posOneSquareAway = new BoardPosition {X = x, Y = y};
+            coordToChange += displacement;
+            // At this point the coordinates will be two squares away.
+            posTwoSquaresAway = new BoardPosition {X = x, Y = y};
+        }
+
+        /// <summary>
+        /// Gets the position the piece will move to.
+        /// </summary>
+        /// <remarks>This method may return an invalid position if
+        /// the move itself is invalid (such as moving up while
+        /// already being at the top of the board).</remarks>
+        public BoardPosition GetResultingPosition()
+        {
+            GetAdjacentPositions(out _, out var position);
+            return position;
         }
 
         /// <inheritdoc/>

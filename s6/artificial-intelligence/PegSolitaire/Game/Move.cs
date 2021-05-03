@@ -37,12 +37,23 @@ namespace PegSolitaire.Game
         /// <summary>
         /// The position of the piece that is going to be moved.
         /// </summary>
-        public BoardPosition Position { get; init; }
+        public BoardPosition Position { get; }
 
         /// <summary>
         /// The direction at which the piece will move.
         /// </summary>
-        public MoveDirection Direction { get; init; }
+        public MoveDirection Direction { get; }
+
+        /// <summary>
+        /// Creates a <see cref="Move"/>.
+        /// </summary>
+        /// <remarks>This constructor is not meant to called from
+        /// outside the <see cref="State.GetMoves"/> method.</remarks>
+        internal Move(BoardPosition position, MoveDirection direction)
+        {
+            Position = position;
+            Direction = direction;
+        }
 
         /// <summary>
         /// Calculates important <see cref="BoardPosition"/>s for this move. 
@@ -87,10 +98,10 @@ namespace PegSolitaire.Game
 
             coordToChange += displacement;
             // At this point the coordinates will be one square away.
-            posOneSquareAway = new BoardPosition {X = x, Y = y};
+            posOneSquareAway = new BoardPosition(x, y);
             coordToChange += displacement;
             // At this point the coordinates will be two squares away.
-            posTwoSquaresAway = new BoardPosition {X = x, Y = y};
+            posTwoSquaresAway = new BoardPosition(x, y);
         }
 
         /// <summary>

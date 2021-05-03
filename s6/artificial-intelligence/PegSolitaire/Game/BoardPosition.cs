@@ -10,12 +10,22 @@ namespace PegSolitaire.Game
         /// <summary>
         /// The position's one-based X coordinate, starting from top to bottom.
         /// </summary>
-        public int X { get; init; }
+        public int X { get; }
 
         /// <summary>
         /// The position's one-based Y coordinate, starting from left to right.
         /// </summary>
-        public int Y { get; init; }
+        public int Y { get; }
+
+        /// <summary>
+        /// Creates a <see cref="BoardPosition"/>
+        /// with the given one-based coordinates.
+        /// </summary>
+        public BoardPosition(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
 
         /// <inheritdoc/>
         public bool Equals(BoardPosition other) =>

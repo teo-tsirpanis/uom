@@ -21,6 +21,13 @@ namespace PegSolitaire.Game
         /// The game's starting <see cref="Board"/>.
         /// </summary>
         public Board Board { get; }
+        
+        /// <summary>
+        /// The <see cref="Move"/>s played in this state so far, with the newest first.
+        /// </summary>
+        /// <seealso cref="TryPlaySingleMove"/>
+        /// <seealso cref="TryPlayManyMoves"/>
+        public ImmutableStack<Move> RecentMovesPlayed { get; }
 
         /// <summary>
         /// Starts a game on the given <see cref="Board"/>.
@@ -42,12 +49,14 @@ namespace PegSolitaire.Game
             }
 
             Pieces = piecesBuilder.ToImmutable();
+            RecentMovesPlayed = ImmutableStack<Move>.Empty;
         }
 
-        private State(Board board, ImmutableHashSet<BoardPosition> pieces)
+        private State(Board board, ImmutableHashSet<BoardPosition> pieces, ImmutableStack<Move> recentMovesPlayed)
         {
             Board = board;
             Pieces = pieces;
+            RecentMovesPlayed = recentMovesPlayed;
         }
 
         /// <summary>
@@ -112,7 +121,7 @@ namespace PegSolitaire.Game
             var pieces = Pieces.ToBuilder();
             if (!TryPlayImpl(pieces, move)) return false;
 
-            newState = new State(Board, pieces.ToImmutable());
+            newState = new State(Board, pieces.ToImmutable(), RecentMovesPlayed.Push(move));
             Debug.Assert(newState.Pieces.Count == Pieces.Count - 1);
             return true;
         }
@@ -141,14 +150,16 @@ namespace PegSolitaire.Game
             illegalMoveIndex = 0;
 
             var pieces = Pieces.ToBuilder();
+            var recentMovesPlayed = RecentMovesPlayed;
 
             foreach (var move in moves)
             {
                 if (!TryPlayImpl(pieces, move)) return false;
+                recentMovesPlayed = recentMovesPlayed.Push(move);
                 illegalMoveIndex++;
             }
 
-            newState = new State(Board, pieces.ToImmutable());
+            newState = new State(Board, pieces.ToImmutable(), recentMovesPlayed);
             // illegalMoveIndex will have by now the total count of moves.
             Debug.Assert(Pieces.Count == newState.Pieces.Count + illegalMoveIndex);
             return true;

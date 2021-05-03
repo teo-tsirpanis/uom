@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -112,6 +113,7 @@ namespace PegSolitaire.Game
             if (!TryPlayImpl(pieces, move)) return false;
 
             newState = new State(Board, pieces.ToImmutable());
+            Debug.Assert(newState.Pieces.Count == Pieces.Count - 1);
             return true;
         }
 
@@ -147,6 +149,8 @@ namespace PegSolitaire.Game
             }
 
             newState = new State(Board, pieces.ToImmutable());
+            // illegalMoveIndex will have by now the total count of moves.
+            Debug.Assert(Pieces.Count == newState.Pieces.Count + illegalMoveIndex);
             return true;
         }
 
@@ -166,14 +170,12 @@ namespace PegSolitaire.Game
             for (int y = 1; y <= Board.Height; y++)
             {
                 for (int x = 1; x <= Board.Width; x++)
-                {
                     if (Board[new BoardPosition(x, y)] == SquareState.Invalid)
                         sb.Append(invalidSquareChar);
                     else if (Pieces.Contains(new BoardPosition(x, y)))
                         sb.Append(takenSquareChar);
                     else
                         sb.Append(emptySquareChar);
-                }
 
                 sb.AppendLine();
             }

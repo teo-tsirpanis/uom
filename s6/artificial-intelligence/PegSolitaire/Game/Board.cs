@@ -80,8 +80,8 @@ namespace PegSolitaire.Game
             if (dimensionsLine == null) return null;
             var dimensions = dimensionsLine.Split(' ');
             if (dimensions.Length != 2) return null;
-            if (!int.TryParse(dimensions[0], out var width)) return null;
-            if (!int.TryParse(dimensions[1], out var height)) return null;
+            if (!int.TryParse(dimensions[0], out var height)) return null;
+            if (!int.TryParse(dimensions[1], out var width)) return null;
 
             var board = new SquareState[height, width];
 

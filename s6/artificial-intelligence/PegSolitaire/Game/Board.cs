@@ -26,6 +26,10 @@ namespace PegSolitaire.Game
     /// <summary>
     /// Represents the initial board of a Peg Solitaire game.
     /// </summary>
+    /// <remarks>This class cannot be modified in any way after
+    /// being created and so cannot be used to actually play a
+    /// game of Peg Solitaire. Instead use the <see cref="State"/>
+    /// class for that purpose.</remarks>
     public class Board
     {
         private readonly SquareState[,] _board;
@@ -40,15 +44,11 @@ namespace PegSolitaire.Game
         /// <summary>
         /// The board's width.
         /// </summary>
-        /// <remarks>If the board is not square, this property will contain the distance
-        /// between the leftmost and the rightmost square where a piece can be placed.</remarks>
         public int Width { get; }
 
         /// <summary>
         /// The board's height.
         /// </summary>
-        /// <remarks>If the board is not square, this property will contain the distance
-        /// between the topmost and the bottommost square where a piece can be placed.</remarks>
         public int Height { get; }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace PegSolitaire.Game
                 if (numbers.Length != width) return null;
                 for (int j = 0; j < width; j++)
                 {
-                    if (!int.TryParse(numbers[j], out var x) || x < 0 || x > 2) return null;
+                    if (!byte.TryParse(numbers[j], out var x) || x > 2) return null;
                     board[i, j] = (SquareState) x;
                 }
             }
@@ -109,7 +109,7 @@ namespace PegSolitaire.Game
             FromTextReader(new StringReader(str));
 
         /// <summary>
-        /// Reads a <see cref="Board"/> from a file at the fiven path.
+        /// Reads a <see cref="Board"/> from a file at the given path.
         /// </summary>
         /// <seealso cref="FromTextReader"/>
         public static Board? FromFile(string path)

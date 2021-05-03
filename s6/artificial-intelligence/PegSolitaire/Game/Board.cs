@@ -62,9 +62,9 @@ namespace PegSolitaire.Game
         {
             get
             {
-                if (position.X < 0 || position.X >= Width || position.Y < 0 || position.Y >= Height)
+                if (position.X <= 0 || position.X > Width || position.Y <= 0 || position.Y > Height)
                     return SquareState.Invalid;
-                return _board[position.Y, position.X];
+                return _board[position.Y - 1, position.X - 1];
             }
         }
 

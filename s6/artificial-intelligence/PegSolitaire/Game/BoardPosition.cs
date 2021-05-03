@@ -8,12 +8,12 @@ namespace PegSolitaire.Game
     public readonly struct BoardPosition : IEquatable<BoardPosition>
     {
         /// <summary>
-        /// The position's X coordinate, starting from top to bottom.
+        /// The position's one-based X coordinate, starting from top to bottom.
         /// </summary>
         public int X { get; init; }
 
         /// <summary>
-        /// The position's Y coordinate, starting from left to right.
+        /// The position's one-based Y coordinate, starting from left to right.
         /// </summary>
         public int Y { get; init; }
 

@@ -21,7 +21,7 @@ namespace PegSolitaire.Game
         /// The game's starting <see cref="Board"/>.
         /// </summary>
         public Board Board { get; }
-        
+
         /// <summary>
         /// The <see cref="Move"/>s played in this state so far, with the newest first.
         /// </summary>

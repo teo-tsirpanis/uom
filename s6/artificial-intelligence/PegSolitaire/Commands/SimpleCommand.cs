@@ -12,7 +12,12 @@ namespace PegSolitaire.Commands
         {
             using var file = File.CreateText(outputFile);
             file.WriteLine(moves.Count);
-            foreach (var move in moves) file.WriteLine(move.ToString());
+            foreach (var move in moves)
+            {
+                var startingPos = move.Position;
+                var resultingPos = move.GetResultingPosition();
+                file.WriteLine($"{startingPos.X} {startingPos.Y} {resultingPos.X} {resultingPos.Y}");
+            }
         }
 
         public static int Run(string commandName, string algorithmName, AbstractGameStateHeuristic heuristic,
@@ -40,7 +45,7 @@ namespace PegSolitaire.Commands
             int exitCode = 0;
             if (searchResult.FoundSolution)
             {
-                Console.WriteLine("Solution found, writing it on the output file.");
+                Console.WriteLine("Solution found, writing it to the output file.");
                 WriteSolutionToFile(outputFile, searchResult.Solution);
             }
             else if (!searchResult.CanContinue)

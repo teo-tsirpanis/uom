@@ -6,6 +6,7 @@ var timeout = TimeSpan.FromSeconds(30);
 
 static int PrintUsage()
 {
+    Console.WriteLine("Usage: dotnet run <command> <arguments>");
     Console.WriteLine("Available commands: dfs");
     return 1;
 }

@@ -22,10 +22,12 @@ namespace PegSolitaire
             try
             {
                 Console.CancelKeyPress += OnCtrlC;
+                Console.Write("Press Ctrl+C to cancel...");
 
                 if (timeout != null)
                     cts.CancelAfter(timeout.Value);
                 var result = f(input, heuristic, cts.Token);
+                Console.WriteLine();
                 if (cts.IsCancellationRequested && !userCancelled)
                     Console.WriteLine($"Execution timed-out after {timeout}");
                 return result;

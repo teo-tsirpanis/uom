@@ -1,12 +1,20 @@
 ﻿using System;
+using PegSolitaire.Ai.Heuristics;
+using PegSolitaire.Commands;
 
-namespace PegSolitaire
+var timeout = TimeSpan.FromSeconds(30);
+
+static int PrintUsage()
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
-    }
+    Console.WriteLine("Available commands: dfs");
+    return 1;
 }
+
+if (args.Length == 0)
+    return PrintUsage();
+ReadOnlySpan<string> otherArgs = args.AsSpan(1);
+return args[0] switch
+{
+    "dfs" => SimpleCommand.Run("dfs", "depth", new RandomHeuristic(), timeout, otherArgs),
+    _ => PrintUsage()
+};

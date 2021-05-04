@@ -16,62 +16,48 @@ namespace PegSolitaire.Ai
         /// <remarks>A value of <see langword="false"/> may mean either
         /// that the algorithm exhaustively searched all possible outcomes
         /// to no avail, or that the search was cancelled. Consult
-        /// <see cref="IsCancelled"/> to dinstinguish.</remarks>
+        /// <see cref="CanContinue"/> to dinstinguish.</remarks>
         [MemberNotNullWhen(true, nameof(Solution))]
-        public bool IsSuccessful { get; private init; }
+        public bool FoundSolution => Solution != null;
 
         /// <summary>
-        /// Whether the search was cancelled while it was running.
+        /// Whether search can continue to find more results.
         /// </summary>
-        /// <remarks>The search is considered to be
-        /// cancelled if it is timed-out too.</remarks>
-        public bool IsCancelled { get; private init; }
+        /// <seealso cref="Solver.ContinueSolving"/>
+        [MemberNotNullWhen(true, nameof(SubsequentSolverState))]
+        public bool CanContinue => SubsequentSolverState != null;
 
         /// <summary>
         /// The time the search took.
         /// </summary>
-        public TimeSpan ElapsedTime { get; private init; }
+        public TimeSpan ElapsedTime { get; }
 
         /// <summary>
         /// The total number of moves that were evaluated during the search.
         /// </summary>
-        public long TotalEvaluatedMoves { get; private init; }
+        public long TotalEvaluatedMoves { get; }
 
         /// <summary>
         /// The first sequence of <see cref="Move"/>s the search found
         /// (if it did) that lead to a winning game of Peg Solitaire. 
         /// </summary>
-        /// <remarks>This property is not <see langword="null"/> if
-        /// <see cref="IsSuccessful"/> is <see langword="true"/>.</remarks>
-        public IReadOnlyList<Move>? Solution { get; private init; }
+        public IReadOnlyList<Move>? Solution { get; }
 
-        internal static SearchResult FromResult(IReadOnlyList<Move> solution, TimeSpan elapsedTime,
-            long totalEvaluatedMoves) =>
-            new SearchResult
-            {
-                IsSuccessful = true,
-                IsCancelled = false,
-                ElapsedTime = elapsedTime,
-                TotalEvaluatedMoves = totalEvaluatedMoves,
-                Solution = solution
-            };
+        /// <summary>
+        /// The <see cref="SolverState"/> from which the
+        /// search can continue to find more solutions.
+        /// </summary>
+        /// <remarks>If it is <see langword="null"/>, search
+        /// has exhausted all possible outcomes and cannot find another solution.</remarks>
+        public SolverState? SubsequentSolverState { get; }
 
-        internal static SearchResult FromFailed(TimeSpan elapsedTime, long totalEvaluatedMoves) =>
-            new SearchResult
-            {
-                IsSuccessful = false,
-                IsCancelled = false,
-                ElapsedTime = elapsedTime,
-                TotalEvaluatedMoves = totalEvaluatedMoves
-            };
-
-        internal static SearchResult FromCancelled(TimeSpan elapsedTime, long totalEvaluatedMoves) =>
-            new SearchResult
-            {
-                IsSuccessful = false,
-                IsCancelled = true,
-                ElapsedTime = elapsedTime,
-                TotalEvaluatedMoves = totalEvaluatedMoves
-            };
+        internal SearchResult(IReadOnlyList<Move>? solution, TimeSpan elapsedTime, long totalEvaluatedMoves,
+            SolverState? subsequentSolverState)
+        {
+            Solution = solution;
+            ElapsedTime = elapsedTime;
+            TotalEvaluatedMoves = totalEvaluatedMoves;
+            SubsequentSolverState = subsequentSolverState;
+        }
     }
 }

@@ -83,21 +83,17 @@ namespace PegSolitaire.Ai
             }
         }
 
-        private static SearchResult SolveImpl(SolverState? state, AbstractGameStateHeuristic heuristic,
-            long totalEvaluatedStates, CancellationToken ct)
+        private static IReadOnlyList<Move>? SolveImpl(ref SolverState? state, AbstractGameStateHeuristic heuristic,
+            ref long totalEvaluatedStates, CancellationToken ct)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
             while (true)
             {
-                if (ct.IsCancellationRequested)
-                    return SearchResult.FromCancelled(stopwatch.Elapsed, totalEvaluatedStates);
-
-                if (state == null || !TryGetNextGameState(state, out var nextGameState, out state))
-                    return SearchResult.FromFailed(stopwatch.Elapsed, totalEvaluatedStates);
+                if (ct.IsCancellationRequested || state == null ||
+                    !TryGetNextGameState(state, out var nextGameState, out state))
+                    return null;
 
                 if (nextGameState.HasWon)
-                    return SearchResult.FromResult(nextGameState.RecentMovesPlayed.Reverse().ToList(),
-                        stopwatch.Elapsed, totalEvaluatedStates);
+                    return nextGameState.RecentMovesPlayed.Reverse().ToList();
 
                 TryFindMoreMoves(nextGameState, heuristic, ref state, ref totalEvaluatedStates);
             }
@@ -111,14 +107,16 @@ namespace PegSolitaire.Ai
         /// that will be used by the search algorithm.</param>
         /// <param name="ct">A <see cref="CancellationToken"/>
         /// that can be used to cancel the search.</param>
-        /// <returns></returns>
         public static SearchResult StartSolving(State gameState, AbstractGameStateHeuristic heuristic,
             CancellationToken ct = default)
         {
+            var stopwatch = Stopwatch.StartNew();
             long totalEvaluatedStates = 0;
             SolverState? solverState = null;
             TryFindMoreMoves(gameState, heuristic, ref solverState, ref totalEvaluatedStates);
-            return SolveImpl(solverState, heuristic, totalEvaluatedStates, ct);
+            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct);
+            stopwatch.Stop();
+            return new SearchResult(solution, stopwatch.Elapsed, totalEvaluatedStates, solverState);
         }
 
         /// <summary>
@@ -129,10 +127,18 @@ namespace PegSolitaire.Ai
         /// that will be used by the search algorithm.</param>
         /// <param name="ct">A <see cref="CancellationToken"/>
         /// that can be used to cancel the search.</param>
-        public static SearchResult ContinueSolving(SolverState solverState,
+        /// <seealso cref="SearchResult.SubsequentSolverState"/>
+        public static SearchResult ContinueSolving([DisallowNull] SolverState? solverState,
             AbstractGameStateHeuristic heuristic, CancellationToken ct = default)
         {
-            return SolveImpl(solverState, heuristic, 0, ct);
+            var originalSolverState = solverState;
+            var stopwatch = Stopwatch.StartNew();
+            long totalEvaluatedStates = 0;
+            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct);
+            stopwatch.Stop();
+            Debug.Assert(originalSolverState != solverState,
+                "Solver state did not change; it will lead to infinite loops.");
+            return new SearchResult(solution, stopwatch.Elapsed, totalEvaluatedStates, solverState);
         }
     }
 }

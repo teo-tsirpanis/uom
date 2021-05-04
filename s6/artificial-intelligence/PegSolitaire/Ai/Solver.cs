@@ -25,7 +25,7 @@ namespace PegSolitaire.Ai
         SolverState? PreviousState);
 
     /// <summary>
-    /// Solves Peg Solitaire games.
+    /// Solves Peg Solitaire games using best-first search.
     /// </summary>
     public static class Solver
     {
@@ -37,7 +37,7 @@ namespace PegSolitaire.Ai
             {
                 if (state == null)
                 {
-                    nextGameState = default;
+                    nextGameState = null;
                     subsequentState = null;
                     return false;
                 }

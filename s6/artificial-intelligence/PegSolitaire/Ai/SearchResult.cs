@@ -33,9 +33,10 @@ namespace PegSolitaire.Ai
         public TimeSpan ElapsedTime { get; }
 
         /// <summary>
-        /// The total number of moves that were evaluated during the search.
+        /// The total number of game <see cref="State"/>s
+        /// that were evaluated during the search.
         /// </summary>
-        public long TotalEvaluatedMoves { get; }
+        public long TotalEvaluatedStates { get; }
 
         /// <summary>
         /// The first sequence of <see cref="Move"/>s the search found
@@ -51,12 +52,12 @@ namespace PegSolitaire.Ai
         /// has exhausted all possible outcomes and cannot find another solution.</remarks>
         public SolverState? SubsequentSolverState { get; }
 
-        internal SearchResult(IReadOnlyList<Move>? solution, TimeSpan elapsedTime, long totalEvaluatedMoves,
+        internal SearchResult(IReadOnlyList<Move>? solution, TimeSpan elapsedTime, long totalEvaluatedStates,
             SolverState? subsequentSolverState)
         {
             Solution = solution;
             ElapsedTime = elapsedTime;
-            TotalEvaluatedMoves = totalEvaluatedMoves;
+            TotalEvaluatedStates = totalEvaluatedStates;
             SubsequentSolverState = subsequentSolverState;
         }
     }

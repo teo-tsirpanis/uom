@@ -129,6 +129,6 @@ namespace PegSolitaire.Game
             HashCode.Combine(Position.X, Position.Y, Direction);
 
         /// <inheritdoc/>
-        public override string ToString() => $"{Position} -> {GetResultingPosition()}";
+        public override string ToString() => $"{Position} {Direction}";
     }
 }

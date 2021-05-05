@@ -21,17 +21,16 @@ namespace PegSolitaire.Commands
         }
 
         public static int Run(string commandName, string algorithmName, AbstractGameStateHeuristic heuristic,
-            TimeSpan timeout, ReadOnlySpan<string> args)
+            TimeSpan? timeout, ReadOnlySpan<string> args)
         {
-            if (args.Length != 2)
+            if (args.Length == 0 || args.Length > 2)
             {
                 Console.WriteLine($"{commandName} - solves Peg Solitaire Games using {algorithmName}-first search");
-                Console.WriteLine($"Usage: {commandName} <input file> <output file>");
+                Console.WriteLine($"Usage: {commandName} <input file> <optional output file>");
                 return 1;
             }
 
             var inputFile = args[0];
-            var outputFile = args[1];
 
             var board = Board.FromFile(inputFile);
             if (board == null)
@@ -45,8 +44,16 @@ namespace PegSolitaire.Commands
             int exitCode = 0;
             if (searchResult.FoundSolution)
             {
-                Console.WriteLine("Solution found, writing it to the output file.");
-                WriteSolutionToFile(outputFile, searchResult.Solution);
+                if (args.Length == 2)
+                {
+                    Console.WriteLine("Solution found, writing it to the output file.");
+                    WriteSolutionToFile(args[1], searchResult.Solution);
+                }
+                else
+                {
+                    Console.WriteLine("Solution found:");
+                    foreach (var move in searchResult.Solution) Console.WriteLine(move.ToString());
+                }
             }
             else if (!searchResult.CanContinue)
             {

@@ -2,7 +2,7 @@
 using PegSolitaire.Ai.Heuristics;
 using PegSolitaire.Commands;
 
-var timeout = TimeSpan.FromSeconds(30);
+TimeSpan? timeout = TimeSpan.FromSeconds(30);
 
 static int PrintUsage()
 {

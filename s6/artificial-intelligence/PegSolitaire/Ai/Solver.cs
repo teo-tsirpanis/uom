@@ -10,21 +10,6 @@ using PegSolitaire.Game;
 namespace PegSolitaire.Ai
 {
     /// <summary>
-    /// Represents a snapshot of the solver's execution.
-    /// </summary>
-    /// <param name="CurrentGameState">The game <see cref="PegSolitaire.Game.State"/>
-    /// the solver is currently evaluating.</param>
-    /// <param name="NextStates">The prospective <see cref="PegSolitaire.Game.State"/>s the
-    /// solver will take a look at next. They are sorted in descending
-    /// order of value.</param>
-    /// <param name="PreviousState">The solver's state before
-    /// the move that led to this one was played.</param>
-    // A record is a syntactic sugar for a class with some fields and a constructor.
-    // It also allows things like the "with" expression as seen in Solver.TryGetNextGameState.
-    public record SolverState(State CurrentGameState, ImmutableStack<State> NextStates,
-        SolverState? PreviousState);
-
-    /// <summary>
     /// Solves Peg Solitaire games using best-first search.
     /// </summary>
     public static class Solver
@@ -42,13 +27,13 @@ namespace PegSolitaire.Ai
                     return false;
                 }
 
-                if (!state.NextStates.IsEmpty)
+                if (!state.RemainingNextStates.IsEmpty)
                 {
-                    subsequentState = state with {NextStates = state.NextStates.Pop(out nextGameState)};
+                    subsequentState = state.PopNextGameState(out nextGameState);
                     return true;
                 }
 
-                state = state.PreviousState;
+                state = state.ParentState;
             }
         }
 
@@ -74,7 +59,8 @@ namespace PegSolitaire.Ai
                 // We sort in descending order because
                 var nextStatesSorted = nextStatesBuffer.OrderByDescending(heuristic.GetHeuristic);
                 var nextStatesStack = ImmutableStack.CreateRange(nextStatesSorted);
-                currentSolverState = new SolverState(gameState, nextStatesStack, currentSolverState);
+                currentSolverState =
+                    new SolverState(gameState, nextStatesBuffer.Count, nextStatesStack, currentSolverState);
                 totalEvaluatedMoves += nextStatesBuffer.Count;
             }
             finally
@@ -84,13 +70,20 @@ namespace PegSolitaire.Ai
         }
 
         private static IReadOnlyList<Move>? SolveImpl(ref SolverState? state, AbstractGameStateHeuristic heuristic,
-            ref long totalEvaluatedStates, CancellationToken ct)
+            ref long totalEvaluatedStates, CancellationToken ct, IProgress<SolverState>? progress)
         {
+            var originalSolverState = state;
             while (true)
             {
+                if (progress != null && state != null)
+                    progress.Report(state);
                 if (ct.IsCancellationRequested || state == null ||
                     !TryGetNextGameState(state, out var nextGameState, out state))
+                {
+                    Debug.Assert(state != null || originalSolverState != state,
+                        "Solver state did not change; it will lead to infinite loops.");
                     return null;
+                }
 
                 if (nextGameState.HasWon)
                     return nextGameState.RecentMovesPlayed.Reverse().ToList();
@@ -107,14 +100,16 @@ namespace PegSolitaire.Ai
         /// that will be used by the search algorithm.</param>
         /// <param name="ct">A <see cref="CancellationToken"/>
         /// that can be used to cancel the search.</param>
+        /// <param name="progress">An <see cref="IProgress{SolverState}"/>
+        /// object that will periodically be informed of the solver's progress.</param>
         public static SearchResult StartSolving(State gameState, AbstractGameStateHeuristic heuristic,
-            CancellationToken ct = default)
+            CancellationToken ct = default, IProgress<SolverState>? progress = null)
         {
             var stopwatch = Stopwatch.StartNew();
             long totalEvaluatedStates = 0;
             SolverState? solverState = null;
             TryFindMoreMoves(gameState, heuristic, ref solverState, ref totalEvaluatedStates);
-            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct);
+            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct, progress);
             stopwatch.Stop();
             return new SearchResult(solution, stopwatch.Elapsed, totalEvaluatedStates, solverState);
         }
@@ -128,16 +123,16 @@ namespace PegSolitaire.Ai
         /// <param name="ct">A <see cref="CancellationToken"/>
         /// that can be used to cancel the search.</param>
         /// <seealso cref="SearchResult.SubsequentSolverState"/>
+        /// <param name="progress">An <see cref="IProgress{SolverState}"/>
+        /// object that will periodically be informed of the solver's progress.</param>
         public static SearchResult ContinueSolving([DisallowNull] SolverState? solverState,
-            AbstractGameStateHeuristic heuristic, CancellationToken ct = default)
+            AbstractGameStateHeuristic heuristic, CancellationToken ct = default,
+            IProgress<SolverState>? progress = null)
         {
-            var originalSolverState = solverState;
             var stopwatch = Stopwatch.StartNew();
             long totalEvaluatedStates = 0;
-            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct);
+            var solution = SolveImpl(ref solverState, heuristic, ref totalEvaluatedStates, ct, progress);
             stopwatch.Stop();
-            Debug.Assert(originalSolverState != solverState,
-                "Solver state did not change; it will lead to infinite loops.");
             return new SearchResult(solution, stopwatch.Elapsed, totalEvaluatedStates, solverState);
         }
     }

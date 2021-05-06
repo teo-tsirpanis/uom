@@ -16,9 +16,6 @@ namespace PegSolitaire.Ai
             TotalNextStates = totalNextStates;
             RemainingNextStates = remainingNextStates;
             ParentState = parentState;
-            CompletionPercentage =
-                (ParentState?.CompletionPercentage ?? 1.0f) * (TotalNextStates - RemainingNextStates.Count()) /
-                TotalNextStates;
         }
 
         /// <summary>
@@ -43,11 +40,9 @@ namespace PegSolitaire.Ai
         /// </summary>
         public SolverState? ParentState { get; }
 
-        /// <summary>
-        /// A floating-point value from 0 to 1 that approximates how much
-        /// of the available game state space has been evaluated.
-        /// </summary>
-        public float CompletionPercentage { get; }
+        internal static SolverState Create(State currentGameState, ImmutableStack<State> nextStates,
+            SolverState? parentState) =>
+            new SolverState(currentGameState, nextStates.Count(), nextStates, parentState);
 
         internal SolverState PopNextGameState(out State nextState) =>
             new SolverState(CurrentGameState, TotalNextStates, RemainingNextStates.Pop(out nextState), ParentState);

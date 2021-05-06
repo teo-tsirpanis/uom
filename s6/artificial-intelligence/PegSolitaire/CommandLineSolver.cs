@@ -8,27 +8,23 @@ namespace PegSolitaire
 {
     /// <summary>
     /// Enhances <see cref="Solver"/>'s methods by making them able to
-    /// be cancelled either by time-out or by the user pressing Ctrl-C,
-    /// and by reporting its progress at regular intervals.
+    /// be cancelled either by time-out or by the user pressing Ctrl-C.
     /// </summary>
     public static class CommandLineSolver
     {
         [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
-        private static SearchResult RunWithCancellationAndProgress(
-            Func<CancellationToken, IProgress<SolverState>?, SearchResult> f, TimeSpan? timeout)
+        private static SearchResult RunWithCancellation(Func<CancellationToken, SearchResult> f, TimeSpan? timeout)
         {
             using var cts = new CancellationTokenSource();
             var userCancelled = false;
             try
             {
                 Console.CancelKeyPress += OnCtrlC;
-                Console.Write("Press Ctrl+C to cancel...");
+                Console.WriteLine("Press Ctrl+C to cancel...");
 
                 if (timeout != null)
                     cts.CancelAfter(timeout.Value);
-                var progress = new Progress<SolverState>(state =>
-                    Console.WriteLine($"Progress: {state.CompletionPercentage:P}."));
-                var result = f(cts.Token, progress);
+                var result = f(cts.Token);
                 Console.WriteLine();
                 if (cts.IsCancellationRequested && !userCancelled)
                     Console.WriteLine($"Execution timed-out after {timeout}");
@@ -53,13 +49,11 @@ namespace PegSolitaire
         /// <seealso cref="Solver.StartSolving"/>
         public static SearchResult StartSolving(State gameState, AbstractGameStateHeuristic heuristic,
             TimeSpan? timeout = null) =>
-            RunWithCancellationAndProgress((ct, progress) =>
-                Solver.StartSolving(gameState, heuristic, ct, progress), timeout);
+            RunWithCancellation((ct) => Solver.StartSolving(gameState, heuristic, ct), timeout);
 
         /// <seealso cref="Solver.ContinueSolving"/>
         public static SearchResult ContinueSolving(SolverState gameState, AbstractGameStateHeuristic heuristic,
             TimeSpan? timeout = null) =>
-            RunWithCancellationAndProgress((ct, progress) =>
-                Solver.ContinueSolving(gameState, heuristic, ct, progress), timeout);
+            RunWithCancellation((ct) => Solver.ContinueSolving(gameState, heuristic, ct), timeout);
     }
 }

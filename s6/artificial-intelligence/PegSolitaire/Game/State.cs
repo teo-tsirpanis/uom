@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -12,10 +11,15 @@ namespace PegSolitaire.Game
     /// </summary>
     public class State
     {
+        private readonly bool[,] _pieces;
+
         /// <summary>
-        /// A set of the pieces that are currently on the board.
+        /// Checks whether there is a piece at the given <see cref="BoardPosition"/>.
         /// </summary>
-        public ImmutableHashSet<BoardPosition> Pieces { get; }
+        /// <param name="pos">The position to check.</param>
+        /// <exception cref="IndexOutOfRangeException">The position
+        /// is outside the board's boundaries.</exception>
+        public bool HasPiece(in BoardPosition pos) => _pieces.GetFromPosition(pos);
 
         /// <summary>
         /// The game's starting <see cref="Board"/>.
@@ -39,23 +43,23 @@ namespace PegSolitaire.Game
         {
             Board = board ?? throw new ArgumentNullException(nameof(board));
 
-            var piecesBuilder = ImmutableHashSet.CreateBuilder<BoardPosition>();
+            var pieces = new bool[board.Height, board.Width];
             for (int x = 1; x <= board.Width; x++)
             for (int y = 1; y <= board.Height; y++)
             {
                 var position = new BoardPosition(x, y);
                 if (board[position] == SquareState.Taken)
-                    piecesBuilder.Add(position);
+                    pieces.GetFromPosition(position) = true;
             }
 
-            Pieces = piecesBuilder.ToImmutable();
+            _pieces = pieces;
             RecentMovesPlayed = ImmutableStack<Move>.Empty;
         }
 
-        private State(Board board, ImmutableHashSet<BoardPosition> pieces, ImmutableStack<Move> recentMovesPlayed)
+        private State(Board board, bool[,] pieces, ImmutableStack<Move> recentMovesPlayed)
         {
             Board = board;
-            Pieces = pieces;
+            _pieces = pieces;
             RecentMovesPlayed = recentMovesPlayed;
         }
 
@@ -64,15 +68,29 @@ namespace PegSolitaire.Game
         /// </summary>
         /// <remarks>A game is considered to be won if
         /// there is only one piece remaining.</remarks>
-        public bool HasWon => Pieces.Count == 1;
+        public bool HasWon()
+        {
+            bool hasEncounteredPiece = false;
+            foreach (var x in _pieces)
+            {
+                if (!x) continue;
+                if (hasEncounteredPiece)
+                    return false;
+                hasEncounteredPiece = true;
+            }
+
+            return hasEncounteredPiece;
+        }
 
         /// <summary>
         /// Checks if a move is legal. Used internally to save some computations.
         /// </summary>
-        private bool IsLegalMoveImpl(in BoardPosition adjacentPosition, in BoardPosition resultingPosition)
+        private bool IsLegalMoveImpl(bool[,] pieces, in BoardPosition adjacentPosition, in BoardPosition resultingPosition)
         {
-            if (!Pieces.Contains(adjacentPosition)) return false;
-            return !Pieces.Contains(resultingPosition) && Board[resultingPosition] != SquareState.Invalid;
+            // This could fail on boards with irregular shapes.
+            if (Board[resultingPosition] == SquareState.Invalid) return false;
+            if (!pieces.GetFromPosition(adjacentPosition)) return false;
+            return !pieces.GetFromPosition(resultingPosition);
         }
 
         /// <summary>
@@ -83,25 +101,32 @@ namespace PegSolitaire.Game
         /// on the same state.</remarks>
         public IEnumerable<Move> GetMoves()
         {
-            foreach (var piece in Pieces)
-                for (int i = (int) MoveDirection.Up; i <= (int) MoveDirection.Right; i++)
+            for (int x = 1; x <= Board.Width; x++)
+            for (int y = 1; y <= Board.Height; y++)
+            {
+                var piece = new BoardPosition(x, y);
+                if (!HasPiece(piece)) continue;
+                for (int direction = (int) MoveDirection.Up; direction <= (int) MoveDirection.Right; direction++)
                 {
-                    var move = new Move(piece, (MoveDirection) i);
+                    var move = new Move(piece, (MoveDirection) direction);
                     move.GetAdjacentPositions(out var adjacentPosition, out var resultingPosition);
 
-                    if (IsLegalMoveImpl(adjacentPosition, resultingPosition))
+                    if (IsLegalMoveImpl(_pieces, adjacentPosition, resultingPosition))
                         yield return move;
                 }
+            }
         }
 
-        private bool TryPlayImpl(ImmutableHashSet<BoardPosition>.Builder pieces, in Move move)
+        private bool[,] ClonePiecesMap() => (bool[,]) _pieces.Clone();
+
+        private bool TryPlayImpl(bool[,] pieces, in Move move)
         {
             move.GetAdjacentPositions(out var adjacentPosition, out var resultingPosition);
-            if (!IsLegalMoveImpl(adjacentPosition, resultingPosition)) return false;
+            if (!IsLegalMoveImpl(_pieces, adjacentPosition, resultingPosition)) return false;
 
-            pieces.Remove(move.Position);
-            pieces.Remove(adjacentPosition);
-            pieces.Add(resultingPosition);
+            pieces.GetFromPosition(move.Position) = false;
+            pieces.GetFromPosition(adjacentPosition) = false;
+            pieces.GetFromPosition(resultingPosition) = true;
 
             return true;
         }
@@ -118,11 +143,10 @@ namespace PegSolitaire.Game
         {
             newState = null;
 
-            var pieces = Pieces.ToBuilder();
+            var pieces = ClonePiecesMap();
             if (!TryPlayImpl(pieces, move)) return false;
 
-            newState = new State(Board, pieces.ToImmutable(), RecentMovesPlayed.Push(move));
-            Debug.Assert(newState.Pieces.Count == Pieces.Count - 1);
+            newState = new State(Board, pieces, RecentMovesPlayed.Push(move));
             return true;
         }
 
@@ -149,7 +173,7 @@ namespace PegSolitaire.Game
             newState = null;
             illegalMoveIndex = 0;
 
-            var pieces = Pieces.ToBuilder();
+            var pieces = ClonePiecesMap();
             var recentMovesPlayed = RecentMovesPlayed;
 
             foreach (var move in moves)
@@ -159,9 +183,7 @@ namespace PegSolitaire.Game
                 illegalMoveIndex++;
             }
 
-            newState = new State(Board, pieces.ToImmutable(), recentMovesPlayed);
-            // illegalMoveIndex will have by now the total count of moves.
-            Debug.Assert(Pieces.Count == newState.Pieces.Count + illegalMoveIndex);
+            newState = new State(Board, pieces, recentMovesPlayed);
             return true;
         }
 
@@ -181,12 +203,15 @@ namespace PegSolitaire.Game
             for (int y = 1; y <= Board.Height; y++)
             {
                 for (int x = 1; x <= Board.Width; x++)
-                    if (Board[new BoardPosition(x, y)] == SquareState.Invalid)
+                {
+                    var position = new BoardPosition(x, y);
+                    if (Board[position] == SquareState.Invalid)
                         sb.Append(invalidSquareChar);
-                    else if (Pieces.Contains(new BoardPosition(x, y)))
+                    else if (HasPiece(position))
                         sb.Append(takenSquareChar);
                     else
                         sb.Append(emptySquareChar);
+                }
 
                 sb.AppendLine();
             }

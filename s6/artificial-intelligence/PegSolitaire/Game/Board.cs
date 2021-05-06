@@ -58,13 +58,13 @@ namespace PegSolitaire.Game
         /// <param name="position">The square's position.</param>
         /// <returns>The square's state, or <see cref="SquareState.Invalid"/>
         /// if <paramref name="position"/> is invalid.</returns>
-        public SquareState this[BoardPosition position]
+        public SquareState this[in BoardPosition position]
         {
             get
             {
                 if (position.X <= 0 || position.X > Width || position.Y <= 0 || position.Y > Height)
                     return SquareState.Invalid;
-                return _board[position.Y - 1, position.X - 1];
+                return _board.GetFromPosition(position);
             }
         }
 

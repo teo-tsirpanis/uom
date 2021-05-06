@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace PegSolitaire.Game
 {
@@ -40,5 +41,19 @@ namespace PegSolitaire.Game
 
         /// <inheritdoc/>
         public override string ToString() => $"({X}, {Y})";
+    }
+
+    internal static class BoardPositionExtensions
+    {
+        /// <summary>
+        /// Accesses two-dimensional arrays with a <see cref="BoardPosition"/>.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="position"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T GetFromPosition<T>(this T[,] array, in BoardPosition position) =>
+            ref array[position.Y - 1, position.X - 1];
     }
 }

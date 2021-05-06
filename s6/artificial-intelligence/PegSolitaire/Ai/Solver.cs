@@ -83,7 +83,7 @@ namespace PegSolitaire.Ai
                     return null;
                 }
 
-                if (nextGameState.HasWon)
+                if (nextGameState.HasWon())
                     return nextGameState.RecentMovesPlayed.Reverse().ToList();
 
                 TryFindMoreMoves(nextGameState, heuristic, ref state, ref totalEvaluatedStates);

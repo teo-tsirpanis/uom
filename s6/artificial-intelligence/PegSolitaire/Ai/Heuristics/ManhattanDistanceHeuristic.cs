@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using PegSolitaire.Game;
 
 namespace PegSolitaire.Ai.Heuristics
@@ -29,16 +28,19 @@ namespace PegSolitaire.Ai.Heuristics
         /// <inheritdoc/>
         public override float GetHeuristic(State state)
         {
-            var numberOfPieces = state.Pieces.Count;
-            Span<BoardPosition> pieces = numberOfPieces <= 64
-                ? stackalloc BoardPosition[numberOfPieces]
-                : new BoardPosition [numberOfPieces];
-            var i = 0;
-            foreach (var piece in state.Pieces) pieces[i++] = piece;
             var distanceSum = 0;
-            for (i = 0; i < pieces.Length; i++)
-            for (int j = i + 1; j < pieces.Length; j++)
-                distanceSum += ManhattanDistance(pieces[i], pieces[j]);
+            for (int x1 = 1; x1 <= state.Board.Width; x1++)
+            for (int y1 = 1; y1 <= state.Board.Height; y1++)
+            {
+                var pos1 = new BoardPosition(x1, y1);
+                if (!state.HasPiece(pos1)) continue;
+                for (int x2 = 1; x2 <= state.Board.Width; x2++)
+                for (int y2 = 1; y2 <= state.Board.Height; y2++)
+                {
+                    var pos2 = new BoardPosition(x2, y2);
+                    if (state.HasPiece(pos2)) distanceSum += ManhattanDistance(pos1, pos2);
+                }
+            }
 
             // We don't need to pick averages; all competing
             // states will have the same number of pieces.

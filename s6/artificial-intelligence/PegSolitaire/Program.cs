@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using PegSolitaire.Ai.Heuristics;
 using PegSolitaire.Commands;
 
@@ -17,5 +17,6 @@ ReadOnlySpan<string> otherArgs = args.AsSpan(1);
 return args[0] switch
 {
     "dfs" => SimpleCommand.Run("dfs", "depth", new RandomHeuristic(), timeout, otherArgs),
+    "best" => SimpleCommand.Run("best", "best", ManhattanDistanceHeuristic.Instance, timeout, otherArgs),
     _ => PrintUsage()
 };

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PegSolitaire.Game
@@ -19,6 +20,7 @@ namespace PegSolitaire.Game
         /// <param name="pos">The position to check.</param>
         /// <exception cref="IndexOutOfRangeException">The position
         /// is outside the board's boundaries.</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasPiece(in BoardPosition pos) => _pieces.GetFromPosition(pos);
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using PegSolitaire.Game;
 
 namespace PegSolitaire.Ai.Heuristics
@@ -12,6 +13,7 @@ namespace PegSolitaire.Ai.Heuristics
     /// access it.</remarks>
     public sealed class ManhattanDistanceHeuristic : AbstractGameStateHeuristic
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int ManhattanDistance(BoardPosition pos1, BoardPosition pos2) =>
             Math.Abs(pos1.X - pos2.X) + Math.Abs(pos1.Y - pos2.Y);
 

@@ -18,5 +18,6 @@ return args[0] switch
 {
     "dfs" => SimpleCommand.Run("dfs", "depth", new RandomHeuristic(), timeout, otherArgs),
     "best" => SimpleCommand.Run("best", "best", ManhattanDistanceHeuristic.Instance, timeout, otherArgs),
+    "verify" => VerifyCommand.Run(otherArgs),
     _ => PrintUsage()
 };

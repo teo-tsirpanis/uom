@@ -105,6 +105,43 @@ namespace PegSolitaire.Game
         }
 
         /// <summary>
+        /// Tries to create a <see cref="Move"/> based on the
+        /// starting and resulting positions of the piece.
+        /// </summary>
+        /// <param name="startingPosition">The
+        /// position the piece starts in.</param>
+        /// <param name="resultingPosition">The
+        /// position the piece ends in.</param>
+        /// <param name="move">A reference where the move the
+        /// two positions represent will be stored.</param>
+        /// <returns>Whether the move was a legal Peg Solitaire move.</returns>
+        public static bool TryCreateFromPositions(in BoardPosition startingPosition, in BoardPosition resultingPosition,
+            out Move move)
+        {
+            var diffX = resultingPosition.X - startingPosition.X;
+            var diffY = resultingPosition.Y - startingPosition.Y;
+
+            switch (diffX)
+            {
+                case 0 when diffY == -2:
+                    move = new Move(startingPosition, MoveDirection.Up);
+                    return true;
+                case 0 when diffY == 2:
+                    move = new Move(startingPosition, MoveDirection.Down);
+                    return true;
+                case -2 when diffY == 0:
+                    move = new Move(startingPosition, MoveDirection.Left);
+                    return true;
+                case 2 when diffY == 0:
+                    move = new Move(startingPosition, MoveDirection.Right);
+                    return true;
+            }
+
+            move = default;
+            return false;
+        }
+
+        /// <summary>
         /// Gets the position the piece will move to.
         /// </summary>
         /// <remarks>This method may return an invalid position if

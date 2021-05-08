@@ -25,7 +25,7 @@ namespace PegSolitaire.Commands
         {
             if (args.Length == 0 || args.Length > 2)
             {
-                Console.WriteLine($"{commandName} - solves Peg Solitaire Games using {algorithmName}-first search");
+                Console.WriteLine($"{commandName} - solves Peg Solitaire games using {algorithmName}-first search");
                 Console.WriteLine($"Usage: {commandName} <input file> <optional output file>");
                 return 1;
             }

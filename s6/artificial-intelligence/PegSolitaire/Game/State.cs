@@ -43,7 +43,7 @@ namespace PegSolitaire.Game
         /// is <see langword="null"/>.</exception>
         public State(Board board)
         {
-            Board = board ?? throw new ArgumentNullException(nameof(board));
+            Board = board;
 
             var pieces = new bool[board.Height, board.Width];
             for (int x = 1; x <= board.Width; x++)
@@ -87,13 +87,10 @@ namespace PegSolitaire.Game
         /// <summary>
         /// Checks if a move is legal. Used internally to save some computations.
         /// </summary>
-        private bool IsLegalMoveImpl(bool[,] pieces, in BoardPosition adjacentPosition, in BoardPosition resultingPosition)
-        {
-            // This could fail on boards with irregular shapes.
-            if (Board[resultingPosition] == SquareState.Invalid) return false;
-            if (!pieces.GetFromPosition(adjacentPosition)) return false;
-            return !pieces.GetFromPosition(resultingPosition);
-        }
+        private static bool IsLegalMoveImpl(Board board, bool[,] pieces, in BoardPosition adjacentPosition,
+            in BoardPosition resultingPosition) =>
+            board[adjacentPosition] != SquareState.Invalid && board[resultingPosition] != SquareState.Invalid &&
+            pieces.GetFromPosition(adjacentPosition) && !pieces.GetFromPosition(resultingPosition);
 
         /// <summary>
         /// Enumerates all legal <see cref="Move"/>s of the game.
@@ -113,7 +110,7 @@ namespace PegSolitaire.Game
                     var move = new Move(piece, (MoveDirection) direction);
                     move.GetAdjacentPositions(out var adjacentPosition, out var resultingPosition);
 
-                    if (IsLegalMoveImpl(_pieces, adjacentPosition, resultingPosition))
+                    if (IsLegalMoveImpl(Board, _pieces, adjacentPosition, resultingPosition))
                         yield return move;
                 }
             }
@@ -121,10 +118,10 @@ namespace PegSolitaire.Game
 
         private bool[,] ClonePiecesMap() => (bool[,]) _pieces.Clone();
 
-        private bool TryPlayImpl(bool[,] pieces, in Move move)
+        private static bool TryPlayImpl(Board board, bool[,] pieces, in Move move)
         {
             move.GetAdjacentPositions(out var adjacentPosition, out var resultingPosition);
-            if (!IsLegalMoveImpl(_pieces, adjacentPosition, resultingPosition)) return false;
+            if (!IsLegalMoveImpl(board, pieces, adjacentPosition, resultingPosition)) return false;
 
             pieces.GetFromPosition(move.Position) = false;
             pieces.GetFromPosition(adjacentPosition) = false;
@@ -146,7 +143,7 @@ namespace PegSolitaire.Game
             newState = null;
 
             var pieces = ClonePiecesMap();
-            if (!TryPlayImpl(pieces, move)) return false;
+            if (!TryPlayImpl(Board, pieces, move)) return false;
 
             newState = new State(Board, pieces, RecentMovesPlayed.Push(move));
             return true;
@@ -171,7 +168,6 @@ namespace PegSolitaire.Game
         public bool TryPlayManyMoves(IEnumerable<Move> moves, [NotNullWhen(true)] out State? newState,
             out int illegalMoveIndex)
         {
-            if (moves == null) throw new ArgumentNullException(nameof(moves));
             newState = null;
             illegalMoveIndex = 0;
 
@@ -180,7 +176,7 @@ namespace PegSolitaire.Game
 
             foreach (var move in moves)
             {
-                if (!TryPlayImpl(pieces, move)) return false;
+                if (!TryPlayImpl(Board, pieces, move)) return false;
                 recentMovesPlayed = recentMovesPlayed.Push(move);
                 illegalMoveIndex++;
             }

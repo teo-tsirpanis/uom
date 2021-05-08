@@ -12,6 +12,11 @@ namespace PegSolitaire
     /// </summary>
     public static class CommandLineSolver
     {
+        private const string PegSolitaireDisableTimeout = "PEG_SOLITAIRE_DISABLE_TIMEOUT";
+
+        private static readonly bool _isTimeoutDisabled =
+            Environment.GetEnvironmentVariable(PegSolitaireDisableTimeout) == "1";
+
         [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
         private static SearchResult RunWithCancellation(Func<CancellationToken, SearchResult> f, TimeSpan? timeout)
         {
@@ -22,12 +27,17 @@ namespace PegSolitaire
                 Console.CancelKeyPress += OnCtrlC;
                 Console.WriteLine("Press Ctrl+C to cancel...");
 
-                if (timeout != null)
+                if (timeout != null && !_isTimeoutDisabled)
                     cts.CancelAfter(timeout.Value);
                 var result = f(cts.Token);
                 Console.WriteLine();
                 if (cts.IsCancellationRequested && !userCancelled)
+                {
                     Console.WriteLine($"Execution timed-out after {timeout}");
+                    Console.WriteLine(
+                        $"You can disable the timeout by setting the \"{PegSolitaireDisableTimeout}\" environment variable to 1.");
+                }
+
                 return result;
             }
             finally
@@ -49,11 +59,11 @@ namespace PegSolitaire
         /// <seealso cref="Solver.StartSolving"/>
         public static SearchResult StartSolving(State gameState, AbstractGameStateHeuristic heuristic,
             TimeSpan? timeout = null) =>
-            RunWithCancellation((ct) => Solver.StartSolving(gameState, heuristic, ct), timeout);
+            RunWithCancellation(ct => Solver.StartSolving(gameState, heuristic, ct), timeout);
 
         /// <seealso cref="Solver.ContinueSolving"/>
         public static SearchResult ContinueSolving(SolverState gameState, AbstractGameStateHeuristic heuristic,
             TimeSpan? timeout = null) =>
-            RunWithCancellation((ct) => Solver.ContinueSolving(gameState, heuristic, ct), timeout);
+            RunWithCancellation(ct => Solver.ContinueSolving(gameState, heuristic, ct), timeout);
     }
 }

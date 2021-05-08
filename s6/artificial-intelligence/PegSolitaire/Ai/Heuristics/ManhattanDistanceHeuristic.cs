@@ -31,11 +31,13 @@ namespace PegSolitaire.Ai.Heuristics
         public override float GetHeuristic(State state)
         {
             var distanceSum = 0;
+            var pieceCount = 0;
             for (int x1 = 1; x1 <= state.Board.Width; x1++)
             for (int y1 = 1; y1 <= state.Board.Height; y1++)
             {
                 var pos1 = new BoardPosition(x1, y1);
                 if (!state.HasPiece(pos1)) continue;
+                pieceCount++;
                 for (int x2 = 1; x2 <= state.Board.Width; x2++)
                 for (int y2 = 1; y2 <= state.Board.Height; y2++)
                 {
@@ -44,9 +46,7 @@ namespace PegSolitaire.Ai.Heuristics
                 }
             }
 
-            // We don't need to pick averages; all competing
-            // states will have the same number of pieces.
-            return distanceSum;
+            return (float) distanceSum / (2 * pieceCount);
         }
     }
 }

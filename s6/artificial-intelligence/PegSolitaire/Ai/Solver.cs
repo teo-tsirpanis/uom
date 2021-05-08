@@ -56,8 +56,10 @@ namespace PegSolitaire.Ai
 
                 if (nextStatesBuffer.Count == 0) return;
 
-                // We sort in descending order because
-                var nextStatesSorted = nextStatesBuffer.OrderByDescending(heuristic.GetHeuristic);
+                // We sort in descending order to make the state with
+                // the worst heuristic value fall deeper in the stack.
+                var nextStatesSorted =
+                    nextStatesBuffer.OrderByDescending(heuristic.GetHeuristic);
                 var nextStatesStack = ImmutableStack.CreateRange(nextStatesSorted);
                 currentSolverState =
                     SolverState.Create(gameState, nextStatesStack, currentSolverState);

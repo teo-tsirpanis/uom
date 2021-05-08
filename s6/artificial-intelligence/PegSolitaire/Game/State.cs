@@ -138,7 +138,7 @@ namespace PegSolitaire.Game
         /// after <paramref name="move"/> was played.</param>
         /// <returns><see langword="true"/> if the <paramref name="move"/>
         /// was legal and <see langword="false"/> if it was not.</returns>
-        public bool TryPlaySingleMove(Move move, [NotNullWhen(true)] out State? newState)
+        public bool TryPlaySingleMove(in Move move, [NotNullWhen(true)] out State? newState)
         {
             newState = null;
 

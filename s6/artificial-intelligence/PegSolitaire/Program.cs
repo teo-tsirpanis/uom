@@ -2,12 +2,12 @@ using System;
 using PegSolitaire.Ai.Heuristics;
 using PegSolitaire.Commands;
 
-TimeSpan? timeout = TimeSpan.FromSeconds(30);
+TimeSpan? timeout = TimeSpan.FromMinutes(15);
 
 static int PrintUsage()
 {
-    Console.WriteLine("Usage: dotnet run <command> <arguments>");
-    Console.WriteLine("Available commands: dfs");
+    Console.WriteLine("Usage: run.bat <command> <arguments>");
+    Console.WriteLine("Available commands: dfs, best, verify");
     return 1;
 }
 

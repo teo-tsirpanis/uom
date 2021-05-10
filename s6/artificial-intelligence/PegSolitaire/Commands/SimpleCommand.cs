@@ -61,7 +61,7 @@ namespace PegSolitaire.Commands
                 exitCode = 2;
             }
 
-            CommandLineUtilities.PrintPerformanceSummary(searchResult.TotalEvaluatedStates, searchResult.ElapsedTime);
+            Console.WriteLine($"Evaluated {searchResult.TotalEvaluatedStates} game states in {searchResult.ElapsedTime}");
 
             return exitCode;
         }

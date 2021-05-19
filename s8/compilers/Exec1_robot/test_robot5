@@ -1,0 +1,6 @@
+agent {
+   no-init 
+   left-laser > 10 => stay
+   left-laser < Temp => turn right  Y
+   true => stay
+}

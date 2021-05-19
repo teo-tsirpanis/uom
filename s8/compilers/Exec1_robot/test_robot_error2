@@ -1,0 +1,6 @@
+robot {
+   init 
+   left-laser > 1 => turn right x
+   right-laser > 45 => turn right y
+   front-sonar-asd > 100 => move 40
+}

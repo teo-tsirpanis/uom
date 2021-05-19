@@ -1,0 +1,6 @@
+agent {
+   init 
+   left-laser > 10 => turn right 12
+   right-laser > 45 => turn right 20
+   front-sonar > 100 => move forward 40
+}

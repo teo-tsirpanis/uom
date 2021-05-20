@@ -1,0 +1,22 @@
+to another [?x ?y]
+   ?x  = 256
+   if (func ?2 12 44) 
+     [ (func ?x ?y)
+       ?y = 44
+       (func ?x (func2 ?x 3) 33)
+     ]
+end
+
+
+to-report makequal [?x ?y ?z ?w]
+   if (fix ?x ?y) [?z = 35]
+end
+
+
+to-report fix [?x ?y]
+   if (another ?x ?y)
+     [
+      if (foo ?x) [?XCap = 32 (func 23)]
+      
+      ]
+end

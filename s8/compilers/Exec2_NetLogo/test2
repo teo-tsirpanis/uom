@@ -1,0 +1,7 @@
+to-report makequal [?x ?y]
+   ?x = 345
+end
+
+to-report makequal [?x ?y]
+   ?x = 834
+end

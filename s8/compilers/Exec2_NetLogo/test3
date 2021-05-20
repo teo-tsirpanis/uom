@@ -1,0 +1,13 @@
+
+to-report makequal [?x ?y]
+   ?x = 834
+end
+
+to-report fix [?x]
+   report ?x
+end
+
+
+to-report anotherfix [?x]
+   report ?x
+end

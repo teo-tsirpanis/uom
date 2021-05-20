@@ -1,0 +1,4 @@
+
+to-report makequal [?x ?y]
+   if (fix ?x ?y) [?z = 35]
+end

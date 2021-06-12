@@ -61,11 +61,12 @@ product(b,56).
 product(c,48).
 product(d,64).
 
-apply_print_constrs([], [], [], [], []).
-apply_print_constrs([Product|Products], [S|Ss], [D|Ds], [Machine|Machines], [End|Ends]) :-
+apply_company_constrs([], [], [], [], [], []).
+apply_company_constrs([Product|Products], [S|Ss], [D|Ds], [RealD|RealDs], [Machine|Machines], [End|Ends]) :-
     D #= Product / Machine,
-    End #= S + 15 + D,
-    apply_print_constrs(Products, Ss, Ds, Machines, Ends).
+    RealD #= 15 + D,
+    End #= S + RealD,
+    apply_company_constrs(Products, Ss, Ds, RealDs, Machines, Ends).
 
 company(st(S), dur(D), machines(Machines), M) :-
     findall(X, product(_, X), Products),
@@ -76,9 +77,9 @@ company(st(S), dur(D), machines(Machines), M) :-
     Machines #:: 2..8,
     length(QCMachines, N),
     QCMachines #:: 1,
-    apply_print_constrs(Products, S, D, Machines, Ends),
-    ic:maxlist(Ends, M),
-    cumulative(S, D, Machines, 8),
-    cumulative(S, D, QCMachines, 2),
+    apply_company_constrs(Products, S, D, RealD, Machines, Ends),
+    M #= max(Ends) - 15,
+    cumulative(S, RealD, Machines, 8),
+    cumulative(S, RealD, QCMachines, 2),
 
     bb_min(labeling([S, Machines]), M, bb_options{strategy:restart, solutions:all}).

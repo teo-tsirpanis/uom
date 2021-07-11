@@ -14,7 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Farkle" Version="6.0.0" />
-    <PackageReference Include="Farkle.Tools.MSBuild" Version="6.0.0" />
+    <PackageReference Include="Farkle.Tools.MSBuild" Version="6.0.0" PrivateAssets="all" />
     <PackageReference Update="FSharp.Core" Version="5.0.1" />
   </ItemGroup>
 </Project>

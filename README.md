@@ -6,7 +6,7 @@ They are originally stored in a private GitLab repository, which is synchronized
 
 ## License
 
-The code here is licensed under the [GNU General Public License Version 3.0 or higher](https://www.gnu.org/licenses/gpl.html), excluding the content inside `s2/data-structures/adt-libraries` which is not written by me.
+The code here is licensed under the [GNU General Public License Version 3.0 or higher](https://www.gnu.org/licenses/gpl.html), excluding provided code and exercise statements which are not written by me.
 
 ## A note about plagiarism
 

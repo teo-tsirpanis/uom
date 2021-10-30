@@ -1,5 +1,7 @@
 # Κατανεμημένα Συστήματα ~ Εργαστήριο 1: ένα κατανεμημένο σύστημα μιας τράπεζας
 
+### Θοδωρής Τσιρπάνης (`dai19090`)
+
 ## Τα επίπεδα από πάνω προς τα κάτω
 
 ### Επίπεδο Παρουσίασης
@@ -17,18 +19,18 @@
 ``` sql
 CREATE TABLE `users`
 (
- `user_id` int NOT NULL AUTO_INCREMENT ,
- `name`    varchar(45) NOT NULL ,
- `surname` varchar(45) NOT NULL ,
+ `user_id` int NOT NULL AUTO_INCREMENT,
+ `name` varchar(45) NOT NULL,
+ `surname` varchar(45) NOT NULL,
 
   PRIMARY KEY (`user_id`)
 );
 
 CREATE TABLE `accounts`
 (
- `amount`     decimal(15,2) NOT NULL ,
  `account_id` int NOT NULL AUTO_INCREMENT ,
- `owner`      int NOT NULL ,
+ `owner` int NOT NULL ,
+ `balance` decimal(15,2) NOT NULL ,
 
   PRIMARY KEY (`account_id`, `owner`),
   KEY `fkIdx_17` (`owner`),
@@ -36,3 +38,94 @@ CREATE TABLE `accounts`
 );
 ```
 
+Όπως φαίνεται, για αποφυγή σφαλμάτων στρογγυλοποίησης οι χρηματικές ποσότητες αποθηκεύονται ως αριθμοί σταθερής υποδιαστολής με δύο δεκαδικά ψηφία.
+
+## Η επικοινωνία μεταξύ των επιπέδων
+
+### Παρουσίαση ➔ Επιχειρηματική Λογική
+
+Παρατίθεται ένα ενδεικτικό API για την επικοινωνία μεταξύ των επιπέδων παρουσίασης και επιχειρηματικής λογικής, με χρήση του πρωτοκόλλου gRPC:
+
+``` proto
+syntax = "proto3";
+
+package MyDistributedBank;
+
+message Account {
+  int32 account_id = 1;
+  int32 owner = 2;
+  double balance = 3;
+}
+
+message CreateAccountRequest {
+  string name = 1;
+  string surname = 2;
+}
+
+message CreateAccountResponse {
+  Account account = 1;
+}
+
+message DepositRequest {
+  int32 account_id = 1;
+  double amount = 2;
+}
+
+message DepositResponse {
+  Account account = 1;
+}
+
+message WithdrawRequest {
+  int32 account_id = 1;
+  double amount = 2;
+}
+
+message WithdrawResponse {
+  Account account = 1;
+}
+
+message TransferRequest {
+  int32 from_account_id = 1;
+  int32 to_account_id = 2;
+  double amount = 3;
+}
+
+message TransferResponse {
+  Account from_account = 1;
+  Account to_account = 2;
+}
+
+service Bank {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc Deposit(DepositRequest) returns (DepositResponse) {}
+  rpc Withdraw(WithdrawRequest) returns (WithdrawResponse) {}
+  rpc Transfer(TransferRequest) returns (TransferResponse) {}
+}
+```
+
+Οι κλήσεις του API επιστρέφουν την κατάσταση του λογαριασμού μετά την λειτουργία. Τυχόν σφάλματα επιστρέφονται από το ίδιο το gRPC.
+
+### Επιχειρηματική Λογική ➔ Δεδομένα
+
+Το επίπεδο Επιχειρηματικής Λογικής θα επικοινωνεί με τη βάση δεδομένων χρησιμοποιώντας είτε μια άμεση διεπαφή όπως το JDBC ή το ADO.NET είτε μια τεχνολογία αντιστοίχισης αντικειμένων-συσχετίσεων (ORM) όπως το Hibernate ή το Entity Framework.
+
+## Λοιπά ζητήματα
+
+### Έλεγχος σφαλμάτων
+
+Στην επικοινωνία μεταξύ των δύο πρώτων επιπέδων, τυχόν σφάλματα στην είσοδο του χρήστη θα πρέπει να ελέγχονται υποχρεωτικά από το επίπεδο επιχειρηματικής λογικής (υποθέτοντας για λόγους ασφαλείας ότι όλα τα δεδομένα που λαμβάνει είναι αναξιόπιστα), και προαιρετικά από το επίπεδο παρουσίασης, για λόγους εμπειρίας χρήστη, χωρίς να χρειαστεί για παράδειγμα ένα αίτημα στο επίπεδο επιχειρηματικής λογικής για να εμφανίσει η εφαρμογή ότι στην αίτηση δημιουργίας λογαριασμού το όνομα ήταν κενό. Παραδείγματα σφαλμάτων που πρέπει να ελεγχθούν:
+
+* Το όνομα και το επίθετο του λογαριασμού δεν είναι κενά ούτε έχει υπερβολικό μήκος (`CreateAccountRequest`)
+* Ο αριθμός λογαριασμού υπάρχει και αντιστοιχεί σε κάποιον λογαριασμό (`DepositRequest`, `WithdrawRequest`, `TransferRequest`)
+* Η χρηματική ποσότητα είναι θετικός και πραγματικός (δηλαδή όχι NaN ή Infinity) αριθμός (`DepositRequest`, `WithdrawRequest`, `TransferRequest`)
+* Ο λογαριασμός έχει αρκετά χρήματα για τη μεταφορά (`WithdrawRequest`, `TransferRequest`)
+
+### Καταστάσεις του πρωτοκόλλου
+
+Το πρωτόκολλο επικοινωνίας όπως περιγράφτηκε δεν έχει καταστάσεις· η κάθε λειτουργία του είναι ανεξάρτητη από τις υπόλοιπες. Θα χρειαστεί μια μορφή κατάστασης όταν υλοποιηθεί η αυθεντικοποίηση των χρηστών (που δεν καλύπτεται καθόλου από αυτό το έγγραφο), κρατώντας τα διαπιστευτήριά τους σε cookies στον browser για παράδειγμα.
+
+Τυχόν στιγμιότυπα των δεδομένων στο επίπεδο παρουσίασης είναι καθαρά για λόγους εμφάνισης στον χρήστη. Η βάση δεδομένων είναι η μοναδική πηγή αλήθειας του συστήματος.
+
+### Ταυτοχρονισμός
+
+Ζητήματα ταυτοχρονισμού αφήνονται να επιλυθούν από τους υπάρχοντες μηχανισμούς της βάσης δεδομένων. Σύνθετες λειτουργίες όπως η εντολή `Transfer` θα χρειαστούν συναλλαγές (transactions) κατά την αλληλεπίδραση με τη βάση δεδομένων για την αποφυγή προβλημάτων στη μέση της μεταφοράς (αν για παράδειγμα ο λογαριασμός Α μεταφέρει κάποια χρήματα στον λογαριασμό Β και ενδιάμεσα καταρρεύσει το σύστημα, χωρίς συναλλαγές τα χρήματα ενδέχεται να χαθούν).

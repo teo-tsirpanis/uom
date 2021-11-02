@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace Dai19090.SimulationTechniques.RandomNumbers.Analyzers;
+﻿namespace Dai19090.SimulationTechniques.RandomNumbers.Analyzers;
 
 public sealed class LimitedMeasuresOfPositionAnalyzer : MeasuresOfPositionAnalyzer
 {
@@ -24,7 +22,7 @@ public sealed class LimitedMeasuresOfPositionAnalyzer : MeasuresOfPositionAnalyz
         output.WriteLine($"--------------------FIRST {_measurements.Count} NUMBERS--------------------");
         for (int i = 0; i < _measurements.Count; i++)
         {
-            output.Write(_measurements[i].ToString(CultureInfo.InvariantCulture));
+            output.Write(_measurements[i].ToString("F7"));
             if (i % 10 == 9)
                 output.WriteLine();
             else
@@ -32,5 +30,6 @@ public sealed class LimitedMeasuresOfPositionAnalyzer : MeasuresOfPositionAnalyz
         }
         output.WriteLine();
         WriteSummary(output);
+        output.WriteLine();
     }
 }

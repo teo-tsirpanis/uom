@@ -1,6 +1,7 @@
 ﻿using Dai19090.SimulationTechniques.RandomNumbers.Analyzers;
 using Dai19090.SimulationTechniques.RandomNumbers.Generators;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Dai19090.SimulationTechniques.RandomNumbers
 {
@@ -11,6 +12,9 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
 
         public static void Main()
         {
+            // We ensure that the decimal point symbol is the dot even on Greek computers.
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             var seed = Random.Shared.Next();
             Console.WriteLine($"Using seed {seed}");
 
@@ -29,8 +33,8 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
             stopwatch.Stop();
 
             Console.WriteLine($"Finished in {stopwatch.Elapsed}");
-
             Console.WriteLine("Displaying results");
+            Console.WriteLine();
 
             foreach (var analyzer in analyzers) analyzer.WriteResultsTo(Console.Out);
         }

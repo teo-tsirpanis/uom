@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace Dai19090.SimulationTechniques.RandomNumbers;
+﻿namespace Dai19090.SimulationTechniques.RandomNumbers;
 
 public class MeasuresOfPositionAnalyzer : IRandomNumberAnalyzer
 {
@@ -31,13 +29,9 @@ public class MeasuresOfPositionAnalyzer : IRandomNumberAnalyzer
     protected void WriteSummary(TextWriter output)
     {
         var mean = GetMean();
-        var meanLine = string.Create(CultureInfo.InvariantCulture,
-            $"Mean: {mean} (should be near {ExpectedMean}, difference is {Math.Abs(mean - ExpectedMean)})");
-        output.WriteLine(meanLine);
+        output.WriteLine($"Mean: {mean:G6} (should be near {ExpectedMean:G6}, difference is {Math.Abs(mean - ExpectedMean):E})");
         var stdev = GetStandardDeviation();
-        var stdevLine = string.Create(CultureInfo.InvariantCulture,
-            $"Standard deviation: {stdev} (should be near {ExpectedStandardDeviation}, difference is {Math.Abs(stdev - ExpectedStandardDeviation)})");
-        output.WriteLine(stdevLine);
+        output.WriteLine($"Standard deviation: {stdev:G6} (should be near {ExpectedStandardDeviation:G6}, difference is {Math.Abs(stdev - ExpectedStandardDeviation):E})");
     }
 
     public virtual void WriteResultsTo(TextWriter output)

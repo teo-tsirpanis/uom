@@ -9,6 +9,7 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
     {
         public const int TotalSamples = 1_000_000;
         public const int TotalSamplesToDisplay = 100;
+        public const int TotalRuns = 10;
 
         public static void Main()
         {
@@ -23,7 +24,8 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
             var analyzers = new IRandomNumberAnalyzer[]
             {
                 new LimitedMeasuresOfPositionAnalyzer(TotalSamplesToDisplay),
-                new MeasuresOfPositionAnalyzer()
+                new MeasuresOfPositionAnalyzer(),
+                new RunsTestAnalyzer(TotalRuns)
             };
 
             Console.WriteLine($"Testing the RNG with {TotalSamples} samples");

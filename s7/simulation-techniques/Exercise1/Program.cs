@@ -1,4 +1,4 @@
-﻿using Dai19090.SimulationTechniques.RandomNumbers.Analyzers;
+using Dai19090.SimulationTechniques.RandomNumbers.Analyzers;
 using Dai19090.SimulationTechniques.RandomNumbers.Generators;
 using System.Diagnostics;
 using System.Globalization;
@@ -25,7 +25,8 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
             {
                 new LimitedMeasuresOfPositionAnalyzer(TotalSamplesToDisplay),
                 new MeasuresOfPositionAnalyzer(),
-                new RunsTestAnalyzer(TotalRuns)
+                new RunsTestAnalyzer(TotalRuns),
+                new RegionsTestAnalyzer()
             };
 
             Console.WriteLine($"Testing the RNG with {TotalSamples} samples");

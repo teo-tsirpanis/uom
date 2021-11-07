@@ -16,7 +16,7 @@ namespace Dai19090.SimulationTechniques.RandomNumbers
             // We ensure that the decimal point symbol is the dot even on Greek computers.
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            var seed = Random.Shared.Next();
+            var seed = new Random().Next();
             Console.WriteLine($"Using seed {seed}");
 
             var rng = new DefaultLinearCongruentialGenerator(seed);

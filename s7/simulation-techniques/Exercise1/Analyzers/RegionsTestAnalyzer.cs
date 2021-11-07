@@ -33,7 +33,7 @@ public sealed class RegionsTestAnalyzer : IRandomNumberAnalyzer
         output.WriteLine($"Each region's frequency should be around {expectedRegionFrequency} ({1.0/_regionFrequencies.Length:P}).");
         for (int i = 0; i < _regionFrequencies.Length; i++)
         {
-            output.WriteLine($"[{i / 10.0}, {(i + 1) / 10.0}): {_regionFrequencies[i]} ({(double)_regionFrequencies[i] / totalMeasurements:P})");
+            output.WriteLine($"[{i / 10.0}, {(i + 1) / 10.0}): {_regionFrequencies[i]} ({(double)_regionFrequencies[i] / totalMeasurements:P}, difference is {Math.Abs(_regionFrequencies[i] - expectedRegionFrequency):E})");
         }
 
         output.WriteLine();

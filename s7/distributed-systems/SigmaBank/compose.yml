@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  data:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    user: root
+    volumes:
+      - data:/var/opt/mssql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SigmaBank47559
+    networks:
+      sigmanet:
+        aliases:
+          - database.sigma.bank
+
+volumes:
+  data:
+
+networks:
+  sigmanet:
+    driver: bridge

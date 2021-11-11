@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
     <RootNamespace>Dai19090.DistributedSystems.SigmaBank</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

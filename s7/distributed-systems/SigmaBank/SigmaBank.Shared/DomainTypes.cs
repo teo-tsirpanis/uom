@@ -81,40 +81,46 @@ public interface IBank
     /// </summary>
     /// <param name="name">The user's name.</param>
     /// <param name="surname">The user's surname.</param>
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>The new user's information.</returns>
-    Task<UserInfo> CreateUserAsync(string name, string surname);
+    Task<UserInfo> CreateUserAsync(string name, string surname, CancellationToken cancellationToken = default);
     /// <summary>
     /// Gets information about a user.
     /// </summary>
     /// <param name="id">The ID of the user to look for.</param>
-    Task<UserInfo?> GetUserInfoAsync(UserId id);
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
+    Task<UserInfo?> GetUserInfoAsync(UserId id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates an account.
     /// </summary>
     /// <param name="id">The ID of the account's owner.</param>
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>The new account's information.</returns>
-    Task<AccountInfo> CreateAccountAsync(UserId id);
+    Task<AccountInfo> CreateAccountAsync(UserId id, CancellationToken cancellationToken = default);
     /// <summary>
     /// Gets information about an account.
     /// </summary>
     /// <param name="id">The ID of the account to look for.</param>
-    Task<AccountInfo?> GetAccountInfoAsync(AccountId id);
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
+    Task<AccountInfo?> GetAccountInfoAsync(AccountId id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deposits money to an account.
     /// </summary>
     /// <param name="id">The ID of the account to deposit money in.</param>
     /// <param name="amount">The monetary amount to deposit.</param>
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>The account's information after the deposit was performed.</returns>
-    Task<AccountInfo> DepositAsync(AccountId id, decimal amount);
+    Task<AccountInfo> DepositAsync(AccountId id, decimal amount, CancellationToken cancellationToken = default);
     /// <summary>
     /// Withdraws money from an account.
     /// </summary>
     /// <param name="id">The ID of the account to withdraw money from.</param>
     /// <param name="amount">The monetary amount to withdraw.</param>
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>The account's information after the withdrawal was performed.</returns>
-    Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount);
+    Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Transfers money between two accounts.
@@ -122,8 +128,9 @@ public interface IBank
     /// <param name="originAccountId">The ID of the account which sends the money.</param>
     /// <param name="destinationAccountId">The ID of the account which receives the money.</param>
     /// <param name="amount">The monetary amount to transfer.</param>
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>Both accounts' information after the transferral was performed.</returns>
-    Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount);
+    Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

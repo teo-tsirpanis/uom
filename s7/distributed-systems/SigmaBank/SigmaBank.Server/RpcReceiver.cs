@@ -59,7 +59,7 @@ public sealed class RpcReceiver
         return Encoding.UTF8.GetString(bw.WrittenSpan);
     }
 
-    private async Task<object?> ProcessJsonRequest(JsonElement json)
+    private async Task<object?> ProcessJsonRequest(JsonElement json, CancellationToken cancellationToken)
     {
         DecomposeRequestMessage(json, out var commandName, out var commandArguments);
 
@@ -72,25 +72,25 @@ public sealed class RpcReceiver
                 var name = json[0].GetString();
                 var surname = json[1].GetString();
                 ArgumentValidation.ValidateAcountCreation(name, surname);
-                return await _bank.CreateUserAsync(name, surname);
+                return await _bank.CreateUserAsync(name, surname, cancellationToken);
 
             case nameof(IBank.GetUserInfoAsync):
                 AssertIsArray(json, 1);
                 var userId = json[0].Deserialize<UserId>();
                 AssertNotNull(userId);
-                return await _bank.GetUserInfoAsync(userId);
+                return await _bank.GetUserInfoAsync(userId, cancellationToken);
 
             case nameof(IBank.CreateAccountAsync):
                 AssertIsArray(json, 1);
                 var ownerId = json[0].Deserialize<UserId>();
                 AssertNotNull(ownerId);
-                return await _bank.CreateAccountAsync(ownerId);
+                return await _bank.CreateAccountAsync(ownerId, cancellationToken);
 
             case nameof(IBank.GetAccountInfoAsync):
                 AssertIsArray(json, 1);
                 var accountId = json[0].Deserialize<AccountId>();
                 AssertNotNull(accountId);
-                return await _bank.GetAccountInfoAsync(accountId);
+                return await _bank.GetAccountInfoAsync(accountId, cancellationToken);
 
             case nameof(IBank.DepositAsync):
                 AssertIsArray(json, 2);
@@ -98,7 +98,7 @@ public sealed class RpcReceiver
                 var amount = json[1].GetDecimal();
                 AssertNotNull(accountId);
                 ArgumentValidation.ValidateCurrencyAmount(amount);
-                return await _bank.DepositAsync(accountId, amount);
+                return await _bank.DepositAsync(accountId, amount, cancellationToken);
 
             case nameof(IBank.WithdrawAsync):
                 AssertIsArray(json, 2);
@@ -106,7 +106,7 @@ public sealed class RpcReceiver
                 amount = json[1].GetDecimal();
                 AssertNotNull(accountId);
                 ArgumentValidation.ValidateCurrencyAmount(amount);
-                return await _bank.WithdrawAsync(accountId, amount);
+                return await _bank.WithdrawAsync(accountId, amount, cancellationToken);
 
             case nameof(IBank.TransferAsync):
                 AssertIsArray(json, 3);
@@ -116,7 +116,7 @@ public sealed class RpcReceiver
                 AssertNotNull(originAccountId);
                 AssertNotNull(destinationAccountId);
                 ArgumentValidation.ValidateCurrencyAmount(amount);
-                return await _bank.TransferAsync(originAccountId, destinationAccountId, amount);
+                return await _bank.TransferAsync(originAccountId, destinationAccountId, amount, cancellationToken);
 
             default:
                 ThrowInvalidOperationException($"Unknown command name: {commandName}");
@@ -128,7 +128,8 @@ public sealed class RpcReceiver
     /// Asynchronously processes an RPC request.
     /// </summary>
     /// <param name="stream">A bidirectional stream that represents the connection.</param>
-    public async Task ProcessRequestAsync(Stream stream)
+    /// <param name="cancellationToken">Used to cancel the operation.</param>
+    public async Task ProcessRequestAsync(Stream stream, CancellationToken cancellationToken)
     {
         object? response = null;
         var succeeded = false;
@@ -136,8 +137,8 @@ public sealed class RpcReceiver
 
         try
         {
-            using var doc = await JsonDocument.ParseAsync(stream);
-            response = await ProcessJsonRequest(doc.RootElement);
+            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            response = await ProcessJsonRequest(doc.RootElement, cancellationToken);
         }
         catch (BankException e)
         {
@@ -163,6 +164,6 @@ public sealed class RpcReceiver
             responseWriter.WriteString(_jsonMessage, errorMessage);
         }
         responseWriter.WriteEndObject();
-        await responseWriter.FlushAsync();
+        await responseWriter.FlushAsync(cancellationToken);
     }
 }

@@ -10,7 +10,7 @@ public sealed class SocketListener : IDisposable
 {
     private readonly EndPoint _endPoint;
     private readonly Socket _socket;
-    private readonly Func<Stream, Task> _requestHandler;
+    private readonly Func<Stream, CancellationToken, Task> _requestHandler;
 
     /// <summary>
     /// Creates a <see cref="SocketListener"/>.
@@ -18,7 +18,7 @@ public sealed class SocketListener : IDisposable
     /// <param name="ep">The <see cref="EndPoint"/> to listen at.</param>
     /// <param name="requestHandler">The function that handles the request.
     /// It accepts a standard .NET <see cref="Stream"/>.</param>
-    public SocketListener(EndPoint ep, Func<Stream, Task> requestHandler)
+    public SocketListener(EndPoint ep, Func<Stream, CancellationToken, Task> requestHandler)
     {
         _endPoint = ep;
         _socket = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -43,7 +43,7 @@ public sealed class SocketListener : IDisposable
                 Console.WriteLine($"Client connected from {client.RemoteEndPoint}");
                 var stream = new NetworkStream(client);
                 // We do not await because we want to continue accepting new connections.
-                _ = _requestHandler(stream);
+                _ = _requestHandler(stream, cancellationToken);
             }
             catch (OperationCanceledException oce) when (oce.CancellationToken == cancellationToken)
             {

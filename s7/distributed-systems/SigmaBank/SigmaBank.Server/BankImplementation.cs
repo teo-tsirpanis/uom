@@ -23,16 +23,16 @@ public sealed class BankImplementation : IBank
         command.Parameters.Add(parameter);
     }
 
-    public async Task<AccountInfo> CreateAccountAsync(UserId id)
+    public async Task<AccountInfo> CreateAccountAsync(UserId id, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         bool succeeded = false;
-        await using var transaction = await connection.BeginTransactionAsync();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
-            if (await GetUserInfoImpl(connection, transaction, id) is null)
+            if (await GetUserInfoImpl(connection, transaction, id, cancellationToken) is null)
                 throw new BankException("Specified account does not exist");
 
             await using var command = connection.CreateCommand();
@@ -40,12 +40,12 @@ public sealed class BankImplementation : IBank
             command.CommandText = "INSERT INTO accounts (owner_id) VALUES (@Owner); SELECT SCOPE_IDENTITY()";
             AddParameter(command, "Owner", id.Id);
 
-            var result = await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync(cancellationToken);
             if (result is not int accountId)
                 throw new InvalidOperationException("Database did not return account ID.");
             var newAccountId = new AccountId(accountId);
 
-            var accountInfo = await GetAccountInfoImpl(connection, transaction, newAccountId);
+            var accountInfo = await GetAccountInfoImpl(connection, transaction, newAccountId, cancellationToken);
             if (accountInfo is null)
                 throw new InvalidOperationException("Could not get account info.");
 
@@ -55,13 +55,13 @@ public sealed class BankImplementation : IBank
         finally
         {
             if (succeeded)
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(cancellationToken);
             else
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(cancellationToken);
         }
     }
 
-    private static async Task<AccountInfo?> GetAccountInfoImpl(DbConnection connection, DbTransaction? transaction, AccountId id)
+    private static async Task<AccountInfo?> GetAccountInfoImpl(DbConnection connection, DbTransaction? transaction, AccountId id, CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
 
@@ -69,28 +69,28 @@ public sealed class BankImplementation : IBank
         command.CommandText = "SELECT * FROM accounts WHERE account_id = @Id";
         AddParameter(command, "Id", id.Id);
 
-        await using var reader = await command.ExecuteReaderAsync();
-        if (!await reader.ReadAsync())
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken))
             return null;
 
         return DbDeserializer.GetAccountInfo(reader);
     }
 
-    public async Task<AccountInfo?> GetAccountInfoAsync(AccountId id)
+    public async Task<AccountInfo?> GetAccountInfoAsync(AccountId id, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
-        return await GetAccountInfoImpl(connection, null, id);
+        return await GetAccountInfoImpl(connection, null, id, cancellationToken);
     }
 
-    public async Task<UserInfo> CreateUserAsync(string name, string surname)
+    public async Task<UserInfo> CreateUserAsync(string name, string surname, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         bool succeeded = false;
-        await using var transaction = await connection.BeginTransactionAsync();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         try
         {
             await using var command = connection.CreateCommand();
@@ -99,12 +99,12 @@ public sealed class BankImplementation : IBank
             AddParameter(command, "Name", name);
             AddParameter(command, "Surname", surname);
 
-            var result = await command.ExecuteScalarAsync();
+            var result = await command.ExecuteScalarAsync(cancellationToken);
             if (result is not int userId)
                 throw new InvalidOperationException("Database did not return user ID.");
             var newUserId = new UserId(userId);
 
-            var accountInfo = await GetUserInfoImpl(connection, transaction, newUserId);
+            var accountInfo = await GetUserInfoImpl(connection, transaction, newUserId, cancellationToken);
             if (accountInfo is null)
                 throw new InvalidOperationException("Could not get user info.");
 
@@ -114,13 +114,13 @@ public sealed class BankImplementation : IBank
         finally
         {
             if (succeeded)
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(cancellationToken);
             else
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(cancellationToken);
         }
     }
 
-    private static async Task<UserInfo?> GetUserInfoImpl(DbConnection connection, DbTransaction? transaction, UserId id)
+    private static async Task<UserInfo?> GetUserInfoImpl(DbConnection connection, DbTransaction? transaction, UserId id, CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
 
@@ -128,22 +128,22 @@ public sealed class BankImplementation : IBank
         command.CommandText = "SELECT * FROM users WHERE user_id = @Id";
         AddParameter(command, "Id", id.Id);
 
-        await using var reader = await command.ExecuteReaderAsync();
-        if (!await reader.ReadAsync())
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken))
             return null;
 
         return DbDeserializer.GetUserInfo(reader);
     }
 
-    public async Task<UserInfo?> GetUserInfoAsync(UserId id)
+    public async Task<UserInfo?> GetUserInfoAsync(UserId id, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
-        return await GetUserInfoImpl(connection, null, id);
+        return await GetUserInfoImpl(connection, null, id, cancellationToken);
     }
 
-    private static async Task<bool> DepositImpl(DbConnection connection, DbTransaction transaction, AccountId id, decimal amount)
+    private static async Task<bool> DepositImpl(DbConnection connection, DbTransaction transaction, AccountId id, decimal amount, CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
 
@@ -152,22 +152,22 @@ public sealed class BankImplementation : IBank
         AddParameter(command, "Amount", amount);
         AddParameter(command, "Id", id.Id);
 
-        return await command.ExecuteNonQueryAsync() == 1;
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
-    public async Task<AccountInfo> DepositAsync(AccountId id, decimal amount)
+    public async Task<AccountInfo> DepositAsync(AccountId id, decimal amount, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
-        await using var transaction = await connection.BeginTransactionAsync();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         bool succeeded = false;
         try
         {
-            if (!await DepositImpl(connection, transaction, id, amount))
+            if (!await DepositImpl(connection, transaction, id, amount, cancellationToken))
                 throw new BankException("Account does not exist.");
 
-            var accountInfo = await GetAccountInfoImpl(connection, transaction, id);
+            var accountInfo = await GetAccountInfoImpl(connection, transaction, id, cancellationToken);
             if (accountInfo is null)
                 throw new InvalidOperationException("Could not get account info.");
 
@@ -177,13 +177,13 @@ public sealed class BankImplementation : IBank
         finally
         {
             if (succeeded)
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(cancellationToken);
             else
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(cancellationToken);
         }
     }
 
-    private static async Task<bool> WithdrawImpl(DbConnection connection, DbTransaction transaction, AccountId id, decimal amount)
+    private static async Task<bool> WithdrawImpl(DbConnection connection, DbTransaction transaction, AccountId id, decimal amount, CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
 
@@ -192,7 +192,7 @@ public sealed class BankImplementation : IBank
         AddParameter(command, "Amount", amount);
         AddParameter(command, "Id", id.Id);
 
-        return await command.ExecuteNonQueryAsync() == 1;
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
     private static void ValidateWithdrawnAccount([NotNull] AccountInfo? accountInfo)
@@ -203,19 +203,19 @@ public sealed class BankImplementation : IBank
             throw new BankException("Insufficient funds.");
     }
 
-    public async Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount)
+    public async Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
-        await using var transaction = await connection.BeginTransactionAsync();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         bool succeeded = false;
         try
         {
-            if (!await WithdrawImpl(connection, transaction, id, amount))
+            if (!await WithdrawImpl(connection, transaction, id, amount, cancellationToken))
                 throw new BankException("Account does not exist.");
 
-            var accountInfo = await GetAccountInfoImpl(connection, transaction, id);
+            var accountInfo = await GetAccountInfoImpl(connection, transaction, id, cancellationToken);
             ValidateWithdrawnAccount(accountInfo);
 
             succeeded = true;
@@ -224,30 +224,30 @@ public sealed class BankImplementation : IBank
         finally
         {
             if (succeeded)
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(cancellationToken);
             else
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(cancellationToken);
         }
     }
 
-    public async Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount)
+    public async Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount, CancellationToken cancellationToken)
     {
         await using var connection = _connectionFactory();
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
-        await using var transaction = await connection.BeginTransactionAsync();
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         bool succeeded = false;
         try
         {
-            if (!await WithdrawImpl(connection, transaction, originAccountId, amount))
+            if (!await WithdrawImpl(connection, transaction, originAccountId, amount, cancellationToken))
                 throw new BankException("Origin account does not exist.");
 
-            if (!await DepositImpl(connection, transaction, destinationAccountId, amount))
+            if (!await DepositImpl(connection, transaction, destinationAccountId, amount, cancellationToken))
                 throw new BankException("Destination account does not exist.");
 
-            var originAccountInfo = await GetAccountInfoImpl(connection, transaction, originAccountId);
+            var originAccountInfo = await GetAccountInfoImpl(connection, transaction, originAccountId, cancellationToken);
             ValidateWithdrawnAccount(originAccountInfo);
-            var destinationAccountInfo = await GetAccountInfoImpl(connection, transaction, destinationAccountId);
+            var destinationAccountInfo = await GetAccountInfoImpl(connection, transaction, destinationAccountId, cancellationToken);
             if (destinationAccountInfo is null)
                 throw new InvalidOperationException("Could not get destination account info.");
 
@@ -257,9 +257,9 @@ public sealed class BankImplementation : IBank
         finally
         {
             if (succeeded)
-                await transaction.CommitAsync();
+                await transaction.CommitAsync(cancellationToken);
             else
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(cancellationToken);
         }
     }
 }

@@ -125,3 +125,14 @@ public interface IBank
     /// <returns>Both accounts' information after the transferral was performed.</returns>
     Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount);
 }
+
+/// <summary>
+/// Signifies that something went wrong with an <see cref="IBank"/> operation.
+/// </summary>
+/// <remarks>
+/// Exceptions of this type are user-visible; their message will be sent to the client.
+/// </remarks>
+public sealed class BankException : Exception
+{
+    public BankException(string message) : base(message) { }
+}

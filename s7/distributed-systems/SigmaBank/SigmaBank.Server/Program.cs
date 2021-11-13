@@ -1,5 +1,7 @@
 ﻿using Dai19090.DistributedSystems.SigmaBank.Server;
 using Microsoft.Data.SqlClient;
+using System.Net;
+using System.Runtime.InteropServices;
 
 const string DatabaseSchema = @"
 CREATE TABLE users (
@@ -37,7 +39,17 @@ catch (Exception e)
     Console.WriteLine($"Initializing database schema failed: {e}");
 }
 
-Console.WriteLine("Hello, World!");
+var endpoint = new IPEndPoint(IPAddress.Any, 5959);
+var bank = new BankImplementation(connectionFactory);
+var rpcReceiver = new RpcReceiver(bank);
+using var listener = new SocketListener(endpoint, rpcReceiver.ProcessRequestAsync);
+
+var cts = new CancellationTokenSource();
+RegisterErrorHandlers(cts.Cancel);
+
+Console.WriteLine($"Listening on {endpoint}");
+await listener.ListenAsync(cts.Token);
+Console.WriteLine("Shutting down");
 
 return 0;
 
@@ -52,4 +64,18 @@ async Task InitializeDatabaseSchema()
     command.CommandText = DatabaseSchema;
 
     var o = await command.ExecuteScalarAsync();
+}
+
+static void RegisterErrorHandlers(Action doCancel)
+{
+    PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ =>
+    {
+        Console.WriteLine("Received SIGTERM, shutting down...");
+        doCancel();
+    });
+
+    TaskScheduler.UnobservedTaskException += (sender, e) =>
+    {
+        Console.WriteLine($"Unobserved task exception: {e.Exception}");
+    };
 }

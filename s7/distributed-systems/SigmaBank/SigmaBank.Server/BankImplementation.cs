@@ -3,6 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Dai19090.DistributedSystems.SigmaBank.Server;
 
+/// <summary>
+/// An implementation of <see cref="IBank"/> that is backed by an ADO.NET database connection.
+/// </summary>
 public sealed class BankImplementation : IBank
 {
     private readonly Func<DbConnection> _connectionFactory;
@@ -30,7 +33,7 @@ public sealed class BankImplementation : IBank
         try
         {
             if (await GetUserInfoImpl(connection, transaction, id) is null)
-                throw new InvalidOperationException("Specified account does not exist");
+                throw new BankException("Specified account does not exist");
 
             await using var command = connection.CreateCommand();
             command.Transaction = transaction;
@@ -39,12 +42,12 @@ public sealed class BankImplementation : IBank
 
             var result = await command.ExecuteScalarAsync();
             if (result is not int accountId)
-                throw new InvalidOperationException("Failed to create account.");
+                throw new InvalidOperationException("Database did not return account ID.");
             var newAccountId = new AccountId(accountId);
 
             var accountInfo = await GetAccountInfoImpl(connection, transaction, newAccountId);
             if (accountInfo is null)
-                throw new InvalidOperationException("Failed to create account.");
+                throw new InvalidOperationException("Could not get account info.");
 
             succeeded = true;
             return accountInfo;
@@ -98,12 +101,12 @@ public sealed class BankImplementation : IBank
 
             var result = await command.ExecuteScalarAsync();
             if (result is not int userId)
-                throw new InvalidOperationException("Failed to create user.");
+                throw new InvalidOperationException("Database did not return user ID.");
             var newUserId = new UserId(userId);
 
             var accountInfo = await GetUserInfoImpl(connection, transaction, newUserId);
             if (accountInfo is null)
-                throw new InvalidOperationException("Failed to create user.");
+                throw new InvalidOperationException("Could not get user info.");
 
             succeeded = true;
             return accountInfo;
@@ -162,7 +165,7 @@ public sealed class BankImplementation : IBank
         try
         {
             if (!await DepositImpl(connection, transaction, id, amount))
-                throw new InvalidOperationException("Account does not exist.");
+                throw new BankException("Account does not exist.");
 
             var accountInfo = await GetAccountInfoImpl(connection, transaction, id);
             if (accountInfo is null)
@@ -197,7 +200,7 @@ public sealed class BankImplementation : IBank
         if (accountInfo is null)
             throw new InvalidOperationException("Could not get account info.");
         if (accountInfo.Balance < 0.0m)
-            throw new InvalidOperationException("Insufficient funds.");
+            throw new BankException("Insufficient funds.");
     }
 
     public async Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount)
@@ -210,7 +213,7 @@ public sealed class BankImplementation : IBank
         try
         {
             if (!await WithdrawImpl(connection, transaction, id, amount))
-                throw new InvalidOperationException("Account does not exist.");
+                throw new BankException("Account does not exist.");
 
             var accountInfo = await GetAccountInfoImpl(connection, transaction, id);
             ValidateWithdrawnAccount(accountInfo);
@@ -237,10 +240,10 @@ public sealed class BankImplementation : IBank
         try
         {
             if (!await WithdrawImpl(connection, transaction, originAccountId, amount))
-                throw new InvalidOperationException("Origin account does not exist.");
+                throw new BankException("Origin account does not exist.");
 
             if (!await DepositImpl(connection, transaction, destinationAccountId, amount))
-                throw new InvalidOperationException("Destination account does not exist.");
+                throw new BankException("Destination account does not exist.");
 
             var originAccountInfo = await GetAccountInfoImpl(connection, transaction, originAccountId);
             ValidateWithdrawnAccount(originAccountInfo);

@@ -1,0 +1,168 @@
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Text.Json;
+
+namespace Dai19090.DistributedSystems.SigmaBank.Server;
+
+/// <summary>
+/// Implements the server-side of SigmaBank's RPC protocol.
+/// </summary>
+public sealed class RpcReceiver
+{
+    private static readonly JsonEncodedText _jsonSuccessful = JsonEncodedText.Encode("Successful");
+    private static readonly JsonEncodedText _jsonMessage = JsonEncodedText.Encode("Message");
+    private static readonly JsonEncodedText _jsonResult = JsonEncodedText.Encode("Result");
+
+    private readonly IBank _bank;
+
+    public RpcReceiver(IBank bank)
+    {
+        _bank = bank;
+    }
+
+    [DoesNotReturn]
+    private static void ThrowInvalidOperationException(string? message = null) =>
+        throw new InvalidOperationException(message);
+
+    private static void AssertNotNull<T>([NotNull] T? x) where T : class
+    {
+        if (x == null)
+            ThrowInvalidOperationException();
+    }
+
+    private static void AssertIsArray(JsonElement json, int expectedLength)
+    {
+        if (json.ValueKind != JsonValueKind.Array || json.GetArrayLength() != expectedLength)
+            ThrowInvalidOperationException("Incorrect number of arguments expected");
+    }
+
+    private static void DecomposeRequestMessage(JsonElement json, out string commandName, out JsonElement arguments)
+    {
+        var protocolVersion = json.GetProperty("ProtocolVersion").GetInt32();
+        if (protocolVersion != 1)
+            ThrowInvalidOperationException($"Invalid protocol version.");
+
+        var name = json.GetProperty("CommandName").GetString();
+        if (name == null)
+            ThrowInvalidOperationException("Missing command name.");
+        commandName = name;
+        arguments = json.GetProperty("Arguments");
+    }
+
+    private static string DisplayJsonToString(JsonElement json)
+    {
+        var bw = new ArrayBufferWriter<byte>();
+        using var writer = new Utf8JsonWriter(bw);
+        json.WriteTo(writer);
+        writer.Flush();
+        return Encoding.UTF8.GetString(bw.WrittenSpan);
+    }
+
+    private async Task<object?> ProcessJsonRequest(JsonElement json)
+    {
+        DecomposeRequestMessage(json, out var commandName, out var commandArguments);
+
+        Console.WriteLine($"Received command {commandName} with arguments {DisplayJsonToString(commandArguments)}");
+
+        switch (commandName)
+        {
+            case nameof(IBank.CreateUserAsync):
+                AssertIsArray(json, 2);
+                var name = json[0].GetString();
+                var surname = json[1].GetString();
+                ArgumentValidation.ValidateAcountCreation(name, surname);
+                return await _bank.CreateUserAsync(name, surname);
+
+            case nameof(IBank.GetUserInfoAsync):
+                AssertIsArray(json, 1);
+                var userId = json[0].Deserialize<UserId>();
+                AssertNotNull(userId);
+                return await _bank.GetUserInfoAsync(userId);
+
+            case nameof(IBank.CreateAccountAsync):
+                AssertIsArray(json, 1);
+                var ownerId = json[0].Deserialize<UserId>();
+                AssertNotNull(ownerId);
+                return await _bank.CreateAccountAsync(ownerId);
+
+            case nameof(IBank.GetAccountInfoAsync):
+                AssertIsArray(json, 1);
+                var accountId = json[0].Deserialize<AccountId>();
+                AssertNotNull(accountId);
+                return await _bank.GetAccountInfoAsync(accountId);
+
+            case nameof(IBank.DepositAsync):
+                AssertIsArray(json, 2);
+                accountId = json[0].Deserialize<AccountId>();
+                var amount = json[1].GetDecimal();
+                AssertNotNull(accountId);
+                ArgumentValidation.ValidateCurrencyAmount(amount);
+                return await _bank.DepositAsync(accountId, amount);
+
+            case nameof(IBank.WithdrawAsync):
+                AssertIsArray(json, 2);
+                accountId = json[0].Deserialize<AccountId>();
+                amount = json[1].GetDecimal();
+                AssertNotNull(accountId);
+                ArgumentValidation.ValidateCurrencyAmount(amount);
+                return await _bank.WithdrawAsync(accountId, amount);
+
+            case nameof(IBank.TransferAsync):
+                AssertIsArray(json, 3);
+                var originAccountId = json[0].Deserialize<AccountId>();
+                var destinationAccountId = json[1].Deserialize<AccountId>();
+                amount = json[2].GetDecimal();
+                AssertNotNull(originAccountId);
+                AssertNotNull(destinationAccountId);
+                ArgumentValidation.ValidateCurrencyAmount(amount);
+                return await _bank.TransferAsync(originAccountId, destinationAccountId, amount);
+
+            default:
+                ThrowInvalidOperationException($"Unknown command name: {commandName}");
+                return null!;
+        }
+    }
+
+    /// <summary>
+    /// Asynchronously processes an RPC request.
+    /// </summary>
+    /// <param name="stream">A bidirectional stream that represents the connection.</param>
+    public async Task ProcessRequestAsync(Stream stream)
+    {
+        object? response = null;
+        var succeeded = false;
+        var errorMessage = "";
+
+        try
+        {
+            using var doc = await JsonDocument.ParseAsync(stream);
+            response = await ProcessJsonRequest(doc.RootElement);
+        }
+        catch (BankException e)
+        {
+            Console.WriteLine($"Operation failed in a user-visible way: {e}");
+            errorMessage = e.Message;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Operation failed: {e}");
+            errorMessage = "Operation failed.";
+        }
+
+        await using var responseWriter = new Utf8JsonWriter(stream);
+        responseWriter.WriteStartObject();
+        responseWriter.WriteBoolean(_jsonSuccessful, succeeded);
+        if (succeeded)
+        {
+            responseWriter.WritePropertyName(_jsonResult);
+            JsonSerializer.Serialize(responseWriter, response, response?.GetType() ?? typeof(object));
+        }
+        else
+        {
+            responseWriter.WriteString(_jsonMessage, errorMessage);
+        }
+        responseWriter.WriteEndObject();
+        await responseWriter.FlushAsync();
+    }
+}

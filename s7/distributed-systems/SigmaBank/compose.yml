@@ -1,6 +1,17 @@
 version: "3.9"
 
 services:
+  server:
+    build:
+      dockerfile: Server.Dockerfile
+    environment:
+      - DB_CONNECTION_STRING=Server=database.sigma.bank;User=sa;Password=SigmaBank47559
+    ports:
+      - "5959:5959"
+    networks:
+      sigmanet:
+        aliases:
+          - backend.sigma.bank
   data:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: root
@@ -8,7 +19,9 @@ services:
       - data:/var/opt/mssql/data
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=SigmaBank47559
+      - MSSQL_SA_PASSWORD=SigmaBank47559
+    ports:
+      - "1433:1433"
     networks:
       sigmanet:
         aliases:
@@ -19,4 +32,3 @@ volumes:
 
 networks:
   sigmanet:
-    driver: bridge

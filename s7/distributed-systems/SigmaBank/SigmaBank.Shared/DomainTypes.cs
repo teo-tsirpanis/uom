@@ -74,10 +74,6 @@ public sealed record class TransferResult(AccountInfo OriginAccountInfo, Account
 /// <summary>
 /// Abstracts away the operations of SigmaBank.
 /// </summary>
-/// <remarks>
-/// All methods are asynchronous and are wrapped by a
-/// <see cref="Result{T}"/> to reptrsent failure.
-/// </remarks>
 public interface IBank
 {
     /// <summary>
@@ -86,24 +82,24 @@ public interface IBank
     /// <param name="name">The user's name.</param>
     /// <param name="surname">The user's surname.</param>
     /// <returns>The new user's information.</returns>
-    Task<Result<UserInfo>> CreateUserAsync(string name, string surname);
+    Task<UserInfo> CreateUserAsync(string name, string surname);
     /// <summary>
     /// Gets information about a user.
     /// </summary>
     /// <param name="id">The ID of the user to look for.</param>
-    Task<Result<UserInfo?>> GetUserInfoAsync(UserId id);
+    Task<UserInfo?> GetUserInfoAsync(UserId id);
 
     /// <summary>
     /// Creates an account.
     /// </summary>
     /// <param name="id">The ID of the account's owner.</param>
     /// <returns>The new account's information.</returns>
-    Task<Result<AccountInfo>> CreateAccountAsync(UserId id);
+    Task<AccountInfo> CreateAccountAsync(UserId id);
     /// <summary>
     /// Gets information about an account.
     /// </summary>
     /// <param name="id">The ID of the account to look for.</param>
-    Task<Result<AccountInfo?>> GetAccountInfoAsync(AccountId id);
+    Task<AccountInfo?> GetAccountInfoAsync(AccountId id);
 
     /// <summary>
     /// Deposits money to an account.
@@ -111,14 +107,14 @@ public interface IBank
     /// <param name="id">The ID of the account to deposit money in.</param>
     /// <param name="amount">The monetary amount to deposit.</param>
     /// <returns>The account's information after the deposit was performed.</returns>
-    Task<Result<AccountInfo>> DepositAsync(AccountId id, decimal amount);
+    Task<AccountInfo> DepositAsync(AccountId id, decimal amount);
     /// <summary>
     /// Withdraws money from an account.
     /// </summary>
     /// <param name="id">The ID of the account to withdraw money from.</param>
     /// <param name="amount">The monetary amount to withdraw.</param>
     /// <returns>The account's information after the withdrawal was performed.</returns>
-    Task<Result<AccountInfo>> WithdrawAsync(AccountId id, decimal amount);
+    Task<AccountInfo> WithdrawAsync(AccountId id, decimal amount);
 
     /// <summary>
     /// Transfers money between two accounts.
@@ -127,5 +123,5 @@ public interface IBank
     /// <param name="destinationAccountId">The ID of the account which receives the money.</param>
     /// <param name="amount">The monetary amount to transfer.</param>
     /// <returns>Both accounts' information after the transferral was performed.</returns>
-    Task<Result<TransferResult>> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount);
+    Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount);
 }

@@ -68,6 +68,13 @@ async Task InitializeDatabaseSchema()
 
 static void RegisterErrorHandlers(Action doCancel)
 {
+    Console.CancelKeyPress += (sender, e) =>
+    {
+        e.Cancel = true;
+        Console.WriteLine("Received console signal, shutting down...");
+        doCancel();
+    };
+
     PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ =>
     {
         Console.WriteLine("Received SIGTERM, shutting down...");

@@ -1,4 +1,6 @@
-﻿namespace Dai19090.DistributedSystems.SigmaBank;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Dai19090.DistributedSystems.SigmaBank;
 
 /// <summary>
 /// Input argument validation code to be shared by both the client and the server.

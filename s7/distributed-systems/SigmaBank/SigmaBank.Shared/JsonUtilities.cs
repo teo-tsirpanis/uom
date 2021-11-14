@@ -31,7 +31,7 @@ internal sealed class AccountIdConverter : JsonConverter<AccountId>
         writer.WriteNumberValue(value.Id);
 }
 
-public static class JsonConstants
+internal static class JsonConstants
 {
     /// <summary>
     /// The protocol's version.
@@ -52,7 +52,7 @@ public static class JsonConstants
     public static readonly string Result = nameof(Result);
 }
 
-public static class JsonEncodedTexts
+internal static class JsonEncodedTexts
 {
     public static readonly JsonEncodedText ProtocolVersion = JsonEncodedText.Encode(JsonConstants.ProtocolVersion);
     public static readonly JsonEncodedText CommandName = JsonEncodedText.Encode(JsonConstants.CommandName);

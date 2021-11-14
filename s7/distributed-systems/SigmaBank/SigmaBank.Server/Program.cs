@@ -25,7 +25,7 @@ catch (Exception e)
 
 var endpoint = new IPEndPoint(IPAddress.Any, 5959);
 var bank = new BankImplementation(connectionFactory);
-var rpcReceiver = new RpcReceiver(bank);
+var rpcReceiver = new BankRpcReceiver(bank);
 using var listener = new SocketListener(endpoint, rpcReceiver.ProcessRequestAsync);
 
 var cts = new CancellationTokenSource();

@@ -10,6 +10,10 @@ public sealed class BankImplementation : IBank
 {
     private readonly Func<DbConnection> _connectionFactory;
 
+    /// <summary>
+    /// Creates a <see cref="BankImplementation"/>.
+    /// </summary>
+    /// <param name="connectionFactory">A function that creates a database connection.</param>
     public BankImplementation(Func<DbConnection> connectionFactory)
     {
         _connectionFactory = connectionFactory;

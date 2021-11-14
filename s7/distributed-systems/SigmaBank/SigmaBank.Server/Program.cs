@@ -1,7 +1,7 @@
-﻿using Dai19090.DistributedSystems.SigmaBank.Server;
+﻿using Dai19090.DistributedSystems.SigmaBank;
+using Dai19090.DistributedSystems.SigmaBank.Server;
 using Microsoft.Data.SqlClient;
 using System.Net;
-using System.Runtime.InteropServices;
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
@@ -29,7 +29,7 @@ var rpcReceiver = new BankRpcReceiver(bank);
 using var listener = new SocketListener(endpoint, rpcReceiver.ProcessRequestAsync);
 
 var cts = new CancellationTokenSource();
-RegisterErrorHandlers(cts.Cancel);
+ErrorHandling.RegisterErrorHandlers(cts.Cancel);
 
 Console.WriteLine($"Listening on {endpoint}");
 await listener.ListenAsync(cts.Token);
@@ -48,25 +48,4 @@ async Task InitializeDatabaseSchema()
     command.CommandText = DatabaseUtilities.Schema;
 
     var o = await command.ExecuteScalarAsync();
-}
-
-static void RegisterErrorHandlers(Action doCancel)
-{
-    Console.CancelKeyPress += (sender, e) =>
-    {
-        e.Cancel = true;
-        Console.WriteLine("Received console signal, shutting down...");
-        doCancel();
-    };
-
-    PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ =>
-    {
-        Console.WriteLine("Received SIGTERM, shutting down...");
-        doCancel();
-    });
-
-    TaskScheduler.UnobservedTaskException += (sender, e) =>
-    {
-        Console.WriteLine($"Unobserved task exception: {e.Exception}");
-    };
 }

@@ -6,14 +6,10 @@ using System.Text.Json;
 namespace Dai19090.DistributedSystems.SigmaBank.Server;
 
 /// <summary>
-/// Implements the server-side of SigmaBank's RPC protocol.
+/// Implements the server side of SigmaBank's RPC protocol.
 /// </summary>
 public sealed class RpcReceiver
 {
-    private static readonly JsonEncodedText _jsonSuccessful = JsonEncodedText.Encode("Successful");
-    private static readonly JsonEncodedText _jsonMessage = JsonEncodedText.Encode("Message");
-    private static readonly JsonEncodedText _jsonResult = JsonEncodedText.Encode("Result");
-
     private readonly IBank _bank;
 
     public RpcReceiver(IBank bank)
@@ -39,15 +35,15 @@ public sealed class RpcReceiver
 
     private static void DecomposeRequestMessage(JsonElement json, out string commandName, out JsonElement arguments)
     {
-        var protocolVersion = json.GetProperty("ProtocolVersion").GetInt32();
-        if (protocolVersion != 1)
+        var protocolVersion = json.GetProperty(JsonConstants.ProtocolVersion).GetInt32();
+        if (protocolVersion != JsonConstants.ProtocolVersionValue)
             ThrowInvalidOperationException($"Invalid protocol version.");
 
-        var name = json.GetProperty("CommandName").GetString();
+        var name = json.GetProperty(JsonConstants.CommandName).GetString();
         if (name == null)
             ThrowInvalidOperationException("Missing command name.");
         commandName = name;
-        arguments = json.GetProperty("Arguments");
+        arguments = json.GetProperty(JsonConstants.Arguments);
     }
 
     private static string DisplayJsonToString(JsonElement json)
@@ -153,15 +149,15 @@ public sealed class RpcReceiver
 
         await using var responseWriter = new Utf8JsonWriter(stream);
         responseWriter.WriteStartObject();
-        responseWriter.WriteBoolean(_jsonSuccessful, succeeded);
+        responseWriter.WriteBoolean(JsonEncodedTexts.Successful, succeeded);
         if (succeeded)
         {
-            responseWriter.WritePropertyName(_jsonResult);
+            responseWriter.WritePropertyName(JsonEncodedTexts.Result);
             JsonSerializer.Serialize(responseWriter, response, response?.GetType() ?? typeof(object));
         }
         else
         {
-            responseWriter.WriteString(_jsonMessage, errorMessage);
+            responseWriter.WriteString(JsonEncodedTexts.Message, errorMessage);
         }
         responseWriter.WriteEndObject();
         await responseWriter.FlushAsync(cancellationToken);

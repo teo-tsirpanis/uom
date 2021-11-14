@@ -73,7 +73,7 @@ public sealed class BankImplementation : IBank
         if (!await reader.ReadAsync(cancellationToken))
             return null;
 
-        return DbDeserializer.GetAccountInfo(reader);
+        return DatabaseUtilities.GetAccountInfo(reader);
     }
 
     public async Task<AccountInfo?> GetAccountInfoAsync(AccountId id, CancellationToken cancellationToken)
@@ -132,7 +132,7 @@ public sealed class BankImplementation : IBank
         if (!await reader.ReadAsync(cancellationToken))
             return null;
 
-        return DbDeserializer.GetUserInfo(reader);
+        return DatabaseUtilities.GetUserInfo(reader);
     }
 
     public async Task<UserInfo?> GetUserInfoAsync(UserId id, CancellationToken cancellationToken)

@@ -3,22 +3,6 @@ using Microsoft.Data.SqlClient;
 using System.Net;
 using System.Runtime.InteropServices;
 
-const string DatabaseSchema = @"
-CREATE TABLE users (
-    user_id int NOT NULL IDENTITY,
-    name varchar(64) NOT NULL,
-    surname varchar(64) NOT NULL,
-    PRIMARY KEY (user_id)
-)
-
-CREATE TABLE accounts (
-    account_id int NOT NULL IDENTITY,
-    owner_id int NOT NULL,
-    balance decimal(15, 2) NOT NULL DEFAULT 0,
-    PRIMARY KEY (account_id),
-    FOREIGN KEY (owner_id) REFERENCES users(user_id)
-)";
-
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
 if (connectionString == null)
@@ -61,7 +45,7 @@ async Task InitializeDatabaseSchema()
 
     using var command = connection.CreateCommand();
 
-    command.CommandText = DatabaseSchema;
+    command.CommandText = DatabaseUtilities.Schema;
 
     var o = await command.ExecuteScalarAsync();
 }

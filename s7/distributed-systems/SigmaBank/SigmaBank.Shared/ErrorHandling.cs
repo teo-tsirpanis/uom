@@ -8,16 +8,20 @@ public static class ErrorHandling
     /// Registers handlers for common abnormal events (Ctrl+C, SIGTERM which is used
     /// for Docker, and unobserved task exceptions which might be thrown by the server).
     /// </summary>
-    /// <param name="doCancel">An action that triggers</param>
+    /// <param name="doCancel">An action that is triggered
+    /// by any of the aforementioned signals.</param>
+    /// <param name="registerCtrlC">Whether to trigger <paramref name="doCancel"/>
+    /// and suspend termination on Ctrl+C instead of simply exiting.</param>
     /// <remarks>
-    public static void RegisterErrorHandlers(Action doCancel)
+    public static void RegisterErrorHandlers(Action doCancel, bool registerCtrlC = true)
     {
-        Console.CancelKeyPress += (sender, e) =>
-        {
-            e.Cancel = true;
-            Console.WriteLine("Received console signal, shutting down...");
-            doCancel();
-        };
+        if (registerCtrlC)
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;
+                Console.WriteLine("Received console signal, shutting down...");
+                doCancel();
+            };
 
         PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ =>
         {
@@ -30,5 +34,4 @@ public static class ErrorHandling
             Console.WriteLine($"Unobserved task exception: {e.Exception}");
         };
     }
-
 }

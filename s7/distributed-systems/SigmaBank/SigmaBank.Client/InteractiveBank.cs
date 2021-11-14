@@ -21,6 +21,7 @@ public sealed class InteractiveBank
         WriteLine("5 Deposit");
         WriteLine("6 Withdraw");
         WriteLine("7 Transfer money between accounts");
+        WriteLine("8 Exit");
         WriteLine();
     }
 
@@ -195,7 +196,7 @@ public sealed class InteractiveBank
         DisplayAccountInfo(transferResult.DestinationAccountInfo);
     }
 
-    private async Task AskCommandAndDispatchAsync(CancellationToken cancellationToken)
+    private async Task<bool> AskCommandAndDispatchAsync(CancellationToken cancellationToken)
     {
         Write("Write your command: ");
         var command = ReadLine();
@@ -203,7 +204,7 @@ public sealed class InteractiveBank
         if (!int.TryParse(command, out var commandNumber))
         {
             WriteLine("Sorry, the command number has to be a number. Please try again.");
-            return;
+            return true;
         }
 
         switch (commandNumber)
@@ -229,10 +230,14 @@ public sealed class InteractiveBank
             case 7:
                 await HandleTransferAsync(cancellationToken);
                 break;
+            case 8: return false;
             default:
                 WriteLine("Sorry, the command number is not valid. Please try again.");
                 break;
         }
+
+        WriteLine();
+        return true;
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
@@ -242,7 +247,8 @@ public sealed class InteractiveBank
         {
             try
             {
-                await AskCommandAndDispatchAsync(cancellationToken);
+                if (!await AskCommandAndDispatchAsync(cancellationToken))
+                    break;
             }
             catch (OperationCanceledException oce) when (oce.CancellationToken == cancellationToken)
             {

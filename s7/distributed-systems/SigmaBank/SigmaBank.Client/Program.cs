@@ -18,7 +18,7 @@ var bankClient = new BankClient(async ct => {
 
 var interactiveBank = new InteractiveBank(bankClient);
 var cts = new CancellationTokenSource();
-ErrorHandling.RegisterErrorHandlers(cts.Cancel);
+ErrorHandling.RegisterErrorHandlers(cts.Cancel, registerCtrlC: false);
 
 await interactiveBank.RunAsync(cts.Token);
 

@@ -25,6 +25,15 @@ public sealed class SocketListener : IDisposable
         _requestHandler = requestHandler;
     }
 
+    private async Task HandleRequest(Socket client, CancellationToken cancellationToken)
+    {
+        using (client)
+        {
+            await using var stream = new NetworkStream(client);
+            await _requestHandler(stream, cancellationToken);
+        }
+    }
+
     /// <summary>
     /// Listens for incoming connections and processes them.
     /// </summary>
@@ -41,9 +50,8 @@ public sealed class SocketListener : IDisposable
             {
                 var client = await _socket.AcceptAsync(cancellationToken);
                 Console.WriteLine($"Client connected from {client.RemoteEndPoint}");
-                var stream = new NetworkStream(client);
                 // We do not await because we want to continue accepting new connections.
-                _ = _requestHandler(stream, cancellationToken);
+                _ = HandleRequest(client, cancellationToken);
             }
             catch (OperationCanceledException oce) when (oce.CancellationToken == cancellationToken)
             {

@@ -5,15 +5,15 @@ WORKDIR /app
 COPY *.sln .
 COPY SigmaBank.Shared/*.csproj ./SigmaBank.Shared/
 RUN dotnet restore SigmaBank.Shared/SigmaBank.Shared.csproj
-COPY SigmaBank.Server/*.csproj ./SigmaBank.Server/
-RUN dotnet restore SigmaBank.Server/SigmaBank.Server.csproj
+COPY SigmaBank.Client/*.csproj ./SigmaBank.Client/
+RUN dotnet restore SigmaBank.Client/SigmaBank.Client.csproj
 
 COPY SigmaBank.Shared/. ./SigmaBank.Shared/
-COPY SigmaBank.Server/. ./SigmaBank.Server/
-RUN dotnet publish SigmaBank.Server/SigmaBank.Server.csproj --no-restore -c Release -o out
+COPY SigmaBank.Client/. ./SigmaBank.Client/
+RUN dotnet publish SigmaBank.Client/SigmaBank.Client.csproj --no-restore -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "SigmaBank.Server.dll"]
+ENTRYPOINT ["dotnet", "SigmaBank.Client.dll", "127.0.0.1:5959"]

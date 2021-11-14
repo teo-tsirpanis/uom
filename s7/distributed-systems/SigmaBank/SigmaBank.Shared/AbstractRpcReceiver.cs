@@ -6,6 +6,7 @@ namespace Dai19090.DistributedSystems.SigmaBank;
 /// <summary>
 /// Τhe server side of a simple JSON-based RPC protocol.
 /// </summary>
+/// <seealso cref="RpcSender"/>
 public abstract class AbstractRpcReceiver
 {
     [DoesNotReturn]

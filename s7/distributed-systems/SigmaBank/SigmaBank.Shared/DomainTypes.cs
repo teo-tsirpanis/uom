@@ -11,7 +11,13 @@ namespace Dai19090.DistributedSystems.SigmaBank;
 /// principles, to distinguish at type-level integers representing users.</para>
 /// </remarks>
 [JsonConverter(typeof(UserIdConverter))]
-public sealed record class UserId(int Id);
+public sealed record class UserId(int Id)
+{
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
+}
 
 /// <summary>
 /// Represents information about a user.
@@ -47,7 +53,13 @@ public sealed class UserInfo
 /// Two instances of <see cref="AccountId"/> are equal if
 /// they store the same <see cref="Id"/>.</para>
 [JsonConverter(typeof(AccountIdConverter))]
-public sealed record class AccountId(int Id);
+public sealed record class AccountId(int Id)
+{
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
+}
 
 public sealed class AccountInfo
 {

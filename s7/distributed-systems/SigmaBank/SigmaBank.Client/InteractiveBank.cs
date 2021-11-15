@@ -13,14 +13,14 @@ public sealed class InteractiveBank
 
     private static void DisplayOptions()
     {
-        WriteLine("Welcome to SigmaBank. You can do the following things:");
+        WriteLine("Welcome to Sigma Bank. You can do the following things:");
         WriteLine("1 Create user");
         WriteLine("2 Get user info");
         WriteLine("3 Create account");
         WriteLine("4 Get account info");
         WriteLine("5 Deposit");
         WriteLine("6 Withdraw");
-        WriteLine("7 Transfer money between accounts");
+        WriteLine("7 Transfer");
         WriteLine("8 Exit");
         WriteLine();
     }
@@ -34,6 +34,7 @@ public sealed class InteractiveBank
 
     private static void DisplayAccountInfo(AccountInfo accountInfo)
     {
+        WriteLine($"ID:       {accountInfo.AccountId}");
         WriteLine($"Owner ID: {accountInfo.Owner}");
         WriteLine($"Balance:  {accountInfo.Balance:C}");
     }
@@ -50,7 +51,7 @@ public sealed class InteractiveBank
 
         WriteLine("User created successfully:");
         DisplayUserInfo(userInfo);
-        WriteLine($"Thanks for choosing SigmaBank. Make sure you remember your user ID in order to create an account");
+        WriteLine("Thanks for choosing Sigma Bank. Make sure you remember your user ID in order to create an account");
     }
 
     private async Task HandleGetUserInfoAsync(CancellationToken cancellationToken)
@@ -236,7 +237,6 @@ public sealed class InteractiveBank
                 break;
         }
 
-        WriteLine();
         return true;
     }
 
@@ -256,8 +256,9 @@ public sealed class InteractiveBank
             }
             catch (BankException e)
             {
-                WriteLine(e);
+                WriteLine($"Error: {e.Message}");
             }
+            WriteLine();
         }
     }
 }

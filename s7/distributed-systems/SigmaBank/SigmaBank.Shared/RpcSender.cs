@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -39,7 +40,8 @@ public static class RpcSender
     public static async Task<T> SendAsync<T, TParameters>(Stream stream, Action<Utf8JsonWriter, TParameters> fSetArguments, TParameters state,
         CancellationToken cancellationToken = default, [CallerMemberName] string commandName = "")
     {
-        await using (var writer = new Utf8JsonWriter(stream))
+        var bufferWriter = new ArrayBufferWriter<byte>();
+        using (var writer = new Utf8JsonWriter(bufferWriter))
         {
             writer.WriteStartObject();
             writer.WriteNumber(JsonEncodedTexts.ProtocolVersion, JsonConstants.ProtocolVersionValue);
@@ -50,10 +52,13 @@ public static class RpcSender
             writer.WriteEndArray();
             writer.WriteEndObject();
 
-            await writer.FlushAsync(cancellationToken);
+            writer.Flush();
         }
+        await stream.WriteLengthPrefixedAsync(bufferWriter.WrittenMemory, cancellationToken);
+        await stream.FlushAsync(cancellationToken);
 
-        using var response = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+        var responseBuffer = await stream.ReadLengthPrefixedAsync(cancellationToken);
+        using var response = JsonDocument.Parse(responseBuffer);
         if (DecomposeResponseMessage(response.RootElement, out var result, out var message))
             return JsonSerializer.Deserialize<T>(result)!;
         else

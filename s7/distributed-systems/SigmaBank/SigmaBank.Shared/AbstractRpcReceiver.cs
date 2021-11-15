@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Dai19090.DistributedSystems.SigmaBank;
@@ -54,7 +55,8 @@ public abstract class AbstractRpcReceiver
 
         try
         {
-            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            var buffer = await stream.ReadLengthPrefixedAsync(cancellationToken);
+            using var doc = JsonDocument.Parse(buffer);
             DecomposeRequestMessage(doc.RootElement, out var commandName, out var commandArguments);
             response = await ProcessCommandAsync(commandName, commandArguments, cancellationToken);
             succeeded = true;
@@ -70,7 +72,8 @@ public abstract class AbstractRpcReceiver
             errorMessage = "Operation failed.";
         }
 
-        await using var responseWriter = new Utf8JsonWriter(stream);
+        var responseBuffer = new ArrayBufferWriter<byte>();
+        using var responseWriter = new Utf8JsonWriter(responseBuffer);
         responseWriter.WriteStartObject();
         responseWriter.WriteBoolean(JsonEncodedTexts.Successful, succeeded);
         if (succeeded)
@@ -83,6 +86,8 @@ public abstract class AbstractRpcReceiver
             responseWriter.WriteString(JsonEncodedTexts.Message, errorMessage);
         }
         responseWriter.WriteEndObject();
-        await responseWriter.FlushAsync(cancellationToken);
+        responseWriter.Flush();
+        await stream.WriteLengthPrefixedAsync(responseBuffer.WrittenMemory, cancellationToken);
+        await stream.FlushAsync(cancellationToken);
     }
 }

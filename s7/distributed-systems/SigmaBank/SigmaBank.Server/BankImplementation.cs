@@ -45,9 +45,10 @@ public sealed class BankImplementation : IBank
             AddParameter(command, "Owner", id.Id);
 
             var result = await command.ExecuteScalarAsync(cancellationToken);
-            if (result is not int accountId)
+            // Yes, SQL Server returns a decimal.
+            if (result is not decimal accountId)
                 throw new InvalidOperationException("Database did not return account ID.");
-            var newAccountId = new AccountId(accountId);
+            var newAccountId = new AccountId(Convert.ToInt32(accountId));
 
             var accountInfo = await GetAccountInfoImpl(connection, transaction, newAccountId, cancellationToken);
             if (accountInfo is null)
@@ -104,9 +105,9 @@ public sealed class BankImplementation : IBank
             AddParameter(command, "Surname", surname);
 
             var result = await command.ExecuteScalarAsync(cancellationToken);
-            if (result is not int userId)
+            if (result is not decimal userId)
                 throw new InvalidOperationException("Database did not return user ID.");
-            var newUserId = new UserId(userId);
+            var newUserId = new UserId(Convert.ToInt32(userId));
 
             var accountInfo = await GetUserInfoImpl(connection, transaction, newUserId, cancellationToken);
             if (accountInfo is null)

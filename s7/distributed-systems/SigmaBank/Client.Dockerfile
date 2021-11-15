@@ -16,4 +16,7 @@ RUN dotnet publish SigmaBank.Client/SigmaBank.Client.csproj --no-restore -c Rele
 FROM mcr.microsoft.com/dotnet/runtime:6.0
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "SigmaBank.Client.dll", "127.0.0.1:5959"]
+
+ENV SERVER_ENDPOINT=127.0.0.1:5959
+
+ENTRYPOINT ["dotnet", "SigmaBank.Client.dll"]

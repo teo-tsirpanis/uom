@@ -3,10 +3,10 @@ using Dai19090.DistributedSystems.SigmaBank.Client;
 using System.Net;
 using System.Net.Sockets;
 
-var endpoint = GetEndpoint();
+var endpoint = TryParseEndpoint();
 if (endpoint == null)
 {
-    Console.WriteLine("You have to specify the server's remote endpoint in the command line (like 127.0.0.1:5959).");
+    Console.WriteLine("No server endpoint found.");
     return 1;
 }
 
@@ -24,10 +24,11 @@ await interactiveBank.RunAsync(cts.Token);
 
 return 0;
 
-EndPoint? GetEndpoint()
+EndPoint? TryParseEndpoint()
 {
-    if (args.Length != 1)
+    var endpointString = Environment.GetEnvironmentVariable("SERVER_ENDPOINT");
+    if (endpointString == null)
         return null;
-    IPEndPoint.TryParse(args[0], out var endPoint);
+    IPEndPoint.TryParse(endpointString, out var endPoint);
     return endPoint;
 }

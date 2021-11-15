@@ -150,7 +150,8 @@ public interface IBank
 /// Signifies that something went wrong with an <see cref="IBank"/> operation.
 /// </summary>
 /// <remarks>
-/// Exceptions of this type are user-visible; their message will be sent to the client.
+/// On the server these exceptions' messages will be sent to the client, and
+/// on the client they will be displayed to the user without terminating it.
 /// </remarks>
 public sealed class BankException : Exception
 {

@@ -2,6 +2,14 @@
 
 namespace Dai19090.DistributedSystems.SigmaBank.Client;
 
+/// <summary>
+/// Uses the console to interact with an <see cref="IBank"/>.
+/// </summary>
+/// <remarks>
+/// Thanks to the abstraction <see cref="IBank"/> provides, nothing can
+/// prevent us from moving this file to the server and with very few changes
+/// directly communicate with the database, merging the upper two tiers.
+/// </remarks>
 public sealed class InteractiveBank
 {
     private readonly IBank _bank;

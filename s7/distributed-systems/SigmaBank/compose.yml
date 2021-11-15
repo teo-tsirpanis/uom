@@ -10,8 +10,6 @@ services:
       - "5959:5959"
     networks:
       sigmanet:
-        aliases:
-          - backend.sigma.bank
   data:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: root
@@ -20,8 +18,6 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=SigmaBank47559
-    ports:
-      - "1433:1433"
     networks:
       sigmanet:
         aliases:

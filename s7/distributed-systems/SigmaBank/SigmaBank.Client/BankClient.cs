@@ -73,7 +73,7 @@ public sealed class BankClient : IBank
 
     public async Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount, CancellationToken cancellationToken = default)
     {
-        ArgumentValidation.ValidateCurrencyAmount(amount);
+        ArgumentValidation.ValidateTransfer(originAccountId, destinationAccountId, amount);
         await using var connection = await _connectionFactory(cancellationToken);
         return await RpcSender.SendAsync<TransferResult, (AccountId, AccountId, decimal)>(connection, static (writer, x) => {
             JsonSerializer.Serialize(writer, x.Item1);

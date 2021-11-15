@@ -92,7 +92,7 @@ public sealed class BankRpcReceiver : AbstractRpcReceiver
                 amount = args[2].GetDecimal();
                 AssertNotNull(originAccountId);
                 AssertNotNull(destinationAccountId);
-                ArgumentValidation.ValidateCurrencyAmount(amount);
+                ArgumentValidation.ValidateTransfer(originAccountId, destinationAccountId, amount);
                 return await _bank.TransferAsync(originAccountId, destinationAccountId, amount, cancellationToken);
 
             default:

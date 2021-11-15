@@ -125,6 +125,7 @@ public interface IBank
     /// <param name="cancellationToken">Used to cancel the operation.</param>
     /// <returns>The account's information after the deposit was performed.</returns>
     Task<AccountInfo> DepositAsync(AccountId id, decimal amount, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Withdraws money from an account.
     /// </summary>
@@ -141,7 +142,7 @@ public interface IBank
     /// <param name="destinationAccountId">The ID of the account which receives the money.</param>
     /// <param name="amount">The monetary amount to transfer.</param>
     /// <param name="cancellationToken">Used to cancel the operation.</param>
-    /// <returns>Both accounts' information after the transferral was performed.</returns>
+    /// <returns>Both accounts' information after the transfer was performed.</returns>
     Task<TransferResult> TransferAsync(AccountId originAccountId, AccountId destinationAccountId, decimal amount, CancellationToken cancellationToken = default);
 }
 

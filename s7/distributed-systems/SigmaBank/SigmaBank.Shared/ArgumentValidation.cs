@@ -34,12 +34,25 @@ public static class ArgumentValidation
     /// Validates decimal values representing currency amounts.
     /// </summary>
     /// <param name="amount">The decimal value to validate.</param>
-    /// <exception cref="ArgumentException">
-    /// <paramref name="amount"/> is negative.
-    /// </exception>
+    /// <exception cref="ArgumentException"><paramref name="amount"/> is negative.</exception>
     public static void ValidateCurrencyAmount(decimal amount)
     {
         if (amount < 0.0m)
             throw new ArgumentException("Amount cannot be negative.");
+    }
+
+    /// <summary>
+    /// Validates the input parameters used for bank account transfers.
+    /// </summary>
+    /// <param name="originAccountId">The ID of the account which sends the money.</param>
+    /// <param name="destinationAccountId">The ID of the account which receives the money.</param>
+    /// <param name="amount">The monetary amount to transfer.</param>
+    /// <exception cref="ArgumentException">Either <paramref name="originAccountId"/> and
+    /// <paramref name="destinationAccountId"/> are equal, or <paramref name="amount"/> is negative.</exception>
+    public static void ValidateTransfer(AccountId originAccountId, AccountId destinationAccountId, decimal amount)
+    {
+        if (originAccountId == destinationAccountId)
+            throw new ArgumentException("Origin and destination account cannot be the same");
+        ValidateCurrencyAmount(amount);
     }
 }

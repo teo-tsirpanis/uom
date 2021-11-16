@@ -59,7 +59,7 @@ public sealed class InteractiveBank
 
         WriteLine("User created successfully:");
         DisplayUserInfo(userInfo);
-        WriteLine("Thanks for choosing Sigma Bank. Make sure you remember your user ID in order to create an account");
+        WriteLine("Thanks for choosing Sigma Bank. Make sure you remember your user ID in order to create an account.");
     }
 
     private async Task HandleGetUserInfoAsync(CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
 ﻿using Dai19090.DistributedSystems.SigmaBank;
+using Dai19090.DistributedSystems.SigmaBank.Data;
 using Dai19090.DistributedSystems.SigmaBank.Server;
-using Microsoft.Data.SqlClient;
 using System.Net;
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
@@ -11,20 +11,8 @@ if (connectionString == null)
     return 1;
 }
 
-var connectionFactory = () => new SqlConnection(connectionString);
-
-try
-{
-    await InitializeDatabaseSchema();
-    Console.WriteLine("Database schema initialized.");
-}
-catch (Exception e)
-{
-    Console.WriteLine($"Initializing database schema failed: {e}");
-}
-
 var endpoint = new IPEndPoint(IPAddress.Any, 5959);
-var bank = new BankImplementation(connectionFactory);
+var bank = await DatabaseUtilities.InitializeSqlServerDatabaseBankAsync(connectionString);
 var rpcReceiver = new BankRpcReceiver(bank);
 using var listener = new SocketListener(endpoint, rpcReceiver.ProcessRequestAsync);
 
@@ -36,16 +24,3 @@ await listener.ListenAsync(cts.Token);
 Console.WriteLine("Shutting down");
 
 return 0;
-
-async Task InitializeDatabaseSchema()
-{
-    await using var connection = connectionFactory();
-
-    await connection.OpenAsync();
-
-    using var command = connection.CreateCommand();
-
-    command.CommandText = DatabaseUtilities.Schema;
-
-    var o = await command.ExecuteScalarAsync();
-}

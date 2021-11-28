@@ -1,20 +1,20 @@
 ﻿using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Dai19090.DistributedSystems.SigmaBank.Server;
+namespace Dai19090.DistributedSystems.SigmaBank.Data;
 
 /// <summary>
 /// An implementation of <see cref="IBank"/> that is backed by an ADO.NET database connection.
 /// </summary>
-public sealed class BankImplementation : IBank
+internal sealed class AdoNetBank : IBank
 {
     private readonly Func<DbConnection> _connectionFactory;
 
     /// <summary>
-    /// Creates a <see cref="BankImplementation"/>.
+    /// Creates an <see cref="AdoNetBank"/>.
     /// </summary>
     /// <param name="connectionFactory">A function that creates a database connection.</param>
-    public BankImplementation(Func<DbConnection> connectionFactory)
+    public AdoNetBank(Func<DbConnection> connectionFactory)
     {
         _connectionFactory = connectionFactory;
     }

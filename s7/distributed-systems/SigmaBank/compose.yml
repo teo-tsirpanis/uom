@@ -10,6 +10,15 @@ services:
       - "5959:5959"
     networks:
       sigmanet:
+  aspnetcore:
+    build:
+      dockerfile: AspNetCore.Dockerfile
+    environment:
+      - DB_CONNECTION_STRING=Server=database.sigma.bank;User=sa;Password=SigmaBank47559
+    ports:
+      - "6060:6060"
+    networks:
+      sigmanet:
   data:
     image: mcr.microsoft.com/mssql/server:2019-latest
     user: root

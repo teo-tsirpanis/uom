@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaBank.Client", "SigmaBa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaBank.Transport.Grpc", "SigmaBank.Transport.Grpc\SigmaBank.Transport.Grpc.csproj", "{81FD4E2F-05E0-4491-97CB-CFF92C780B76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaBank.Data", "SigmaBank.Data\SigmaBank.Data.csproj", "{A1545C7E-6C1A-4546-A791-A86742BAB16E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaBank.Server.AspNetCore", "SigmaBank.Server.AspNetCore\SigmaBank.Server.AspNetCore.csproj", "{11A575D5-7F72-4A08-B24F-272A1AB03DDA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaBank.Data", "SigmaBank.Data\SigmaBank.Data.csproj", "{A1545C7E-6C1A-4546-A791-A86742BAB16E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +42,10 @@ Global
 		{81FD4E2F-05E0-4491-97CB-CFF92C780B76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81FD4E2F-05E0-4491-97CB-CFF92C780B76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81FD4E2F-05E0-4491-97CB-CFF92C780B76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11A575D5-7F72-4A08-B24F-272A1AB03DDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A575D5-7F72-4A08-B24F-272A1AB03DDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A575D5-7F72-4A08-B24F-272A1AB03DDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A575D5-7F72-4A08-B24F-272A1AB03DDA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A1545C7E-6C1A-4546-A791-A86742BAB16E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A1545C7E-6C1A-4546-A791-A86742BAB16E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1545C7E-6C1A-4546-A791-A86742BAB16E}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Grpc.Net.Client" Version="2.40.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\SigmaBank.Shared\SigmaBank.Shared.csproj" />
+    <ProjectReference Include="..\SigmaBank.Transport.Grpc\SigmaBank.Transport.Grpc.csproj" />
   </ItemGroup>
 </Project>

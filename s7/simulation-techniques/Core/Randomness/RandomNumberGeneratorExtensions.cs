@@ -1,9 +1,9 @@
-namespace Dai19090.SimulationTechniques.ElevatorSim.Randomness;
+namespace Dai19090.SimulationTechniques.Randomness;
 
 /// <summary>
 /// Extension methods for <see cref="IRandomNumberGenerator"/>s.
 /// </summary>
-internal static class RandomNumberGeneratorExtensions
+public static class RandomNumberGeneratorExtensions
 {
     /// <summary>
     /// Returns a random 32-bit floating-point number between zero and one, exclusive.

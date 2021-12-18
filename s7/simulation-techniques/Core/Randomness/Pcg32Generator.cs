@@ -1,12 +1,12 @@
 using System.Numerics;
 
-namespace Dai19090.SimulationTechniques.ElevatorSim.Randomness;
+namespace Dai19090.SimulationTechniques.Randomness;
 
 /// <summary>
 /// An implementation of <see cref="IRandomNumberGenerator"/> that
 /// is powered by the PCG-XSH-RR generator. It has 64 bits of state.
 /// </summary>
-internal sealed class Pcg32Generator : IRandomNumberGenerator
+public class Pcg32Generator : IRandomNumberGenerator
 {
     private const ulong Multiplier = 6364136223846793005;
     private const ulong Increment = 1442695040888963407;

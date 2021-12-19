@@ -27,17 +27,33 @@ public interface ISimulationState
     IRandomNumberGenerator Random { get; }
 
     /// <summary>
-    /// Queues a work item to be run at a later time.
+    /// Queues a work item to be run at a later time. User code should not call this method.
     /// </summary>
     /// <param name="workItem">The work item to run.</param>
     /// <param name="delay">The time units after which the work item will run.</param>
+    /// <remarks>
+    /// The <see cref="ExecutionContext"/> is not propagated.
+    /// </remarks>
     /// <seealso cref="ISimulationWorkItem"/>
-    void QueueWorkItemLater(ISimulationWorkItem workItem, int delay);
+    void UnsafeQueueWorkItemLater(ISimulationWorkItem workItem, int delay);
 
     /// <summary>
-    /// Queues a work item to be run at this time.
+    /// Queues a work item to be run at this time. User code should not call this method.
     /// </summary>
     /// <param name="workItem">The work item to run.</param>
+    /// <remarks>
+    /// The <see cref="ExecutionContext"/> is not propagated.
+    /// </remarks>
     /// <seealso cref="ISimulationWorkItem"/>
-    void QueueWorkItemNow(ISimulationWorkItem workItem);
+    void UnsafeQueueWorkItemNow(ISimulationWorkItem workItem);
+
+    /// <summary>
+    /// Adds a <see cref="ISimulationInstrument"/> to display results when the simulation ends.
+    /// </summary>
+    /// <remarks>
+    /// Each instrument is responsible for gathering its data.
+    /// A default instrument that measures statistics about the simulation's work item queue
+    /// is already registered.
+    /// </remarks>
+    void RegisterInstrument(ISimulationInstrument instrument);
 }

@@ -6,12 +6,13 @@ namespace Dai19090.SimulationTechniques;
 public interface ISimulationInstrument
 {
     /// <summary>
-    /// Outputs the results of the simulation.
+    /// Outputs the results of the instrument.
     /// </summary>
-    /// <param name="simulation">The <see cref="TextWriter"/>
+    /// <param name="writer">The <see cref="TextWriter"/>
     /// to write the results to.</param>
     /// <remarks>
     /// This method is called after the simulation has completed.
+    /// Implementations are recommended to end their output with a blank line.
     /// </remarks>
     void WriteResultsTo(TextWriter writer);
 }

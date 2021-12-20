@@ -11,7 +11,7 @@ public static class RandomNumberGeneratorExtensions
     /// <param name="random">The <see cref="IRandomNumberGenerator"/> to use.</param>
     public static float NextSingleUniform01Open(this IRandomNumberGenerator random)
     {
-        return ((random.NextUInt32() >> 9) + 0.5f) * (1 / (2 << 23));
+        return ((random.NextUInt32() >> 9) + 0.5f) * (1.0f / (2 << 23));
     }
 
     /// <summary>

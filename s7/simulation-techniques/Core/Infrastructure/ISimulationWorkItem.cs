@@ -1,4 +1,4 @@
-namespace Dai19090.SimulationTechniques;
+namespace Dai19090.SimulationTechniques.Infrastructure;
 
 /// <summary>
 /// Represents a standalone action that is run by a simulation and is scheduled at a specific time.

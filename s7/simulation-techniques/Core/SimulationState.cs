@@ -1,3 +1,4 @@
+using Dai19090.SimulationTechniques.Infrastructure;
 using Dai19090.SimulationTechniques.Instruments;
 using Dai19090.SimulationTechniques.Randomness;
 
@@ -17,6 +18,8 @@ internal sealed class SimulationState : ISimulationState
     public Timestamp CurrentTime { get; private set; }
 
     public IRandomNumberGenerator Random { get; }
+
+    public IEnumerable<ISimulationInstrument> Instruments => _instruments;
 
     internal bool RunNextWorkItem()
     {

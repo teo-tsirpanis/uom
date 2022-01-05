@@ -19,7 +19,7 @@ internal sealed class SimulationState : ISimulationState
 
     public IRandomNumberGenerator Random { get; }
 
-    public IEnumerable<ISimulationInstrument> Instruments => _instruments;
+    public ISimulationInstrument [] GetInstruments() => _instruments.ToArray();
 
     internal bool RunNextWorkItem()
     {
@@ -64,6 +64,8 @@ internal sealed class SimulationState : ISimulationState
     {
         if (instrument is null)
             ThrowHelpers.ThrowArgumentNull(nameof(instrument));
+        if (instrument is WorkItemQueueInstrument)
+            throw new InvalidOperationException($"Cannot register a {nameof(WorkItemQueueInstrument)} again; it is already registered.");
         _instruments.Add(instrument);
     }
 }

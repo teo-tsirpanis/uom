@@ -3,9 +3,17 @@ using System.Runtime.CompilerServices;
 
 namespace Dai19090.SimulationTechniques.Infrastructure;
 
-public struct AsyncSimulationOpMethodBuilder
+internal static class AsyncSimulationOpMethodBuilderShared
 {
-    private sealed class AsyncStateMachineBox<TStateMachine> : SimulationOp, ISimulationWorkItem where TStateMachine : IAsyncStateMachine
+    public static void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
+        // It does some ExecutionContext trickery that can't be done from
+        // public APIs. Let's just hope the method remains stateless.
+        default(AsyncTaskMethodBuilder).Start(ref stateMachine);
+}
+
+public struct AsyncSimulationOpMethodBuilder<TResult>
+{
+    private sealed class AsyncStateMachineBox<TStateMachine> : SimulationOp<TResult>, ISimulationWorkItem where TStateMachine : IAsyncStateMachine
     {
         public TStateMachine? StateMachine;
         public ExecutionContext? Context;
@@ -34,14 +42,11 @@ public struct AsyncSimulationOpMethodBuilder
     }
 
     private readonly ISimulationState _state;
-    private SimulationOp? _op;
+    private SimulationOp<TResult>? _op;
 
-    private AsyncSimulationOpMethodBuilder(ISimulationState state) : this()
-    {
-        _state = state;
-    }
+    private AsyncSimulationOpMethodBuilder(ISimulationState state) : this() => _state = state;
 
-    private ISimulationWorkItem GetStateMachineBox<TStateMachine>(ref TStateMachine stateMachine, ref SimulationOp? op) where TStateMachine : IAsyncStateMachine
+    internal static ISimulationWorkItem GetStateMachineBox<TStateMachine>(ref TStateMachine stateMachine, ref SimulationOp<TResult>? op) where TStateMachine : IAsyncStateMachine
     {
         var executionContext = ExecutionContext.Capture();
         switch (op)
@@ -63,43 +68,67 @@ public struct AsyncSimulationOpMethodBuilder
         }
     }
 
-    public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine
-    {
+    public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine =>
         AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
-    }
 
-    public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine
-    {
+    public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine =>
         awaiter.UnsafeOnCompleted(_state, GetStateMachineBox(ref stateMachine, ref _op));
+
+    public void SetException(Exception exception) => Task.SetException(exception);
+
+    public void SetResult(TResult result)
+    {
+        if (_op is null)
+            _op = SimulationOp.FromResult(result);
+        else
+            _op.SetResult(result);
     }
 
-    public void SetException(Exception exception)
+    public SimulationOp<TResult> Task => _op ??= new();
+
+    public static AsyncSimulationOpMethodBuilder<TResult> Create() => new(Simulation.GetCurrentState());
+
+    public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
+        AsyncSimulationOpMethodBuilderShared.Start(ref stateMachine);
+
+    public void SetStateMachine(IAsyncStateMachine stateMachine)
     {
-        Task.SetException(exception);
+        if (stateMachine is null)
+            throw new ArgumentNullException(nameof(stateMachine));
     }
+}
+
+internal struct VoidOpResult { }
+
+public struct AsyncSimulationOpMethodBuilder
+{
+    private readonly ISimulationState _state;
+    private SimulationOp<VoidOpResult>? _op;
+
+    private AsyncSimulationOpMethodBuilder(ISimulationState state) : this() => _state = state;
+
+    public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine =>
+        AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
+
+    public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ISimulationCompletion where TStateMachine : IAsyncStateMachine =>
+        awaiter.UnsafeOnCompleted(_state, AsyncSimulationOpMethodBuilder<VoidOpResult>.GetStateMachineBox(ref stateMachine, ref _op));
+
+    public void SetException(Exception exception) => Task.SetException(exception);
 
     public void SetResult()
     {
         if (_op is null)
-            _op = SimulationOp.Completed;
+            _op = SimulationOp<VoidOpResult>.s_defaultResultOp;
         else
-            _op.SetResult();
+            _op.SetResult(default);
     }
 
-    public SimulationOp Task => _op ?? new();
+    public SimulationOp Task => _op ??= new();
 
-    public static AsyncSimulationOpMethodBuilder Create()
-    {
-        var state = Simulation.GetCurrentState();
-        return new(state);
-    }
+    public static AsyncSimulationOpMethodBuilder Create() => new(Simulation.GetCurrentState());
 
-    public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
-    {
-        // It does some ExecutionContext trickery that can't be done from
-        // public APIs. Let's just hope the method remains stateless.
-        default(AsyncTaskMethodBuilder).Start(ref stateMachine);
-    }
+    public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
+        AsyncSimulationOpMethodBuilderShared.Start(ref stateMachine);
 
     public void SetStateMachine(IAsyncStateMachine stateMachine)
     {

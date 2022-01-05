@@ -14,7 +14,7 @@ namespace Dai19090.SimulationTechniques;
 [AsyncMethodBuilder(typeof(AsyncSimulationOpMethodBuilder))]
 public class SimulationOp
 {
-    private bool _isCompleted;
+    private protected bool _isCompleted;
     private ExceptionDispatchInfo? _exception;
     private List<ISimulationWorkItem>? _continuations;
 
@@ -36,13 +36,28 @@ public class SimulationOp
     /// <summary>
     /// A completed <see cref="SimulationOp"/>.
     /// </summary>
-    public static SimulationOp Completed { get; } = new SimulationOp() { _isCompleted = true};
+    public static SimulationOp CompletedOp { get; } = new() { _isCompleted = true };
+
+    /// <summary>
+    /// Creates a failed <see cref="SimulationOp"/>.
+    /// </summary>
+    /// <param name="e">The exception that is thrown when the op gets awaited.</param>
+    public static SimulationOp FromException(Exception e) =>
+        new() { _isCompleted = true, _exception = ExceptionDispatchInfo.Capture(e) };
+
+    /// <summary>
+    /// Creates a failed <see cref="SimulationOp{T}"/>.
+    /// </summary>
+    /// <param name="e">The exception that is thrown when the op gets awaited.</param>
+    public static SimulationOp<TResult> FromException<TResult>(Exception e) =>
+        new() { _isCompleted = true, _exception = ExceptionDispatchInfo.Capture(e) };
+
+    public static SimulationOp<TResult> FromResult<TResult>(TResult result) =>
+        result is null ? SimulationOp<TResult>.s_defaultResultOp : new() { _isCompleted = true, _result = result };
 
     public SimulationOpAwaiter GetAwaiter() => new(this);
 
-    internal SimulationOp()
-    {
-    }
+    internal SimulationOp() { }
 
     internal void UnsafeAddContinuation(ISimulationWorkItem continuation)
     {
@@ -63,6 +78,14 @@ public class SimulationOp
             simulationState.UnsafeQueueWorkItemNow(continuation);
     }
 
+    private protected bool TryComplete()
+    {
+        if (_isCompleted)
+            return false;
+        _isCompleted = true;
+        return true;
+    }
+
     internal void CheckCompletedException()
     {
         if (!_isCompleted)
@@ -72,17 +95,15 @@ public class SimulationOp
 
     internal void SetResult()
     {
-        if (_isCompleted)
+        if (!TryComplete())
             ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
-        _isCompleted = true;
         InvokeContinuations();
     }
 
     internal void SetException(Exception exception)
     {
-        if (_isCompleted)
+        if (!TryComplete())
             ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
-        _isCompleted = true;
         _exception = ExceptionDispatchInfo.Capture(exception);
         InvokeContinuations();
     }

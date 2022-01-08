@@ -1,4 +1,4 @@
-﻿using Dai19090.DistributedSystems.SigmaBank;
+using Dai19090.DistributedSystems.SigmaBank;
 using Dai19090.DistributedSystems.SigmaBank.Client;
 using Dai19090.DistributedSystems.SigmaBank.Transport.Grpc;
 using Grpc.Net.Client;
@@ -8,7 +8,7 @@ using System.Net.Sockets;
 var cts = new CancellationTokenSource();
 ErrorHandling.RegisterErrorHandlers(cts.Cancel, registerCtrlC: false);
 
-Console.Write("Select your protocol(1 - sockets, 2 - gRPC): ");
+Console.Write("Select your protocol(1 - sockets, 2 - gRPC, 3 - Web Services): ");
 if (int.TryParse(Console.ReadLine(), out var response))
     switch (response)
     {
@@ -16,6 +16,8 @@ if (int.TryParse(Console.ReadLine(), out var response))
             return await SocketMain(cts.Token);
         case 2:
             return await GrpcMain(cts.Token);
+        case 3:
+            return await RestMain(cts.Token);
     }
 
 Console.WriteLine("Invalid response");
@@ -64,6 +66,24 @@ static async Task<int> GrpcMain(CancellationToken cancellationToken)
 
     using var channel = GrpcChannel.ForAddress(endpoint);
     var bank = new BankGrpcSender(new Bank.BankClient(channel));
+    var interactiveBank = new InteractiveBank(bank);
+
+    await interactiveBank.RunAsync(cancellationToken);
+
+    return 0;
+}
+
+static async Task<int> RestMain(CancellationToken cancellationToken)
+{
+    var endpoint = Environment.GetEnvironmentVariable("REST_ENDPOINT");
+    if (endpoint is null)
+    {
+        Console.WriteLine("No REST endpoint found.");
+        return 1;
+    }
+
+    using var httpClient = new HttpClient();
+    var bank = new RestClient(endpoint, httpClient);
     var interactiveBank = new InteractiveBank(bank);
 
     await interactiveBank.RunAsync(cancellationToken);

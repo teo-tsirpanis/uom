@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -6,7 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="swagger.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <OpenApiReference Include="swagger.json" ClassName="RestClientImpl" CodeGenerator="NSwagCSharp" Namespace="SwaggerImpl.SigmaBank" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Grpc.Net.Client" Version="2.40.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="3.0.0" PrivateAssets="all" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SigmaBank.Shared\SigmaBank.Shared.csproj" />

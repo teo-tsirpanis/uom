@@ -22,5 +22,6 @@ COPY --from=build-env /app/out .
 
 ENV SOCKETS_ENDPOINT=127.0.0.1:5959
 ENV GRPC_ENDPOINT=http://localhost:6060
+ENV REST_ENDPOINT=http://localhost:6161
 
 ENTRYPOINT ["dotnet", "SigmaBank.Client.dll"]

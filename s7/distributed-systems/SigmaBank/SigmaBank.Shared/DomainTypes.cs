@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Dai19090.DistributedSystems.SigmaBank;
 
@@ -10,7 +10,6 @@ namespace Dai19090.DistributedSystems.SigmaBank;
 /// <para>This type was introduced in accordance with the Domain Driven Design
 /// principles, to distinguish at type-level integers representing users.</para>
 /// </remarks>
-[JsonConverter(typeof(UserIdConverter))]
 public sealed record class UserId(int Id)
 {
     public override string ToString()
@@ -52,7 +51,6 @@ public sealed class UserInfo
 /// <para>This class follows structural equality semantics.
 /// Two instances of <see cref="AccountId"/> are equal if
 /// they store the same <see cref="Id"/>.</para>
-[JsonConverter(typeof(AccountIdConverter))]
 public sealed record class AccountId(int Id)
 {
     public override string ToString()

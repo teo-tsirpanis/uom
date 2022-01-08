@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace Dai19090.DistributedSystems.SigmaBank;
 
@@ -32,6 +32,7 @@ public static class ErrorHandling
         TaskScheduler.UnobservedTaskException += (sender, e) =>
         {
             Console.WriteLine($"Unobserved task exception: {e.Exception}");
+            e.SetObserved();
         };
     }
 }

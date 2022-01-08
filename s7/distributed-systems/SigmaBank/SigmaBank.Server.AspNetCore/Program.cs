@@ -3,6 +3,7 @@ using Dai19090.DistributedSystems.SigmaBank.Data;
 using Dai19090.DistributedSystems.SigmaBank.Transport.Grpc;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using System.Reflection;
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
@@ -21,13 +22,22 @@ builder.Services.AddGrpc(options =>
     options.Interceptors.Add<ExceptionRewritingInterceptor>();
 });
 builder.Services.AddSingleton<IBank>(bank);
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen(options => {
+    options.SwaggerDoc("v1", new() { Title = "Sigma Bank REST API", Version = "v1" });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
 app.UseRouting();
+app.UseSwagger();
+app.UseSwaggerUI();
 
+app.MapControllers();
 app.MapGrpcService<BankGrpcReceiver>();
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.Run();
 

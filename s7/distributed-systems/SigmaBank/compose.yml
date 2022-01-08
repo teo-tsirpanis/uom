@@ -16,6 +16,7 @@ services:
     environment:
       - DB_CONNECTION_STRING=Server=database.sigma.bank;User=sa;Password=SigmaBank47559
     ports:
+      - "6161:6161"
       - "6060:6060"
     networks:
       sigmanet:

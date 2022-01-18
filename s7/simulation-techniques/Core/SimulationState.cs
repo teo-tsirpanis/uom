@@ -17,11 +17,27 @@ internal sealed class SimulationState : ISimulationState
 
     private readonly Action<string>? _fLog;
 
-    public Timestamp CurrentTime { get; private set; }
+    private Timestamp _currentTime;
+
+    public Timestamp CurrentTime
+    {
+        get
+        {
+            return _currentTime;
+        }
+        private set
+        {
+            if (_currentTime != value)
+            {
+                _currentTime = value;
+                CallOnSimulationTimeChanged(value);
+            }
+        }
+    }
 
     public IRandomNumberGenerator Random { get; }
 
-    public ISimulationInstrument [] GetInstruments() => _instruments.ToArray();
+    public ISimulationInstrument[] GetInstruments() => _instruments.ToArray();
 
     private void CallOnSimulationTimeChanged(Timestamp newTime)
     {
@@ -35,8 +51,6 @@ internal sealed class SimulationState : ISimulationState
             return false;
 
         CurrentTime = timestamp;
-        if (timestamp != CurrentTime)
-            CallOnSimulationTimeChanged(timestamp);
         workItem.Run();
         _workItemQueueInstrument.WorkItemRan();
         return true;

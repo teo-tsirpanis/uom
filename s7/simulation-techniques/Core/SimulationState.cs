@@ -42,8 +42,7 @@ internal sealed class SimulationState : ISimulationState
 
     public SimulationState(IRandomNumberGenerator random)
     {
-        if (random is null)
-            ThrowHelpers.ThrowArgumentNull(nameof(random));
+        ArgumentNullException.ThrowIfNull(random);
         Random = random;
         _workItems = new();
         _workItemQueueInstrument = new();
@@ -52,8 +51,7 @@ internal sealed class SimulationState : ISimulationState
 
     public void UnsafeQueueWorkItemLater(ISimulationWorkItem workItem, int delay)
     {
-        if (workItem is null)
-            ThrowHelpers.ThrowArgumentNull(nameof(workItem));
+        ArgumentNullException.ThrowIfNull(workItem);
         if (delay < 0)
             ThrowHelpers.ThrowNegativeNumber(nameof(delay), delay);
         _workItems.Enqueue(workItem, CurrentTime + delay);
@@ -61,15 +59,13 @@ internal sealed class SimulationState : ISimulationState
 
     public void UnsafeQueueWorkItemNow(ISimulationWorkItem workItem)
     {
-        if (workItem is null)
-            ThrowHelpers.ThrowArgumentNull(nameof(workItem));
+        ArgumentNullException.ThrowIfNull(workItem);
         _workItems.Enqueue(workItem, CurrentTime);
     }
 
     public void RegisterInstrument(ISimulationInstrument instrument)
     {
-        if (instrument is null)
-            ThrowHelpers.ThrowArgumentNull(nameof(instrument));
+        ArgumentNullException.ThrowIfNull(instrument);
         if (instrument is WorkItemQueueInstrument)
             throw new InvalidOperationException($"Cannot register a {nameof(WorkItemQueueInstrument)} again; it is already registered.");
         _instruments.Add(instrument);

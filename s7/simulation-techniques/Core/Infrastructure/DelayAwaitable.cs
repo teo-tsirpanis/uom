@@ -31,5 +31,4 @@ public readonly struct DelayAwaitable
     }
 
     public DelayAwaiter GetAwaiter() => new(_delay);
-
 }

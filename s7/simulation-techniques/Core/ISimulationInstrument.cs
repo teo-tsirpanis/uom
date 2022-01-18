@@ -6,6 +6,12 @@ namespace Dai19090.SimulationTechniques;
 public interface ISimulationInstrument
 {
     /// <summary>
+    /// This function is called when the simulation's time changes.
+    /// </summary>
+    /// <param name="newTime">The simulation's new time.</param>
+    void OnSimulationTimeChanged(Timestamp newTime) { }
+
+    /// <summary>
     /// Outputs the results of the instrument.
     /// </summary>
     /// <param name="writer">The <see cref="TextWriter"/>

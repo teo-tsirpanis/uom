@@ -5,7 +5,6 @@ namespace Dai19090.SimulationTechniques.Instruments;
 /// </summary>
 /// <remarks>
 /// Such instrument is automatically added when a simulation starts.
-/// Adding it again will cause an error.
 /// </remarks>
 public sealed class WorkItemQueueInstrument : ISimulationInstrument
 {
@@ -24,12 +23,14 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
     /// </summary>
     public int TotalWorkItems { get; private set; }
 
+    internal WorkItemQueueInstrument() { }
+
     internal void WorkItemRan()
     {
         TotalWorkItems++;
     }
 
-    internal void SimulationTimeChanged(Timestamp newTime)
+    void ISimulationInstrument.OnSimulationTimeChanged(Timestamp newTime)
     {
         SimulationDuration = newTime.Value;
         TotalFruitfulTimeUnits++;

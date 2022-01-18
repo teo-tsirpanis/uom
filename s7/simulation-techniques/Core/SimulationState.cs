@@ -21,14 +21,20 @@ internal sealed class SimulationState : ISimulationState
 
     public ISimulationInstrument [] GetInstruments() => _instruments.ToArray();
 
+    private void CallOnSimulationTimeChanged(Timestamp newTime)
+    {
+        foreach (var instrument in _instruments)
+            instrument.OnSimulationTimeChanged(newTime);
+    }
+
     internal bool RunNextWorkItem()
     {
         if (!_workItems.TryDequeue(out var workItem, out var timestamp))
             return false;
 
-        if (timestamp != CurrentTime)
-            _workItemQueueInstrument.SimulationTimeChanged(timestamp);
         CurrentTime = timestamp;
+        if (timestamp != CurrentTime)
+            CallOnSimulationTimeChanged(timestamp);
         workItem.Run();
         _workItemQueueInstrument.WorkItemRan();
         return true;

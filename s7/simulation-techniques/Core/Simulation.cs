@@ -21,12 +21,11 @@ public static partial class Simulation
     /// It must call <c>async SimulationOp</c> methods in a fire-and-forget style.</param>
     /// <param name="options">The simulation's options. Also passed to <paramref name="initSimulation"/>.</param>
     /// <param name="initArg">An argument that gets passed to <paramref name="initSimulation"/>.</param>
-    /// <returns>The simulation's registered <see cref="ISimulationInstrument"/>s.</returns>
     /// <remarks>
     /// In documentation, code running "inside a simulation" means code that is called from
     /// <paramref name="initSimulation"/> directly or indirectly.
     /// </remarks>
-    public static ISimulationInstrument[] Run(Action<ISimulationState, SimulationOptions> initSimulation, SimulationOptions options)
+    public static SimulationResult Run(Action<ISimulationState, SimulationOptions> initSimulation, SimulationOptions options)
     {
         var state = new SimulationState(options);
         var oldState = _ambientState.Value;
@@ -42,7 +41,7 @@ public static partial class Simulation
 
         while (state.RunNextWorkItem());
 
-        return state.GetInstruments();
+        return new(state.CurrentTime.Value, state.GetInstruments());
     }
 
     /// <summary>

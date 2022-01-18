@@ -42,14 +42,14 @@ internal sealed class SimulationState : ISimulationState
         return true;
     }
 
-    public SimulationState(IRandomNumberGenerator random, Action<string>? fLog = null)
+    public SimulationState(SimulationOptions options)
     {
-        ArgumentNullException.ThrowIfNull(random);
-        Random = random;
+        ArgumentNullException.ThrowIfNull(options);
+        Random = options.RandomNumberGenerator;
         _workItems = new();
         _workItemQueueInstrument = new();
         _instruments = new() { _workItemQueueInstrument };
-        _fLog = fLog;
+        _fLog = options.GetOnLogMessage();
     }
 
     public void UnsafeQueueWorkItemLater(ISimulationWorkItem workItem, int delay)

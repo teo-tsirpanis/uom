@@ -1,5 +1,4 @@
 using Dai19090.SimulationTechniques.Infrastructure;
-using Dai19090.SimulationTechniques.Randomness;
 
 namespace Dai19090.SimulationTechniques;
 
@@ -18,16 +17,18 @@ public static partial class Simulation
     /// <summary>
     /// Runs a simulation.
     /// </summary>
-    /// <typeparam name="TOptions">The type of <paramref name="options"/>.</typeparam>
-    /// <param name="options">An argument that gets passed to <paramref name="initSimulation"/>.</param>
-    /// <param name="initSimulation">A delegate that kicks off the simulation's work items.</param>
-    /// <param name="random">The random number generator used by the simulation.</param>
+    /// <param name="initSimulation">A delegate that kicks off the simulation's work items.
+    /// It must call <c>async SimulationOp</c> methods in a fire-and-forget style.</param>
+    /// <param name="options">The simulation's options. Also passed to <paramref name="initSimulation"/>.</param>
+    /// <param name="initArg">An argument that gets passed to <paramref name="initSimulation"/>.</param>
     /// <returns>The simulation's registered <see cref="ISimulationInstrument"/>s.</returns>
     /// <remarks>
+    /// In documentation, code running "inside a simulation" means code that is called from
+    /// <paramref name="initSimulation"/> directly or indirectly.
     /// </remarks>
-    public static ISimulationInstrument[] Run<TOptions>(TOptions options, Action<ISimulationState, TOptions> initSimulation, IRandomNumberGenerator random)
+    public static ISimulationInstrument[] Run(Action<ISimulationState, SimulationOptions> initSimulation, SimulationOptions options)
     {
-        var state = new SimulationState(random);
+        var state = new SimulationState(options);
         var oldState = _ambientState.Value;
         _ambientState.Value = state;
         try

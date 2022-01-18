@@ -57,4 +57,10 @@ public interface ISimulationState
     /// is already registered.
     /// </remarks>
     void RegisterInstrument(ISimulationInstrument instrument);
+
+    /// <summary>
+    /// Logs a simulation message along with the <see cref="CurrentTime"/> it occured.
+    /// </summary>
+    /// <param name="message">The message's content.</param>
+    void LogMessage(string message);
 }

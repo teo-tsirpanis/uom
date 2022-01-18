@@ -15,6 +15,8 @@ internal sealed class SimulationState : ISimulationState
 
     private readonly List<ISimulationInstrument> _instruments;
 
+    private readonly Action<string>? _fLog;
+
     public Timestamp CurrentTime { get; private set; }
 
     public IRandomNumberGenerator Random { get; }
@@ -40,13 +42,14 @@ internal sealed class SimulationState : ISimulationState
         return true;
     }
 
-    public SimulationState(IRandomNumberGenerator random)
+    public SimulationState(IRandomNumberGenerator random, Action<string>? fLog = null)
     {
         ArgumentNullException.ThrowIfNull(random);
         Random = random;
         _workItems = new();
         _workItemQueueInstrument = new();
         _instruments = new() { _workItemQueueInstrument };
+        _fLog = fLog;
     }
 
     public void UnsafeQueueWorkItemLater(ISimulationWorkItem workItem, int delay)
@@ -69,5 +72,12 @@ internal sealed class SimulationState : ISimulationState
         if (instrument is WorkItemQueueInstrument)
             throw new InvalidOperationException($"Cannot register a {nameof(WorkItemQueueInstrument)} again; it is already registered.");
         _instruments.Add(instrument);
+    }
+
+    public void LogMessage(string message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        if (_fLog is not null)
+            _fLog($"[{CurrentTime.Value:06}] {message}");
     }
 }

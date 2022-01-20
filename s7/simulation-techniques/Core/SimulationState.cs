@@ -15,7 +15,9 @@ internal sealed class SimulationState : ISimulationState
 
     private readonly List<ISimulationInstrument> _instruments;
 
-    private readonly Action<string>? _fLog;
+    private readonly LogMessageHandler? _fLog;
+
+    private CorrelationId _correlationId;
 
     private Timestamp _currentTime;
 
@@ -88,10 +90,11 @@ internal sealed class SimulationState : ISimulationState
         _instruments.Add(instrument);
     }
 
-    public void LogMessage(string message)
+    public void LogMessage(string message, CorrelationId correlationId)
     {
         ArgumentNullException.ThrowIfNull(message);
-        if (_fLog is not null)
-            _fLog($"[{CurrentTime.Value:06}] {message}");
+        _fLog?.Invoke(CurrentTime, correlationId, message);
     }
+
+    public CorrelationId NewCorrelationId() => _correlationId = _correlationId.Next();
 }

@@ -3,6 +3,11 @@ using Dai19090.SimulationTechniques.Randomness;
 namespace Dai19090.SimulationTechniques;
 
 /// <summary>
+/// Handles simulation log messages.
+/// </summary>
+public delegate void LogMessageHandler(Timestamp time, CorrelationId correlationId, string message);
+
+/// <summary>
 /// Contains system options for a simulation.
 /// </summary>
 /// <remarks>
@@ -18,7 +23,7 @@ public class SimulationOptions
     /// <summary>
     /// The action that will be called when a message needs to be logged.
     /// </summary>
-    public event Action<string>? OnLogMessage;
+    public event LogMessageHandler? OnLogMessage;
 
     /// <summary>
     /// Creates a <see cref="SimulationOptions"/>.
@@ -30,5 +35,5 @@ public class SimulationOptions
         RandomNumberGenerator = randomNumberGenerator;
     }
 
-    internal Action<string>? GetOnLogMessage() => OnLogMessage;
+    internal LogMessageHandler? GetOnLogMessage() => OnLogMessage;
 }

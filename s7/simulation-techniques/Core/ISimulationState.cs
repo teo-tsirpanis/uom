@@ -62,5 +62,11 @@ public interface ISimulationState
     /// Logs a simulation message along with the <see cref="CurrentTime"/> it occured.
     /// </summary>
     /// <param name="message">The message's content.</param>
-    void LogMessage(string message);
+    /// <param name="correlationId">The message's correlation ID. Defaults to <see cref="CorrelationId.Default"/>.</param>
+    void LogMessage(string message, CorrelationId correlationId = default);
+
+    /// <summary>
+    /// Creates a unique <see cref="CorrelationId"/>.
+    /// </summary>
+    CorrelationId NewCorrelationId();
 }

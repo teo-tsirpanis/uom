@@ -12,25 +12,27 @@ public sealed class WaitingQueue
     /// </summary>
     public readonly struct QueueTicket : IDisposable
     {
-        internal readonly WaitingQueue _queue;
+        private readonly WaitingQueue _queue;
 
-        internal QueueTicket(WaitingQueue queue)
+        private readonly CorrelationId _id;
+
+        internal QueueTicket(WaitingQueue queue, CorrelationId id)
         {
             _queue = queue;
+            _id = id;
         }
 
         /// <summary>
         /// Signals that the waiting queue can process the next arrival.
         /// </summary>
-        public void Dispose()
-        {
-            _queue.Exit();
-        }
+        public void Dispose() => _queue.Exit(_id);
     }
+
+    private readonly record struct Arrival(CorrelationId Id, Timestamp ArrivalTime, SimulationOpCompletionSource<QueueTicket> CompletionSource);
 
     private bool _isOccupied;
 
-    private readonly Queue<(Timestamp, SimulationOpCompletionSource<QueueTicket>)> _queue = new();
+    private readonly Queue<Arrival> _queue = new();
 
     private readonly ISimulationState _simulationState;
 
@@ -62,7 +64,7 @@ public sealed class WaitingQueue
         simulationState.RegisterInstrument(Instrument);
     }
 
-    private QueueTicket CreateTicket() => new(this);
+    private QueueTicket CreateTicket(CorrelationId id) => new(this, id);
 
     /// <summary>
     /// Asynchronously waits for the turn to come to enter the queue.
@@ -71,9 +73,10 @@ public sealed class WaitingQueue
     /// A simulation operation that must be awaited to οbtain the
     /// <see cref="QueueTicket"> to be used to exit the queue.
     /// </returns>
-    public SimulationOp<QueueTicket> EnterAsync()
+    public SimulationOp<QueueTicket> EnterAsync(CorrelationId correlationId)
     {
         var currentSimulationTime = _simulationState.CurrentTime;
+        _simulationState.LogMessage($"{Name}: entered", correlationId);
         Instrument.ArrivalCame();
 
         // If the queue is empty, the arrival is immediately fulfilled.
@@ -83,31 +86,39 @@ public sealed class WaitingQueue
         {
             _isOccupied = true;
             Instrument.ArrivalFulfilled(currentSimulationTime, currentSimulationTime);
-            return SimulationOp.FromResult(CreateTicket());
+            _simulationState.LogMessage($"{Name}: found an empty queue and will be served immediately", correlationId);
+            return SimulationOp.FromResult(CreateTicket(correlationId));
         }
 
         var ticket = new SimulationOpCompletionSource<QueueTicket>();
-        _queue.Enqueue((currentSimulationTime, ticket));
+        _queue.Enqueue(new(correlationId, currentSimulationTime, ticket));
+        _simulationState.LogMessage($"{Name}: queued along with {_queue.Count - 1} other arrivals in front of it", correlationId);
         return ticket.Op;
     }
 
-    internal void Exit()
+    internal void Exit(CorrelationId exitingArrivalId)
     {
         if (!_isOccupied)
             throw new InvalidOperationException("Trying to exit an unoccupied queue.");
+
+        _simulationState.LogMessage($"{Name}: leaving", exitingArrivalId);
 
         ProcessNextInLine();
     }
 
     private void ProcessNextInLine()
     {
-        if (_queue.TryDequeue(out (Timestamp time, SimulationOpCompletionSource<QueueTicket> completionSource) arrival))
+        if (_queue.TryDequeue(out var arrival))
         {
             _isOccupied = true;
-            Instrument.ArrivalFulfilled(arrival.time, _simulationState.CurrentTime);
-            arrival.completionSource.SetResult(CreateTicket());
+            Instrument.ArrivalFulfilled(arrival.ArrivalTime, _simulationState.CurrentTime);
+            _simulationState.LogMessage($"{Name}: served", arrival.Id);
+            arrival.CompletionSource.SetResult(CreateTicket(arrival.Id));
         }
         else
+        {
+            _simulationState.LogMessage($"{Name}: the queue is now empty");
             _isOccupied = false;
+        }
     }
 }

@@ -64,9 +64,4 @@ public interface ISimulationState
     /// <param name="message">The message's content.</param>
     /// <param name="correlationId">The message's correlation ID. Defaults to <see cref="CorrelationId.Default"/>.</param>
     void LogMessage(string message, CorrelationId correlationId = default);
-
-    /// <summary>
-    /// Creates a unique <see cref="CorrelationId"/>.
-    /// </summary>
-    CorrelationId NewCorrelationId();
 }

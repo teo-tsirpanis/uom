@@ -17,8 +17,6 @@ internal sealed class SimulationState : ISimulationState
 
     private readonly LogMessageHandler? _fLog;
 
-    private CorrelationId _correlationId;
-
     private Timestamp _currentTime;
 
     public Timestamp CurrentTime
@@ -95,6 +93,4 @@ internal sealed class SimulationState : ISimulationState
         ArgumentNullException.ThrowIfNull(message);
         _fLog?.Invoke(CurrentTime, correlationId, message);
     }
-
-    public CorrelationId NewCorrelationId() => _correlationId = _correlationId.Next();
 }

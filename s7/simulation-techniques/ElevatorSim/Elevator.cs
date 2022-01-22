@@ -4,7 +4,11 @@ public sealed class Elevator
 {
     private record PassengerEntry(IElevatorPassenger Passenger, int DestinationFloor);
 
+    private readonly ISimulationState _simulationState;
+
     private readonly ElevatorSimOptions _simulationOptions;
+
+    private readonly CorrelationId _id;
 
     private readonly PassengerEntry?[] _passengers;
 
@@ -19,6 +23,11 @@ public sealed class Elevator
         get => _currentFloor;
         private set
         {
+            if (value == _currentFloor) return;
+            if (Math.Abs(value - CurrentFloor) > 1)
+                throw new InvalidOperationException($"Cannot directly jump from floor {CurrentFloor} to {value}.");
+
+            _simulationState.LogMessage($"At floor {value}", _id);
             _currentFloor = value;
             foreach (var x in _passengers)
                 if (x is not null)
@@ -30,12 +39,15 @@ public sealed class Elevator
 
     public bool IsDoorOpen { get; private set; }
 
-    public Elevator(ElevatorSimOptions options, int id)
+    public Elevator(ISimulationState simulationState, ElevatorSimOptions options, int id)
     {
-        _simulationOptions = options;
         var capacity = options.ElevatorCapacity;
         if (capacity < 0)
             throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "Capacity must be a positive number.");
+
+        _simulationState = simulationState;
+        _simulationOptions = options;
+        _id = new($"elevator_{_id}");
         _passengers = new PassengerEntry?[capacity];
         _floorsToStop = new SimulationOpCompletionSource<bool>?[options.NumberOfFloors];
     }
@@ -50,9 +62,11 @@ public sealed class Elevator
         if (nextRequestedFloorOppositeDirection != -1)
         {
             Direction = Direction.Opposite();
+            _simulationState.LogMessage($"Changing direction to {Direction}", _id);
             return true;
         }
 
+        _simulationState.LogMessage($"Resting at floor {CurrentFloor}", _id);
         return false;
 
         int FindRequestedFloorTowards(ElevatorDirection direction)
@@ -72,6 +86,7 @@ public sealed class Elevator
         foreach (ref var x in span)
             if (x is not null && x.DestinationFloor == CurrentFloor)
             {
+                _simulationState.LogMessage($"Left {_id}, arrived at floor {CurrentFloor}", x.Passenger.CorrelationId);
                 changed = true;
                 x = null;
             }
@@ -91,12 +106,16 @@ public sealed class Elevator
 
             if (arrivedCs is not null)
             {
+                _simulationState.LogMessage($"Stopped at floor {CurrentFloor}, opening doors", _id);
                 await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
+                _simulationState.LogMessage($"Opened doors", _id);
                 IsDoorOpen = true;
                 ReleasePassengersWhoArrived();
                 arrivedCs.SetResult(true);
-                await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
+                _simulationState.LogMessage($"Closing doors", _id);
                 IsDoorOpen = false;
+                await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
+                _simulationState.LogMessage($"Closed doors", _id);
 
                 _floorsToStop[CurrentFloor] = null;
             }
@@ -122,7 +141,11 @@ public sealed class Elevator
         return completionSource.Op;
     }
 
-    public SimulationOp Summon(int floor) => GoToFloor(floor);
+    public SimulationOp Summon(int floor)
+    {
+        _simulationState.LogMessage($"Summoned to floor {floor}", _id);
+        return GoToFloor(floor);
+    }
 
     public SimulationOp<bool> TryEnter(IElevatorPassenger passenger, int destinationFloor)
     {
@@ -134,9 +157,13 @@ public sealed class Elevator
 
         var freeSpotIndex = Array.IndexOf(_passengers, null);
         if (freeSpotIndex < 0)
+        {
+            _simulationState.LogMessage($"Cannot enter {_id}, it is full", passenger.CorrelationId);
             return SimulationOp.FromResult(false);
+        }
 
         _passengers[freeSpotIndex] = new(passenger, destinationFloor);
+        _simulationState.LogMessage($"Entered {_id}, going to floor {destinationFloor}", passenger.CorrelationId);
         return GoToFloor(destinationFloor);
     }
 }

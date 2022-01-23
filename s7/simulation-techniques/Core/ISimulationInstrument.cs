@@ -9,6 +9,10 @@ public interface ISimulationInstrument
     /// This function is called when the simulation's time changes.
     /// </summary>
     /// <param name="newTime">The simulation's new time.</param>
+    /// <remarks>
+    /// To prevent user code from calling this function,
+    /// this method should be implemented explicitly.
+    /// </remarks>
     void OnSimulationTimeChanged(Timestamp newTime) { }
 
     /// <summary>

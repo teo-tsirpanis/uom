@@ -3,11 +3,13 @@ namespace Dai19090.SimulationTechniques.ElevatorSim;
 /// <summary>
 /// A simulated elevator cabin.
 /// </summary>
-public sealed class Elevator
+internal sealed class Elevator
 {
     private record PassengerEntry(IElevatorPassenger Passenger, int DestinationFloor);
 
     private readonly CorrelationId _id;
+
+    private readonly ElevatorInstrument _instrument;
 
     private readonly PassengerEntry?[] _passengers;
 
@@ -31,6 +33,7 @@ public sealed class Elevator
                 throw new InvalidOperationException($"Cannot directly jump from floor {CurrentFloor} to {value}.");
 
             _simulationState.LogMessage($"At floor {value}", _id);
+            _instrument.OnOneFloorTraveled();
             _currentFloor = value;
             foreach (var x in _passengers)
                 if (x is not null)
@@ -51,6 +54,8 @@ public sealed class Elevator
         _simulationState = simulationState;
         _simulationOptions = options;
         _id = new($"elevator_{id}");
+        _instrument = new(options, _id);
+        simulationState.RegisterInstrument(_instrument);
         _passengers = new PassengerEntry?[capacity];
         _floorsToStop = new SimulationOpCompletionSource<bool>?[options.NumberOfFloors];
     }
@@ -90,6 +95,7 @@ public sealed class Elevator
             if (x is not null && x.DestinationFloor == CurrentFloor)
             {
                 _simulationState.LogMessage($"Left {_id}, arrived at floor {CurrentFloor}", x.Passenger.CorrelationId);
+                _instrument.OnPassengerLeft();
                 changed = true;
                 x = null;
             }
@@ -133,6 +139,8 @@ public sealed class Elevator
             return;
         _isActive = true;
         Direction = direction;
+        _simulationState.LogMessage($"Sprung into motion, heading {Direction}", _id);
+        _instrument.OnActivated();
         _ = MovingLoop();
     }
 
@@ -167,6 +175,7 @@ public sealed class Elevator
 
         _passengers[freeSpotIndex] = new(passenger, destinationFloor);
         _simulationState.LogMessage($"Entered {_id}, going to floor {destinationFloor}", passenger.CorrelationId);
+        _instrument.OnPassengerEntered();
         return GoToFloor(destinationFloor);
     }
 }

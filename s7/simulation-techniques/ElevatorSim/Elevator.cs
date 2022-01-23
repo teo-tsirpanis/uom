@@ -1,16 +1,19 @@
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
+/// <summary>
+/// A simulated elevator cabin.
+/// </summary>
 public sealed class Elevator
 {
     private record PassengerEntry(IElevatorPassenger Passenger, int DestinationFloor);
 
-    private readonly ISimulationState _simulationState;
-
-    private readonly ElevatorSimOptions _simulationOptions;
-
     private readonly CorrelationId _id;
 
     private readonly PassengerEntry?[] _passengers;
+
+    private readonly ISimulationState _simulationState;
+
+    private readonly ElevatorSimOptions _simulationOptions;
 
     private readonly SimulationOpCompletionSource<bool>?[] _floorsToStop;
 
@@ -47,7 +50,7 @@ public sealed class Elevator
 
         _simulationState = simulationState;
         _simulationOptions = options;
-        _id = new($"elevator_{_id}");
+        _id = new($"elevator_{id}");
         _passengers = new PassengerEntry?[capacity];
         _floorsToStop = new SimulationOpCompletionSource<bool>?[options.NumberOfFloors];
     }

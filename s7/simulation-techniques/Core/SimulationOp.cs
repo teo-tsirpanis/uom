@@ -12,7 +12,7 @@ namespace Dai19090.SimulationTechniques;
 /// and calling an <c>async SimulationOp</c> function.
 /// </remarks>
 [AsyncMethodBuilder(typeof(AsyncSimulationOpMethodBuilder))]
-public class SimulationOp
+public partial class SimulationOp
 {
     private protected bool _isCompleted;
     private ExceptionDispatchInfo? _exception;
@@ -93,18 +93,30 @@ public class SimulationOp
         _exception?.Throw();
     }
 
+    internal bool TrySetResult()
+    {
+        if (!TryComplete()) return false;
+        InvokeContinuations();
+        return true;
+    }
+
+    internal bool TrySetException(Exception exception)
+    {
+        if (!TryComplete()) return false;
+        _exception = ExceptionDispatchInfo.Capture(exception);
+        InvokeContinuations();
+        return true;
+    }
+
     internal void SetResult()
     {
-        if (!TryComplete())
+        if (!TrySetResult())
             ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
-        InvokeContinuations();
     }
 
     internal void SetException(Exception exception)
     {
-        if (!TryComplete())
+        if (!TrySetException(exception))
             ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
-        _exception = ExceptionDispatchInfo.Capture(exception);
-        InvokeContinuations();
     }
 }

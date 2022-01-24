@@ -14,12 +14,18 @@ public class SimulationOp<TResult> : SimulationOp
 
     internal TResult? _result;
 
-    internal void SetResult(TResult result)
+    internal bool TrySetResult(TResult result)
     {
-        if (!TryComplete())
-            ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
+        if (!TryComplete()) return false;
         _result = result;
         InvokeContinuations();
+        return true;
+    }
+
+    internal void SetResult(TResult result)
+    {
+        if (!TrySetResult(result))
+            ThrowHelpers.ThrowSimulationOpAlreadyCompleted();
     }
 
     internal SimulationOp() { }

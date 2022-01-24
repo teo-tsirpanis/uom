@@ -14,6 +14,8 @@ public sealed class ElevatorSimOptions : SimulationOptions
 
     public int ElevatorDoorOpeningDelay { get; set; }
 
+    public int ElevatorDoorOpeningDuration { get; set; }
+
     public int ElevatorCapacity { get; set; }
 
     public ElevatorSimOptions(ulong seed) : base(new Pcg32Generator(seed))

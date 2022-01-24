@@ -1,12 +1,12 @@
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
-internal enum ElevatorDirection
+public enum ElevatorDirection
 {
     Up = 1,
     Down = -1
 }
 
-internal static class DirectionExtensions
+public static class DirectionExtensions
 {
     public static ElevatorDirection Opposite(this ElevatorDirection direction) =>
         direction == ElevatorDirection.Up ? ElevatorDirection.Down : ElevatorDirection.Up;

@@ -1,11 +1,48 @@
+using Dai19090.SimulationTechniques.Infrastructure;
+using System.Diagnostics;
+
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
 /// <summary>
 /// A simulated elevator cabin.
 /// </summary>
-internal sealed class Elevator
+public sealed class Elevator
 {
     private record PassengerEntry(IElevatorPassenger Passenger, int DestinationFloor);
+
+    private struct DoorOpeningTicket
+    {
+        public Elevator? Elevator { get; }
+
+        public DoorOpeningTicket(Elevator elevator) => Elevator = elevator;
+
+        public SimulationOp DisposeAsync() => Elevator?.WaitAndCloseDoorsAsync() ?? SimulationOp.CompletedOp;
+    }
+
+    private struct DoorEventAwaitable : ISimulationCompletion
+    {
+        private readonly List<ISimulationWorkItem>? _workItems;
+
+        public DoorEventAwaitable(List<ISimulationWorkItem> workItems) => _workItems = workItems;
+
+        public DoorEventAwaitable GetAwaiter() => this;
+
+        public bool IsCompleted => _workItems is null;
+
+        public void GetResult() { }
+
+        public void UnsafeOnCompleted(ISimulationState simulationState, ISimulationWorkItem workItem)
+        {
+            if (_workItems is List<ISimulationWorkItem> workItems)
+                workItems.Add(workItem);
+            else
+                simulationState.UnsafeQueueWorkItemNow(workItem);
+        }
+    }
+
+    private enum DoorState { Closed, Closing, Opening, Open }
+
+    private enum ActivationState { Inactive, Activating, Active }
 
     private readonly CorrelationId _id;
 
@@ -17,11 +54,17 @@ internal sealed class Elevator
 
     private readonly ElevatorSimOptions _simulationOptions;
 
-    private readonly SimulationOpCompletionSource<bool>?[] _floorsToStop;
+    private readonly SimulationOpCompletionSource?[] _floorsToStop;
+
+    private readonly List<ISimulationWorkItem> _doorOpenedEvents = new(), _doorClosedEvents = new();
+
+    private ActivationState _activationState = ActivationState.Inactive;
 
     private int _currentFloor;
 
-    private bool _isActive;
+    private DoorState _doorState = DoorState.Closed;
+
+    private bool _isMoving;
 
     public int CurrentFloor
     {
@@ -41,9 +84,11 @@ internal sealed class Elevator
         }
     }
 
-    internal ElevatorDirection Direction { get; private set; }
+    public ElevatorDirection Direction { get; private set; }
 
-    public bool IsDoorOpen { get; private set; }
+    public bool IsDoorOpen => _doorState == DoorState.Open;
+
+    public bool IsDoorClosed => _doorState == DoorState.Closed;
 
     public Elevator(ISimulationState simulationState, ElevatorSimOptions options, int id)
     {
@@ -57,7 +102,7 @@ internal sealed class Elevator
         _instrument = new(options, _id);
         simulationState.RegisterInstrument(_instrument);
         _passengers = new PassengerEntry?[capacity];
-        _floorsToStop = new SimulationOpCompletionSource<bool>?[options.NumberOfFloors];
+        _floorsToStop = new SimulationOpCompletionSource?[options.NumberOfFloors];
     }
 
     private bool ShouldContinue()
@@ -104,10 +149,82 @@ internal sealed class Elevator
             span.MoveNullsToTheEnd();
     }
 
+    private async SimulationOp<DoorOpeningTicket> OpenDoorsAsync()
+    {
+        if (_doorState != DoorState.Closed)
+        {
+            if (_doorState == DoorState.Closing)
+                _doorState = DoorState.Opening;
+            await WaitForDoorsToOpenAsync();
+            return new(this);
+        }
+
+        _simulationState.LogMessage("Opening doors", _id);
+        _doorState = DoorState.Opening;
+        await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
+        _simulationState.LogMessage("Opened doors", _id);
+        _doorState = DoorState.Open;
+        TriggerDoorEvents();
+
+        return new(this);
+    }
+
+    private async SimulationOp WaitAndCloseDoorsAsync()
+    {
+        if (IsDoorClosed) return;
+
+        await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDuration);
+        _simulationState.LogMessage("Closing doors", _id);
+        _doorState = DoorState.Closing;
+        await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
+        if (_doorState == DoorState.Closing)
+        {
+            _simulationState.LogMessage("Closed doors", _id);
+            _doorState = DoorState.Closed;
+        }
+        else
+        {
+            Debug.Assert(_doorState == DoorState.Opening);
+            _simulationState.LogMessage($"Reopening doors");
+            _doorState = DoorState.Open;
+        }
+        TriggerDoorEvents();
+    }
+
+    private void TriggerDoorEvents()
+    {
+        List<ISimulationWorkItem> workItems;
+        switch (_doorState)
+        {
+            case DoorState.Open:
+                workItems = _doorOpenedEvents;
+                break;
+            case DoorState.Closed:
+                workItems = _doorClosedEvents;
+                break;
+            default:
+                return;
+        }
+        foreach (var workItem in workItems)
+            _simulationState.UnsafeQueueWorkItemNow(workItem);
+        workItems.Clear();
+    }
+
+    private DoorEventAwaitable WaitForDoorsToOpenAsync() =>
+        _doorState == DoorState.Open ? default : new(_doorOpenedEvents);
+
+    private DoorEventAwaitable WaitForDoorsToCloseAsync() =>
+        _doorState == DoorState.Closed ? default : new(_doorClosedEvents);
+
     private async SimulationOp MovingLoop()
     {
+        await WaitForDoorsToCloseAsync();
+        _activationState = ActivationState.Active;
+        _simulationState.LogMessage($"Sprung into motion, heading {Direction}", _id);
+
         while (ShouldContinue())
         {
+            _isMoving = true;
             await Simulation.Delay(_simulationOptions.ElevatorMovingDelay);
             CurrentFloor += (int)Direction;
 
@@ -115,67 +232,87 @@ internal sealed class Elevator
 
             if (arrivedCs is not null)
             {
-                _simulationState.LogMessage($"Stopped at floor {CurrentFloor}, opening doors", _id);
-                await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
-                _simulationState.LogMessage($"Opened doors", _id);
-                IsDoorOpen = true;
-                ReleasePassengersWhoArrived();
-                arrivedCs.SetResult(true);
-                _simulationState.LogMessage($"Closing doors", _id);
-                IsDoorOpen = false;
-                await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDelay);
-                _simulationState.LogMessage($"Closed doors", _id);
+                _isMoving = false;
+                _simulationState.LogMessage($"Stopped at floor {CurrentFloor}", _id);
+                await using (await OpenDoorsAsync())
+                    ReleasePassengersWhoArrived();
+                arrivedCs.SetResult();
 
                 _floorsToStop[CurrentFloor] = null;
+
+                await WaitForDoorsToCloseAsync();
             }
         }
 
-        _isActive = false;
+        _isMoving = false;
+        _activationState = ActivationState.Inactive;
     }
 
     private void Activate(ElevatorDirection direction)
     {
-        if (_isActive)
+        if (_activationState != ActivationState.Inactive)
             return;
-        _isActive = true;
+        _activationState = ActivationState.Activating;
         Direction = direction;
-        _simulationState.LogMessage($"Sprung into motion, heading {Direction}", _id);
         _instrument.OnActivated();
         _ = MovingLoop();
     }
 
-    private SimulationOp<bool> GoToFloor(int floor)
+    private SimulationOp GoToFloor(int floor)
     {
-        if (floor == CurrentFloor) return SimulationOp.FromResult(true);
+        if (floor == CurrentFloor) return SimulationOp.CompletedOp;
         var completionSource = _floorsToStop[floor] ??= new();
         Activate(DirectionExtensions.Create(CurrentFloor, floor));
         return completionSource.Op;
     }
 
-    public SimulationOp Summon(int floor)
+    internal SimulationOp Summon(int floor)
     {
         _simulationState.LogMessage($"Summoned to floor {floor}", _id);
         return GoToFloor(floor);
     }
 
-    public SimulationOp<bool> TryEnter(IElevatorPassenger passenger, int destinationFloor)
+    private bool TryEmbarkPassenger(IElevatorPassenger passenger, int destinationFloor)
     {
-        if (passenger.CurrentFloor != CurrentFloor || !IsDoorOpen)
-            return SimulationOp.FromResult(false);
-
-        if (CurrentFloor == destinationFloor)
-            return SimulationOp.FromResult(true);
+        if (!IsDoorOpen)
+            throw new InvalidOperationException("A passenger cannot embark if the elevator's door is not open.");
 
         var freeSpotIndex = Array.IndexOf(_passengers, null);
         if (freeSpotIndex < 0)
         {
             _simulationState.LogMessage($"Cannot enter {_id}, it is full", passenger.CorrelationId);
-            return SimulationOp.FromResult(false);
+            return false;
         }
 
         _passengers[freeSpotIndex] = new(passenger, destinationFloor);
         _simulationState.LogMessage($"Entered {_id}, going to floor {destinationFloor}", passenger.CorrelationId);
         _instrument.OnPassengerEntered();
+
+        return true;
+    }
+
+    internal async SimulationOp<SimulationOp?> TryEnterAsync(IElevatorPassenger passenger, int destinationFloor)
+    {
+        if (passenger.CurrentFloor != CurrentFloor)
+        {
+            _simulationState.LogMessage($"[{passenger.CorrelationId}] Cannot enter {_id}, it is not in the correct floor.");
+            return null;
+        }
+
+        if (_isMoving)
+        {
+            throw new InvalidOperationException($"[{passenger.CorrelationId}] Cannot enter {_id} while it is moving.");
+        }
+
+        await using (IsDoorOpen ? default : await OpenDoorsAsync())
+        {
+            if (CurrentFloor == destinationFloor)
+                return SimulationOp.CompletedOp;
+
+            if (!TryEmbarkPassenger(passenger, destinationFloor))
+                return null;
+        }
+
         return GoToFloor(destinationFloor);
     }
 }

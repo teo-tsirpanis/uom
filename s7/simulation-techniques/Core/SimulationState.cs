@@ -91,8 +91,6 @@ internal sealed class SimulationState : ISimulationState
     public void RegisterInstrument(ISimulationInstrument instrument)
     {
         ArgumentNullException.ThrowIfNull(instrument);
-        if (instrument is WorkItemQueueInstrument)
-            throw new InvalidOperationException($"Cannot register a {nameof(WorkItemQueueInstrument)} again; it is already registered.");
         _instruments.Add(instrument);
     }
 

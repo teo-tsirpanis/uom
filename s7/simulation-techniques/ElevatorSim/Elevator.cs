@@ -1,5 +1,6 @@
 using Dai19090.SimulationTechniques.Infrastructure;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
@@ -105,7 +106,7 @@ public sealed class Elevator
         _instrument = new(options, _id);
         simulationState.RegisterInstrument(_instrument);
         _passengers = new PassengerEntry?[capacity];
-        _floorsToStop = new SimulationOpCompletionSource?[options.NumberOfFloors];
+        _floorsToStop = new SimulationOpCompletionSource?[options.NumberOfFloors + 1];
     }
 
     private bool ShouldContinue()
@@ -270,10 +271,15 @@ public sealed class Elevator
         return completionSource.Op;
     }
 
-    internal SimulationOp Summon(int floor)
+    internal async SimulationOp Summon(int floor)
     {
         _simulationState.LogMessage($"Summoned to floor {floor}", _id);
-        return GoToFloor(floor);
+        if (floor == CurrentFloor && !_isMoving)
+        {
+            await OpenDoorAsync();
+            return;
+        }
+        await GoToFloor(floor);
     }
 
     private bool TryEmbarkPassenger(IElevatorPassenger passenger, int destinationFloor)
@@ -295,20 +301,22 @@ public sealed class Elevator
         return true;
     }
 
+    [DoesNotReturn]
+    private void ThrowInvalidOperationException(CorrelationId id, string message) =>
+        throw new InvalidOperationException($"{Utilities.FormatLogItem(_simulationState.CurrentTime, id)} {message}");
+
     internal async SimulationOp<SimulationOp?> TryEnterAsync(IElevatorPassenger passenger, int destinationFloor)
     {
+        if (destinationFloor < 0 || destinationFloor >= _floorsToStop.Length)
+            throw new ArgumentOutOfRangeException(nameof(destinationFloor), $"The building has only {_floorsToStop.Length} floors");
+
         if (passenger.CurrentFloor != CurrentFloor)
         {
-            _simulationState.LogMessage($"[{passenger.CorrelationId}] Cannot enter {_id}, it is not in the correct floor.");
+            ThrowInvalidOperationException(passenger.CorrelationId, $"Cannot enter {_id}, it is not in the correct floor.");
             return null;
         }
 
-        if (_isMoving)
-        {
-            throw new InvalidOperationException($"[{passenger.CorrelationId}] Cannot enter {_id} while it is moving.");
-        }
-
-        await OpenDoorAsync();
+        await WaitForDoorToOpenAsync();
 
         if (CurrentFloor == destinationFloor)
             return SimulationOp.CompletedOp;

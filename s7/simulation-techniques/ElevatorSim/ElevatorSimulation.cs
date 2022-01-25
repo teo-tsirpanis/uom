@@ -43,6 +43,8 @@ public sealed class ElevatorSimulation
 
     private readonly Floor[] _floors;
 
+    private readonly PeopleInstrument _peopleInstrument = new();
+
     private readonly IRandomNumberGenerator _random;
 
     private readonly ElevatorSimOptions _simulationOptions;
@@ -58,6 +60,7 @@ public sealed class ElevatorSimulation
         _random = simulationState.Random;
         _simulationOptions = simulationOptions;
         _simulationState = simulationState;
+        simulationState.RegisterInstrument(_peopleInstrument);
 
         _ = SimulationMain();
 
@@ -166,6 +169,8 @@ public sealed class ElevatorSimulation
         LogMessage($"Time to go to the ground floor and leave");
         await GoToFloorAsync(person, 0);
         LogMessage($"Left the building");
+        var departureTime = _simulationState.CurrentTime;
+        _peopleInstrument.ArrivalFulfilled(arrivalTime, departureTime, person.TotalProductiveTime);
 
         void LogMessage(string message) => _simulationState.LogMessage(message, person.CorrelationId);
     }

@@ -21,8 +21,27 @@ public abstract class AbstractElevatorController
 
     protected abstract IEnumerable<Elevator> SelectElevatorsToSummon(int currentFloor, ElevatorDirection direction);
 
+    private async SimulationOp<SimulationOp> CallOnlyElevatorAndGotoFloorAsync(IElevatorPassenger passenger, int destinationFloor)
+    {
+        var elevator = _elevatorCabins[0];
+
+        while (true)
+        {
+            await elevator.Summon(destinationFloor);
+
+            if (await elevator.TryEnterAsync(passenger, destinationFloor) is SimulationOp op)
+                return op;
+
+            _simulationState.LogMessage($"The elevator was full, trying to summon it again", passenger.CorrelationId);
+        }
+    }
+
     public async SimulationOp<SimulationOp> CallElevatorAndGoToFloorAsync(IElevatorPassenger passenger, int destinationFloor)
     {
+        // If we have only one elevator, we can take a simpler path.
+        if (_elevatorCabins.Length == 1)
+            return await CallOnlyElevatorAndGotoFloorAsync(passenger, destinationFloor);
+
         var currentFloor = passenger.CurrentFloor;
         var direction = DirectionExtensions.Create(currentFloor, destinationFloor);
 
@@ -44,9 +63,7 @@ public abstract class AbstractElevatorController
                 // If we can enter it, we return a simulation op that
                 // will complete when we arrive to our destination.
                 if (await chosenElevator.TryEnterAsync(passenger, destinationFloor) is SimulationOp op)
-                {
                     return op;
-                }
 
                 // If we cannot because it is full, we cross it off and wait for one of the rest.
                 var elevatorIdx = Array.IndexOf(elevators, chosenElevatorOp);

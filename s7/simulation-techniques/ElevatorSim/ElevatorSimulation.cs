@@ -7,19 +7,41 @@ namespace Dai19090.SimulationTechniques.ElevatorSim;
 /// </summary>
 public sealed class ElevatorSimulation
 {
-    private record Person(int Id, (int Floor, int DurationOfStay)[] Plan) : IElevatorPassenger
+    private sealed record Person(int Id, (int Floor, int DurationOfStay)[] Plan) : IElevatorPassenger
     {
         public int CurrentFloor { get; set; }
 
+        internal Timestamp LastFloorArrivalTime;
+
+        internal int LastDurationOfStay;
+
         public CorrelationId CorrelationId { get; } = new($"citizen_{Id}");
 
-        public int TotalDurationOfStay() =>
-            Plan.Sum(x => x.DurationOfStay);
+        public int TotalProductiveTime => Plan.Sum(static x => x.DurationOfStay);
+    }
+
+    private sealed class Floor
+    {
+        public readonly FloorInstrument? Instrument;
+
+        public readonly WaitingQueue WaitingQueue;
+
+        public Floor(int floorNumber, ISimulationState simulationState)
+        {
+            // No reason to keep statistics about the ground floor.
+            if (floorNumber != 0)
+            {
+                var instrument = new FloorInstrument(floorNumber);
+                Instrument = instrument;
+                simulationState.RegisterInstrument(instrument);
+            }
+            WaitingQueue = new($"floor_{floorNumber}");
+        }
     }
 
     private readonly AbstractElevatorController _elevatorController;
 
-    private readonly WaitingQueue[] _floorWaitingQueues;
+    private readonly Floor[] _floors;
 
     private readonly IRandomNumberGenerator _random;
 
@@ -32,18 +54,18 @@ public sealed class ElevatorSimulation
         ArgumentNullException.ThrowIfNull(simulationState);
         simulationOptions.Validate();
         _elevatorController = CreateElevatorController(simulationOptions.ElevatorStrategy);
-        _floorWaitingQueues = CreateFloorWaitingQueues();
+        _floors = CreateFloors();
         _random = simulationState.Random;
         _simulationOptions = simulationOptions;
         _simulationState = simulationState;
 
         _ = SimulationMain();
 
-        WaitingQueue[] CreateFloorWaitingQueues()
+        Floor[] CreateFloors()
         {
-            var waitingQueues = new WaitingQueue[simulationOptions.NumberOfFloors + 1];
+            var waitingQueues = new Floor[simulationOptions.NumberOfFloors + 1];
             for (int i = 0; i < waitingQueues.Length; i++)
-                waitingQueues[i] = new($"floor_{i}");
+                waitingQueues[i] = new(i, simulationState);
             return waitingQueues;
         }
 
@@ -58,7 +80,7 @@ public sealed class ElevatorSimulation
     public static SimulationResult Run(ElevatorSimOptions options, SimulationOptions simulationOptions)
     {
         ElevatorSimulation? currentSimulation;
-        return Simulation.Run((state, __) => currentSimulation = new ElevatorSimulation(state, options), simulationOptions);
+        return Simulation.Run((state, _) => currentSimulation = new ElevatorSimulation(state, options), simulationOptions);
     }
 
     private static int RoundToInt(float x) =>
@@ -102,15 +124,28 @@ public sealed class ElevatorSimulation
         return new(id, GenerateRandomPlan());
     }
 
+    private void ArrivedAtFloor(Person person) =>
+        _floors[person.CurrentFloor].Instrument?.ArrivedAtFloor();
+
+    private void LeftFloor(Person person) =>
+        _floors[person.CurrentFloor].Instrument?.LeftTheFloor(person.LastFloorArrivalTime, _simulationState.CurrentTime, person.LastDurationOfStay);
+
     private async SimulationOp GoToFloorAsync(Person person, int floor)
     {
         SimulationOp leftElevatorOp;
+        var currentFloor = person.CurrentFloor;
         // We enter the respective floor's waiting queue.
-        using (await _floorWaitingQueues[person.CurrentFloor].EnterAsync(person.CorrelationId))
+        using (await _floors[currentFloor].WaitingQueue.EnterAsync(person.CorrelationId))
+        {
             // When our turn comes, we call the elevator(s) and enter them when one of them comes.
             leftElevatorOp = await _elevatorController.CallElevatorAndGoToFloorAsync(person, floor);
+
+        }
+        LeftFloor(person);
         // Having entered an elevator, we leave the queue and wait until we arrive at our floor.
         await leftElevatorOp;
+        ArrivedAtFloor(person);
+        person.LastFloorArrivalTime = _simulationState.CurrentTime;
     }
 
     private async SimulationOp PersonMain(Person person)
@@ -125,6 +160,7 @@ public sealed class ElevatorSimulation
             if (person.CurrentFloor != floor)
                 throw new Exception($"{Utilities.FormatLogItem(_simulationState.CurrentTime, person.CorrelationId)} did not arrive at floor {floor} but is at floor {person.CurrentFloor}");
             await Simulation.Delay(durationOfStay);
+            person.LastDurationOfStay = durationOfStay;
         }
 
         LogMessage($"Time to go to the ground floor and leave");

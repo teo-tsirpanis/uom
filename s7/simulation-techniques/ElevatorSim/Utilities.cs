@@ -3,12 +3,6 @@ namespace Dai19090.SimulationTechniques.ElevatorSim;
 internal static class Utilities
 {
     internal static TimeOnly BaseElevatorSimTime => new(8, 0);
-
-    public static void MoveNullsToTheEnd<T> (this Span<T> x) where T: class?
-    {
-        x.Sort(static (x1, x2) => (x1 is null).CompareTo(x2 is null));
-    }
-
     public static string FormatLogItem(Timestamp timestamp, CorrelationId correlationId)
     {
         var time = BaseElevatorSimTime.Add(TimeSpan.FromSeconds(timestamp.Value), out var wrappedDays);
@@ -18,4 +12,11 @@ internal static class Utilities
         else
             return $"[D{wrappedDays + 1} {time:HH:mm:ss} {correlationId.Value}]";
     }
+
+    public static void MoveNullsToTheEnd<T> (this Span<T> x) where T: class?
+    {
+        x.Sort(static (x1, x2) => (x1 is null).CompareTo(x2 is null));
+    }
+
+    public static TimeSpan ToSeconds(this double x) => double.IsFinite(x) ? TimeSpan.FromSeconds(x) : TimeSpan.Zero;
 }

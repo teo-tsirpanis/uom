@@ -25,7 +25,7 @@ public partial class SimulationOp
             try
             {
                 await op;
-                resultOp.SetResult(op);
+                resultOp.TrySetResult(op);
             }
             catch (Exception e)
             {

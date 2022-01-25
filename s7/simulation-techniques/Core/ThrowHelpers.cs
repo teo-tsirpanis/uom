@@ -37,6 +37,6 @@ internal static class ThrowHelpers
     [DoesNotReturn]
     public static void ThrowSimulationOpAlreadyCompleted()
     {
-        throw new InvalidOperationException("SimulationOp must be completed before calling GetResult.");
+        throw new InvalidOperationException("SimulationOp is already completed.");
     }
 }

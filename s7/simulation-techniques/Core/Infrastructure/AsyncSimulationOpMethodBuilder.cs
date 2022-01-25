@@ -5,6 +5,7 @@ namespace Dai19090.SimulationTechniques.Infrastructure;
 
 internal static class AsyncSimulationOpMethodBuilderShared
 {
+    [DebuggerStepThrough]
     public static void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
         // It does some ExecutionContext trickery that can't be done from
         // public APIs. Let's just hope the method remains stateless.
@@ -88,6 +89,7 @@ public struct AsyncSimulationOpMethodBuilder<TResult>
 
     public static AsyncSimulationOpMethodBuilder<TResult> Create() => new(Simulation.GetCurrentState());
 
+    [DebuggerStepThrough]
     public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
         AsyncSimulationOpMethodBuilderShared.Start(ref stateMachine);
 
@@ -125,8 +127,10 @@ public struct AsyncSimulationOpMethodBuilder
 
     public SimulationOp Task => _op ??= new();
 
+    [DebuggerNonUserCode]
     public static AsyncSimulationOpMethodBuilder Create() => new(Simulation.GetCurrentState());
 
+    [DebuggerStepThrough]
     public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine =>
         AsyncSimulationOpMethodBuilderShared.Start(ref stateMachine);
 

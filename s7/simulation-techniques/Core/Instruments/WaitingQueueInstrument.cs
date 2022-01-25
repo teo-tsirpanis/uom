@@ -7,7 +7,9 @@ namespace Dai19090.SimulationTechniques.Instruments;
 /// </summary>
 public class WaitingQueueInstrument : ISimulationInstrument
 {
-    private int _queueLength, _totalArrivalsArea, _simulationDuration;
+    private UpDownAccumulator _queueLengthAccumulator;
+
+    private IntegerAccumulator _waitingTimeAccumulator;
 
     /// <summary>
     /// The <see cref="WaitingQueue">'s name.
@@ -17,32 +19,32 @@ public class WaitingQueueInstrument : ISimulationInstrument
     /// <summary>
     /// The maximum amount of time units an arrival has waited in the queue.
     /// </summary>
-    public int MaxWaitingTime { get; private set; }
+    public int MaxWaitingTime => _waitingTimeAccumulator.Max;
 
     /// <summary>
     /// The total amount of time units spent while waiting in the queue.
     /// </summary>
-    public int TotalWaitingTime { get; private set; }
+    public int TotalWaitingTime => _waitingTimeAccumulator.Total;
 
     /// <summary>
     /// The total number of arrivals that have waited in the queue.
     /// </summary>
-    public int TotalQueueArrivals { get; private set; }
-
-    /// <summary>
-    /// The maximum number of arrivals that have ever waited in the queue at the same time.
-    /// </summary>
-    public int MaxQueueLength { get; private set; }
+    public int TotalQueueArrivals => _waitingTimeAccumulator.SubmissionCount;
 
     /// <summary>
     /// The average time units an arrival has waited in the queue.
     /// </summary>
-    public double AverageWaitingTime => (double)TotalWaitingTime / TotalQueueArrivals;
+    public double AverageWaitingTime => _waitingTimeAccumulator.Average;
+
+    /// <summary>
+    /// The maximum number of arrivals that have ever waited in the queue at the same time.
+    /// </summary>
+    public int MaxQueueLength => _queueLengthAccumulator.Max;
 
     /// <summary>
     /// The average number of arrivals that have waited in the queue at the same time.
     /// </summary>
-    public double AverageQueueLength => (double)_totalArrivalsArea / _simulationDuration;
+    public double AverageQueueLength => _queueLengthAccumulator.Average;
 
     internal WaitingQueueInstrument(string queueName)
     {
@@ -51,28 +53,19 @@ public class WaitingQueueInstrument : ISimulationInstrument
 
     internal void ArrivalCame()
     {
-        _queueLength++;
+        _queueLengthAccumulator.Up();
     }
 
     internal void ArrivalFulfilled(Timestamp startingTime, Timestamp endingTime)
     {
-        _queueLength--;
+        _queueLengthAccumulator.Down();
         var waitingTime = endingTime.Value - startingTime.Value;
-        TotalWaitingTime += waitingTime;
-        TotalQueueArrivals++;
-        if (waitingTime > MaxWaitingTime)
-            MaxWaitingTime = waitingTime;
+        _waitingTimeAccumulator.Submit(waitingTime);
     }
 
     void ISimulationInstrument.OnSimulationTimeChanged(Timestamp newTime)
     {
-        var timePassed = newTime.Value - _simulationDuration;
-        Debug.Assert(timePassed > 0);
-        _totalArrivalsArea += _queueLength * timePassed;
-        if (_queueLength > MaxQueueLength)
-            MaxQueueLength = _queueLength;
-
-        _simulationDuration = newTime.Value;
+        _queueLengthAccumulator.AdvanceTime(newTime);
     }
 
     public void WriteResultsTo(TextWriter writer)

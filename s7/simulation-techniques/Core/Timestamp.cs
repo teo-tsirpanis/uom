@@ -28,6 +28,9 @@ public readonly struct Timestamp : IEquatable<Timestamp>, IComparable<Timestamp>
         return new(ts.Value + offset);
     }
 
+    public static int operator -(Timestamp x1, Timestamp x2) =>
+        x1.Value - x2.Value;
+
     public static bool operator ==(Timestamp left, Timestamp right) => left.Equals(right);
 
     public static bool operator !=(Timestamp left, Timestamp right) => !(left == right);

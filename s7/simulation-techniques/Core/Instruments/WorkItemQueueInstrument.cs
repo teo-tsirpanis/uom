@@ -23,6 +23,12 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
     /// </summary>
     public int TotalWorkItems { get; private set; }
 
+    public double SimulationTimeInIdle => 1 - (double)TotalFruitfulTimeUnits / SimulationDuration;
+
+    public double AverageWorkItemsPerTimeUnit => (double)TotalWorkItems / SimulationDuration;
+
+    public double AverageWorkItemsPerFruitfulTimeUnit => (double)TotalWorkItems / TotalFruitfulTimeUnits;
+
     internal WorkItemQueueInstrument() { }
 
     internal void WorkItemRan()
@@ -42,9 +48,9 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
         writer.WriteLine($"Total work items executed: {TotalWorkItems}");
         writer.WriteLine($"Total time units passed: {SimulationDuration}");
         writer.WriteLine($"Total fruitful time units (with scheduled work items): {TotalFruitfulTimeUnits}");
-        writer.WriteLine($"Idle simulation time: {1 - (double)TotalFruitfulTimeUnits / SimulationDuration:P2}");
-        writer.WriteLine($"Average work items per time unit: {TotalWorkItems / (double)SimulationDuration:G2}");
-        writer.WriteLine($"Average work items per fruitful time unit: {TotalWorkItems / (double)TotalFruitfulTimeUnits:G2}");
+        writer.WriteLine($"Idle simulation time: {SimulationTimeInIdle:P2}");
+        writer.WriteLine($"Average work items per time unit: {AverageWorkItemsPerTimeUnit:G2}");
+        writer.WriteLine($"Average work items per fruitful time unit: {AverageWorkItemsPerFruitfulTimeUnit:G2}");
         writer.WriteLine();
     }
 }

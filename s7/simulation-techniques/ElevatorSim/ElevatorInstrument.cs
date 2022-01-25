@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using Dai19090.SimulationTechniques.Instruments;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
@@ -11,19 +11,19 @@ public sealed class ElevatorInstrument : ISimulationInstrument
 
     private readonly int _floorDelay;
 
-    private int _simulationDuration, _currentPassengers, _totalTimeWithPassengers;
+    private UpDownAccumulator _totalPassengersAccumulator;
 
-    private long _totalPassengersArea;
+    private int _simulationDuration;
 
     /// <summary>
     /// The average number of passengers in the elevator, at times where it had passengers.
     /// </summary>
-    public double AverageNonEmptyOccupancy => (double)_totalPassengersArea / _totalTimeWithPassengers;
+    public double AverageNonEmptyOccupancy => _totalPassengersAccumulator.AverageNonZero;
 
     /// <summary>
     /// The average number of passengers in the elevator, at all times.
     /// </summary>
-    public double AverageOccupancy => (double)_totalPassengersArea / _simulationDuration;
+    public double AverageOccupancy => _totalPassengersAccumulator.Average;
 
     /// <summary>
     /// The total number of times the elevator has left the idle state and started moving.
@@ -65,22 +65,18 @@ public sealed class ElevatorInstrument : ISimulationInstrument
 
     internal void OnOneFloorTraveled() => TotalFloorsTraveled++;
 
-    internal void OnPassengerEntered() => _currentPassengers++;
+    internal void OnPassengerEntered() => _totalPassengersAccumulator.Up();
 
     internal void OnPassengerLeft()
     {
-        _currentPassengers--;
+        _totalPassengersAccumulator.Down();
         TotalPassengersServed++;
-        Debug.Assert(_currentPassengers >= 0);
     }
 
     void ISimulationInstrument.OnSimulationTimeChanged(Timestamp newTime)
     {
-        var timePassed = newTime.Value - _simulationDuration;
-        _totalPassengersArea += timePassed * _currentPassengers;
+        _totalPassengersAccumulator.AdvanceTime(newTime);
         _simulationDuration = newTime.Value;
-        if (_currentPassengers != 0)
-            _totalTimeWithPassengers += timePassed;
     }
 
     public void WriteResultsTo(TextWriter writer)

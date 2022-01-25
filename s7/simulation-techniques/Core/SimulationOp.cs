@@ -90,7 +90,12 @@ public partial class SimulationOp
     {
         if (!_isCompleted)
             ThrowHelpers.ThrowSimulationOpNotCompleted();
-        _exception?.Throw();
+
+        if (_exception is ExceptionDispatchInfo edi)
+        {
+            Simulation.GetCurrentState().ExceptionHandled(edi.SourceException);
+            edi.Throw();
+        }
     }
 
     internal bool TrySetResult()
@@ -104,6 +109,7 @@ public partial class SimulationOp
     {
         if (!TryComplete()) return false;
         _exception = ExceptionDispatchInfo.Capture(exception);
+        Simulation.GetCurrentState().ExceptionThrown(exception);
         InvokeContinuations();
         return true;
     }

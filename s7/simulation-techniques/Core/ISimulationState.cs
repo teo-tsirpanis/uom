@@ -64,4 +64,19 @@ public interface ISimulationState
     /// <param name="message">The message's content.</param>
     /// <param name="correlationId">The message's correlation ID. Defaults to <see cref="CorrelationId.Default"/>.</param>
     void LogMessage(string message, CorrelationId correlationId = default);
+
+    /// <summary>
+    /// Signals that an exception was thrown inside the simulation.
+    /// </summary>
+    /// <remarks>
+    /// Unless the same exception is passed to <see cref="ExceptionHandled"/>,
+    /// it will be thrown when the simulation ends.
+    /// </remarks>
+    void ExceptionThrown(Exception ex);
+
+    /// <summary>
+    /// Signals that an exception has been handled inside the
+    /// simulation and does not need to be thrown when the simulation ends.
+    /// </summary>
+    void ExceptionHandled(Exception ex);
 }

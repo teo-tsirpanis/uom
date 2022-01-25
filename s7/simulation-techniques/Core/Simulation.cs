@@ -41,6 +41,8 @@ public static partial class Simulation
 
         while (state.RunNextWorkItem());
 
+        state.ThrowUnhandledExceptions();
+
         return new(state.CurrentTime.Value, state.GetInstruments());
     }
 

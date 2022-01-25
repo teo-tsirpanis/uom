@@ -15,6 +15,8 @@ internal sealed class SimulationState : ISimulationState
 
     private readonly List<ISimulationInstrument> _instruments;
 
+    private readonly HashSet<Exception> _unhandledExceptions = new();
+
     private readonly LogMessageHandler? _fLog;
 
     private Timestamp _currentTime;
@@ -56,6 +58,12 @@ internal sealed class SimulationState : ISimulationState
         return true;
     }
 
+    internal void ThrowUnhandledExceptions()
+    {
+        if (_unhandledExceptions.Count > 0)
+            throw new AggregateException("There were unhandled exceptions in the simulation.", _unhandledExceptions);
+    }
+
     public SimulationState(SimulationOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -92,5 +100,15 @@ internal sealed class SimulationState : ISimulationState
     {
         ArgumentNullException.ThrowIfNull(message);
         _fLog?.Invoke(CurrentTime, correlationId, message);
+    }
+
+    public void ExceptionThrown(Exception ex)
+    {
+        _unhandledExceptions.Add(ex);
+    }
+
+    public void ExceptionHandled(Exception ex)
+    {
+        _unhandledExceptions.Remove(ex);
     }
 }

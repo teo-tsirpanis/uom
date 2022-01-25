@@ -1,10 +1,12 @@
 using Dai19090.SimulationTechniques.Instruments;
+using System.Diagnostics;
 
 namespace Dai19090.SimulationTechniques;
 
 /// <summary>
 /// An asynchronous waiting queue for simulation work items.
 /// </summary>
+[DebuggerDisplay("Occupied: {_isOccupied}, Arrivals in queue: {_queue.Count}")]
 public sealed class WaitingQueue
 {
     /// <summary>
@@ -37,9 +39,9 @@ public sealed class WaitingQueue
     private readonly ISimulationState _simulationState;
 
     /// <summary>
-    /// The waiting queue's name. Totally informative.
+    /// The waiting queue's correlation ID. Used for diagnostics.
     /// </summary>
-    public string Name { get; }
+    public CorrelationId Id { get; }
 
     /// <summary>
     /// The waiting queue's associated <see cref="WaitingQueueInstrument"/>.
@@ -58,7 +60,7 @@ public sealed class WaitingQueue
         ArgumentNullException.ThrowIfNull(name);
         var simulationState = Simulation.GetCurrentState();
 
-        Name = name;
+        Id = new(name);
         Instrument = new WaitingQueueInstrument(name);
         _simulationState = simulationState;
         simulationState.RegisterInstrument(Instrument);
@@ -76,23 +78,23 @@ public sealed class WaitingQueue
     public SimulationOp<QueueTicket> EnterAsync(CorrelationId correlationId)
     {
         var currentSimulationTime = _simulationState.CurrentTime;
-        _simulationState.LogMessage($"{Name}: entered", correlationId);
+        _simulationState.LogMessage($"{correlationId} entered", Id);
         Instrument.ArrivalCame();
 
         // If the queue is empty, the arrival is immediately fulfilled.
         // The instrument receives both events in quick succession, and
         // we return an already completed operation.
-        if (_isOccupied)
+        if (!_isOccupied)
         {
             _isOccupied = true;
             Instrument.ArrivalFulfilled(currentSimulationTime, currentSimulationTime);
-            _simulationState.LogMessage($"{Name}: found an empty queue and will be served immediately", correlationId);
+            _simulationState.LogMessage($"{correlationId} found an empty queue and will be served immediately", Id);
             return SimulationOp.FromResult(CreateTicket(correlationId));
         }
 
         var ticket = new SimulationOpCompletionSource<QueueTicket>();
         _queue.Enqueue(new(correlationId, currentSimulationTime, ticket));
-        _simulationState.LogMessage($"{Name}: queued along with {_queue.Count - 1} other arrivals in front of it", correlationId);
+        _simulationState.LogMessage($"{correlationId} is queued along with {_queue.Count - 1} other arrivals in front of it", Id);
         return ticket.Op;
     }
 
@@ -101,7 +103,7 @@ public sealed class WaitingQueue
         if (!_isOccupied)
             throw new InvalidOperationException("Trying to exit an unoccupied queue.");
 
-        _simulationState.LogMessage($"{Name}: leaving", exitingArrivalId);
+        _simulationState.LogMessage($"{exitingArrivalId} is leaving", Id);
 
         ProcessNextInLine();
     }
@@ -112,12 +114,12 @@ public sealed class WaitingQueue
         {
             _isOccupied = true;
             Instrument.ArrivalFulfilled(arrival.ArrivalTime, _simulationState.CurrentTime);
-            _simulationState.LogMessage($"{Name}: served", arrival.Id);
+            _simulationState.LogMessage($"{arrival.Id} was served", Id);
             arrival.CompletionSource.SetResult(CreateTicket(arrival.Id));
         }
         else
         {
-            _simulationState.LogMessage($"{Name}: the queue is now empty");
+            _simulationState.LogMessage($"The queue is now empty", Id);
             _isOccupied = false;
         }
     }

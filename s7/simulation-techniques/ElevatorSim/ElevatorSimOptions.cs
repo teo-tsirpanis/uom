@@ -1,12 +1,13 @@
 using Dai19090.SimulationTechniques.Randomness;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
 public enum ElevatorStrategy { Simple, Smart }
 
-public sealed class ElevatorSimOptions : SimulationOptions
+public sealed class ElevatorSimOptions
 {
     private ulong? _seed;
 
@@ -35,21 +36,12 @@ public sealed class ElevatorSimOptions : SimulationOptions
     public ulong? Seed
     {
         get => _seed;
-        set
-        {
-            var seed = value ?? GenerateRandomSeed();
-            _seed = seed;
-            RandomNumberGenerator = new Pcg32Generator(seed);
-        }
+        set => _seed = value ?? IRandomNumberGenerator.GetRandomSeed();
     }
 
-    public ElevatorSimOptions() : base(new Pcg32Generator(0)) { }
-
-    private static ulong GenerateRandomSeed()
+    public ElevatorSimOptions()
     {
-        Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-        System.Security.Cryptography.RandomNumberGenerator.Fill(buffer);
-        return MemoryMarshal.Read<ulong>(buffer);
+        Seed = null;
     }
 
     public void Validate()

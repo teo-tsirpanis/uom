@@ -273,7 +273,7 @@ public sealed class Elevator
 
     internal async SimulationOp Summon(int floor)
     {
-        _simulationState.LogMessage($"Summoned to floor {floor}", _id);
+        _simulationState.LogMessage($"Summoned to floor {floor} from floor {CurrentFloor}", _id);
         if (floor == CurrentFloor && !_isMoving)
         {
             await OpenDoorAsync();

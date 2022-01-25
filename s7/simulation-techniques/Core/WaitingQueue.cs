@@ -78,7 +78,7 @@ public sealed class WaitingQueue
     public SimulationOp<QueueTicket> EnterAsync(CorrelationId correlationId)
     {
         var currentSimulationTime = _simulationState.CurrentTime;
-        _simulationState.LogMessage($"{correlationId} entered", Id);
+        _simulationState.LogMessage($"{correlationId} entered the queue", Id);
         Instrument.ArrivalCame();
 
         // If the queue is empty, the arrival is immediately fulfilled.
@@ -103,7 +103,7 @@ public sealed class WaitingQueue
         if (!_isOccupied)
             throw new InvalidOperationException("Trying to exit an unoccupied queue.");
 
-        _simulationState.LogMessage($"{exitingArrivalId} is leaving", Id);
+        _simulationState.LogMessage($"{exitingArrivalId} is leaving the queue", Id);
 
         ProcessNextInLine();
     }

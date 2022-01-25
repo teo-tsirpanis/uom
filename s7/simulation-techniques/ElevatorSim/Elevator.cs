@@ -253,21 +253,21 @@ public sealed class Elevator
         _activationState = ActivationState.Inactive;
     }
 
-    private void Activate(ElevatorDirection direction)
+    private void Activate(int currentFloor, int destinationFloor)
     {
         if (_activationState != ActivationState.Inactive)
             return;
         _activationState = ActivationState.Activating;
-        Direction = direction;
+        if (currentFloor != destinationFloor)
+            Direction = DirectionExtensions.Create(currentFloor, destinationFloor);
         _instrument.OnActivated();
         _ = MovingLoop();
     }
 
     private SimulationOp GoToFloor(int floor)
     {
-        if (floor == CurrentFloor) return SimulationOp.CompletedOp;
         var completionSource = _floorsToStop[floor] ??= new();
-        Activate(DirectionExtensions.Create(CurrentFloor, floor));
+        Activate(CurrentFloor, floor);
         return completionSource.Op;
     }
 
@@ -285,7 +285,7 @@ public sealed class Elevator
     private bool TryEmbarkPassenger(IElevatorPassenger passenger, int destinationFloor)
     {
         if (!IsDoorOpen)
-            throw new InvalidOperationException("A passenger cannot embark if the elevator's door is not open.");
+            ThrowInvalidOperationException(passenger.CorrelationId, "A passenger cannot embark if the elevator's door is not open.");
 
         var freeSpotIndex = Array.IndexOf(_passengers, null);
         if (freeSpotIndex < 0)
@@ -319,7 +319,10 @@ public sealed class Elevator
         await WaitForDoorToOpenAsync();
 
         if (CurrentFloor == destinationFloor)
+        {
+            _simulationState.LogMessage($"Staying on floor {destinationFloor}", passenger.CorrelationId);
             return SimulationOp.CompletedOp;
+        }
 
         if (!TryEmbarkPassenger(passenger, destinationFloor))
             return null;

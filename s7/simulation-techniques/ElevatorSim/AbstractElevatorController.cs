@@ -1,3 +1,4 @@
+using Dai19090.SimulationTechniques.Infrastructure;
 using System.Diagnostics;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
@@ -21,18 +22,24 @@ public abstract class AbstractElevatorController
 
     protected abstract IEnumerable<Elevator> SelectElevatorsToSummon(int currentFloor, ElevatorDirection direction);
 
+    private DelayAwaitable CoolDownUntilRetry() =>
+        // We wait for the minimum time to be absolutely sure that the elevators'
+        // doors have closed, to avoid spamming the button without getting anything done.
+        Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDuration + _simulationOptions.ElevatorDoorOpeningDelay + 1);
+
     private async SimulationOp<SimulationOp> CallOnlyElevatorAndGotoFloorAsync(IElevatorPassenger passenger, int destinationFloor)
     {
         var elevator = _elevatorCabins[0];
 
         while (true)
         {
-            await elevator.Summon(destinationFloor);
+            await elevator.Summon(passenger.CurrentFloor);
 
             if (await elevator.TryEnterAsync(passenger, destinationFloor) is SimulationOp op)
                 return op;
 
             _simulationState.LogMessage($"The elevator was full, trying to summon it again", passenger.CorrelationId);
+            await CoolDownUntilRetry();
         }
     }
 
@@ -73,7 +80,7 @@ public abstract class AbstractElevatorController
             // If all the elevators are full, we try to ask from the controller again.
             _simulationState.LogMessage($"All elevators were full, trying to summon them again", passenger.CorrelationId);
             // But first we wait for a bit until the elevators have left the floor.
-            await Simulation.Delay(_simulationOptions.ElevatorDoorOpeningDuration);
+            await CoolDownUntilRetry();
         }
 
         static async SimulationOp<Elevator> SummonImpl(int floor, Elevator elevator)

@@ -53,6 +53,11 @@ public sealed class ElevatorSimOptions
         AssertIsPositive(ElevatorDoorOpeningDelay);
         AssertIsPositive(ElevatorDoorOpeningDuration);
         AssertIsPositive(ElevatorCapacity);
+        AssertIsFinite(DurationOfStayOnFloor.Mean);
+        AssertIsFinite(DurationOfStayOnFloor.Stdev);
+        AssertIsFinite(NumberOfFloorsVisited.Mean);
+        AssertIsFinite(NumberOfFloorsVisited.Stdev);
+        AssertIsFinite(MeanTimeBetweenArrivals);
         if (MeanTimeBetweenArrivals <= 0)
             exceptions.Add(new ArgumentOutOfRangeException(nameof(MeanTimeBetweenArrivals), MeanTimeBetweenArrivals, "Value must be greater than zero."));
         if (!Enum.IsDefined(ElevatorStrategy))
@@ -61,16 +66,22 @@ public sealed class ElevatorSimOptions
         if (exceptions.Count > 0)
             throw new AggregateException("Validating options failed", exceptions);
 
-        void AssertIsPositive(int x, [CallerArgumentExpression("x")] string? expression = null)
+        void AssertIsPositive(int x, [CallerArgumentExpression("x")] string expression = "")
         {
             if (x < 0)
                 exceptions!.Add(new ArgumentOutOfRangeException(expression, x, "Value must be positive."));
         }
 
-        void AssertIsStrictlyPositive(int x, [CallerArgumentExpression("x")] string? expression = null)
+        void AssertIsStrictlyPositive(int x, [CallerArgumentExpression("x")] string expression = "")
         {
             if (x <= 0)
                 exceptions!.Add(new ArgumentOutOfRangeException(expression, x, "Value must be greater than zero."));
+        }
+
+        void AssertIsFinite(float x, [CallerArgumentExpression("x")] string expression = "")
+        {
+            if (!float.IsFinite(x))
+                exceptions!.Add(new ArgumentOutOfRangeException(expression, x, "Value must be finite"));
         }
     }
 }

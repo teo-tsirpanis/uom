@@ -16,18 +16,18 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
     /// <summary>
     /// The simulation's time units where work items were executed.
     /// </summary>
-    public int TotalFruitfulTimeUnits { get; private set; }
+    public int TotalProductiveTimeUnits { get; private set; }
 
     /// <summary>
     /// The total number of work items that were executed in this simulation.
     /// </summary>
     public int TotalWorkItems { get; private set; }
 
-    public double SimulationTimeInIdle => 1 - (double)TotalFruitfulTimeUnits / SimulationDuration;
+    public double SimulationPercentageInIdle => 1 - (double)TotalProductiveTimeUnits / SimulationDuration;
 
     public double AverageWorkItemsPerTimeUnit => (double)TotalWorkItems / SimulationDuration;
 
-    public double AverageWorkItemsPerFruitfulTimeUnit => (double)TotalWorkItems / TotalFruitfulTimeUnits;
+    public double AverageWorkItemsPerProductiveTimeUnit => (double)TotalWorkItems / TotalProductiveTimeUnits;
 
     internal WorkItemQueueInstrument() { }
 
@@ -39,7 +39,7 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
     void ISimulationInstrument.OnSimulationTimeChanged(Timestamp newTime)
     {
         SimulationDuration = newTime.Value;
-        TotalFruitfulTimeUnits++;
+        TotalProductiveTimeUnits++;
     }
 
     public void WriteResultsTo(TextWriter writer)
@@ -47,10 +47,10 @@ public sealed class WorkItemQueueInstrument : ISimulationInstrument
         writer.WriteLine($"------------------WORK ITEM QUEUE STATISTICS------------------");
         writer.WriteLine($"Total work items executed: {TotalWorkItems}");
         writer.WriteLine($"Total time units passed: {SimulationDuration}");
-        writer.WriteLine($"Total fruitful time units (with scheduled work items): {TotalFruitfulTimeUnits}");
-        writer.WriteLine($"Idle simulation time: {SimulationTimeInIdle:P2}");
+        writer.WriteLine($"Total productive time units (with scheduled work items): {TotalProductiveTimeUnits}");
+        writer.WriteLine($"Idle simulation time: {SimulationPercentageInIdle:P2}");
         writer.WriteLine($"Average work items per time unit: {AverageWorkItemsPerTimeUnit:G2}");
-        writer.WriteLine($"Average work items per fruitful time unit: {AverageWorkItemsPerFruitfulTimeUnit:G2}");
+        writer.WriteLine($"Average work items per productive time unit: {AverageWorkItemsPerProductiveTimeUnit:G2}");
         writer.WriteLine();
     }
 }

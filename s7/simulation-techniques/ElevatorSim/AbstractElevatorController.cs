@@ -17,7 +17,7 @@ public abstract class AbstractElevatorController
         _simulationOptions = options;
         _simulationState = simulationState;
         for (int i = 0; i < _elevatorCabins.Length; i++)
-            _elevatorCabins[i] = new Elevator(simulationState, options, i);
+            _elevatorCabins[i] = new Elevator(simulationState, options, i + 1);
     }
 
     protected abstract IEnumerable<Elevator> SelectElevatorsToSummon(int currentFloor, ElevatorDirection direction);

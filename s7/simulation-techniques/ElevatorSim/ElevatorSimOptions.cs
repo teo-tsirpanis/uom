@@ -4,6 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(ElevatorSimOptions))]
+internal partial class ElevatorSimJsonContext : JsonSerializerContext { }
+
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ElevatorStrategy { Simple, Smart }
 

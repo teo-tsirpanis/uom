@@ -1,8 +1,10 @@
 using Dai19090.SimulationTechniques.Randomness;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Dai19090.SimulationTechniques.ElevatorSim;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ElevatorStrategy { Simple, Smart }
 
 public sealed class ElevatorSimOptions

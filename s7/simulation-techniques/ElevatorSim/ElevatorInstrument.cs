@@ -41,14 +41,14 @@ public sealed class ElevatorInstrument : ISimulationInstrument
     public int TotalPassengersServed { get; private set; }
 
     /// <summary>
-    /// The total amount of time units in which the elevator has been moving.
+    /// The total amount of time where the elevator has spent moving.
     /// </summary>
-    public int TimeInMotion => _floorDelay * TotalFloorsTraveled;
+    public TimeSpan TimeInMotion => TimeSpan.FromSeconds(_floorDelay * TotalFloorsTraveled);
 
     /// <summary>
     /// The percentage of time in the simulation the elevator has been moving.
     /// </summary>
-    public double PercentageInMotion => (double)TimeInMotion / _simulationDuration;
+    public double PercentageInMotion => TimeInMotion.TotalSeconds / _simulationDuration;
 
     /// <summary>
     /// The elevator's name.
@@ -83,7 +83,7 @@ public sealed class ElevatorInstrument : ISimulationInstrument
     {
         writer.WriteLine($"------------------{ElevatorName} STATISTICS------------------");
         writer.WriteLine($"Total floors traveled: {TotalFloorsTraveled}");
-        writer.WriteLine($"Time units in motion: {TimeInMotion}");
+        writer.WriteLine($"Time in motion: {TimeInMotion}");
         writer.WriteLine($"Percentage in motion: {PercentageInMotion:P2}");
         writer.WriteLine($"Total activations: {TotalActivations}");
         writer.WriteLine($"Total passengers served: {TotalPassengersServed}");

@@ -19,4 +19,6 @@ internal static class Utilities
     }
 
     public static TimeSpan ToSeconds(this double x) => double.IsFinite(x) ? TimeSpan.FromSeconds(x) : TimeSpan.Zero;
+
+    public static TimeSpan ToSeconds(this float x) => float.IsFinite(x) ? TimeSpan.FromSeconds(x) : TimeSpan.Zero;
 }

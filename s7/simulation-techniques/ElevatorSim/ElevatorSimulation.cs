@@ -92,16 +92,11 @@ public sealed class ElevatorSimulation
 
     private int GetRandomFloor(int existingFloor)
     {
-        // Let's say that we are on the first out of five floors.
-        // totalFloors will be 5. The zeroth floor is only used
-        // to enter and exit the building.
         var totalFloors = _simulationOptions.NumberOfFloors;
-        // floor will have one of 1, 2, 3, 4. One less possible value
-        // than the number of floors.
-        var floor = _random.NextInt32UniformClosedOpen(1, totalFloors);
-        // Then, if we roll the same floor again (we don't want to), we
-        // will return the top floor, ensuring equidistribution of results.
-        return floor == existingFloor ? totalFloors : floor;
+        // We keep generating floor numbers until they are different from the existing floor.
+        while (true)
+            if (_random.NextInt32UniformClosedOpen(1, totalFloors + 1) is int floor && floor != existingFloor)
+                return floor;
     }
 
     private (int Floor, int DurationOfStay)[] GenerateRandomPlan()

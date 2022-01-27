@@ -44,7 +44,7 @@ public class WaitingQueueInstrument : ISimulationInstrument
     /// <summary>
     /// The average number of arrivals that have waited in the queue at the same time.
     /// </summary>
-    public double AverageQueueLength => _queueLengthAccumulator.Average;
+    public double AverageQueueLength => _queueLengthAccumulator.AverageNonZero;
 
     internal WaitingQueueInstrument(string queueName)
     {

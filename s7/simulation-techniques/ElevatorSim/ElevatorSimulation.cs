@@ -76,7 +76,8 @@ public sealed class ElevatorSimulation
             strategy switch
             {
                 ElevatorStrategy.Simple => new SimpleElevatorController(simulationState, simulationOptions),
-                _ => throw new NotImplementedException()
+                ElevatorStrategy.Smart => new SmartElevatorController(simulationState, simulationOptions),
+                _ => throw new ArgumentOutOfRangeException(nameof(strategy))
             };
     }
 
@@ -177,6 +178,8 @@ public sealed class ElevatorSimulation
 
     private async SimulationOp SimulationMain()
     {
+        // We generate the people beforehand to ensure identical results
+        // accross elevator controller implementations that might use randomness.
         var allArrivals = new (Person Person, int TimeUntilNext)[_simulationOptions.TotalArrivals];
         var scale = 1.0f / _simulationOptions.MeanTimeBetweenArrivals;
         for (int i = 1; i <= allArrivals.Length; i++)

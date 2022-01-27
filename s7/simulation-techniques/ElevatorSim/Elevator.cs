@@ -57,8 +57,6 @@ public sealed class Elevator
 
     private DoorState _doorState = DoorState.Closed;
 
-    private bool _isMoving;
-
     public int CurrentFloor
     {
         get => _currentFloor;
@@ -83,12 +81,16 @@ public sealed class Elevator
 
     public bool IsDoorClosed => _doorState == DoorState.Closed;
 
+    public bool IsActive => _activationState == ActivationState.Active;
+
+    public bool IsMoving { get; private set; }
+
     private string DebugInfo
     {
         get
         {
             var calledFloors = _floorsToStop.Select((x, idx) => (x, idx)).Where(x => x.x is not null).Select(x => x.idx);
-            return $"{_activationState} at floor {CurrentFloor}, Moving: {_isMoving}, Direction: {Direction}, Doors are {_doorState}, " +
+            return $"{_activationState} at floor {CurrentFloor}, Moving: {IsMoving}, Direction: {Direction}, Doors are {_doorState}, " +
                 $"{_passengers.Count(x => x is not null)} passengers inside, " +
                 $"Called by floors [{string.Join(',', calledFloors)}]";
         }
@@ -108,6 +110,8 @@ public sealed class Elevator
         _passengers = new PassengerEntry?[capacity];
         _floorsToStop = new SimulationOpCompletionSource?[options.NumberOfFloors + 1];
     }
+
+    public override string ToString() => _id.Value!;
 
     private bool ShouldContinue()
     {
@@ -229,7 +233,7 @@ public sealed class Elevator
 
         while (ShouldContinue())
         {
-            _isMoving = true;
+            IsMoving = true;
             await Simulation.Delay(_simulationOptions.ElevatorMovingDelay);
             CurrentFloor += (int)Direction;
 
@@ -237,7 +241,7 @@ public sealed class Elevator
 
             if (arrivedCs is not null)
             {
-                _isMoving = false;
+                IsMoving = false;
                 _simulationState.LogMessage($"Stopped at floor {CurrentFloor}", _id);
                 await OpenDoorAsync();
                 ReleasePassengersWhoArrived();
@@ -249,7 +253,7 @@ public sealed class Elevator
             }
         }
 
-        _isMoving = false;
+        IsMoving = false;
         _activationState = ActivationState.Inactive;
     }
 
@@ -274,7 +278,7 @@ public sealed class Elevator
     internal async SimulationOp Summon(int floor)
     {
         _simulationState.LogMessage($"Summoned to floor {floor} from floor {CurrentFloor}", _id);
-        if (floor == CurrentFloor && !_isMoving)
+        if (floor == CurrentFloor && !IsMoving)
         {
             await OpenDoorAsync();
             return;

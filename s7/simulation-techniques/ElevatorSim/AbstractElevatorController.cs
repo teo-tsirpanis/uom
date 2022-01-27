@@ -20,6 +20,18 @@ public abstract class AbstractElevatorController
             _elevatorCabins[i] = new Elevator(simulationState, options, i + 1);
     }
 
+    protected static IEnumerable<Elevator> PickTop(IEnumerable<(Elevator elevator, int rank)> elevatorsRanked)
+    {
+        int lastRank = -1;
+        foreach (var (elevator, rank) in elevatorsRanked.OrderBy(e => e.rank))
+        {
+            if (lastRank >= 0 && rank > lastRank)
+                yield break;
+            lastRank = rank;
+            yield return elevator;
+        }
+    }
+
     protected abstract IEnumerable<Elevator> SelectElevatorsToSummon(int currentFloor, ElevatorDirection direction);
 
     private DelayAwaitable CoolDownUntilRetry() =>

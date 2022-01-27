@@ -12,18 +12,10 @@ internal sealed class SimpleElevatorController : AbstractElevatorController
     {
         var elevatorsSorted =
             from elevator in _elevatorCabins
-            orderby Math.Abs(elevator.CurrentFloor - currentFloor)
-            select elevator;
+            let distance = Math.Abs(elevator.CurrentFloor - currentFloor)
+            orderby distance
+            select (elevator, distance);
 
-        var lastDistance = -1;
-
-        foreach (var elevator in elevatorsSorted)
-        {
-            var distance = Math.Abs(elevator.CurrentFloor - currentFloor);
-            if (lastDistance >= 0 && distance > lastDistance)
-                yield break;
-            lastDistance = distance;
-            yield return elevator;
-        }
+        return PickTop(elevatorsSorted);
     }
 }

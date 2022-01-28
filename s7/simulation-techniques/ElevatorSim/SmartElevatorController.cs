@@ -41,8 +41,10 @@ internal sealed class SmartElevatorController : AbstractElevatorController
         LogMessage("Trying to intelligently pick an elevator");
         var smartPick =
             from elevator in _elevatorCabins
-            where elevator.IsMoving ? (direction == ElevatorDirection.Up ? elevator.CurrentFloor < currentFloor : elevator.CurrentFloor > currentFloor)
-            : (direction == ElevatorDirection.Up ? elevator.CurrentFloor <= currentFloor : elevator.CurrentFloor >= currentFloor)
+            where
+            !elevator.IsActive
+            || (!elevator.IsMoving && elevator.CurrentFloor == currentFloor)
+            || (direction == elevator.Direction && direction == ElevatorDirection.Up ? elevator.CurrentFloor < currentFloor : elevator.CurrentFloor > currentFloor)
             let distance = Math.Abs(elevator.CurrentFloor - currentFloor)
             orderby distance
             select (elevator, distance);

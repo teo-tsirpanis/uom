@@ -28,3 +28,81 @@
     * Δηλώνουμε με κάποιον τρόπο ότι έχουμε βρει τη λέξη που αντιστοιχεί στον κόμβο $x$, στη θέση $matchPos$.
 
 ### Η βιβλιοθήκη κανονικών εκφράσεων του .NET
+
+Από την πρώτη του κυκλοφορία το 2002, το προγραμματιστικό περιβάλλον .NET προσφέρει μια πλούσια βιβλιοθήκη κανονικών εκφράσεων, η οποία βρίσκεται στο namespace `System.Text.RegularExpressions`. Τα τελευταία χρόνια υπέστη σημαντικές βελτιώσεις στις εκδόσεις [.NET 5](https://devblogs.microsoft.com/dotnet/regex-performance-improvements-in-net-5/) και [.NET 7](https://devblogs.microsoft.com/dotnet/regular-expression-improvements-in-dotnet-7/), το οποίο θα κυκλοφορήσει τον Νοέμβριο του 2022.
+
+Η χρήση της βιβλιοθήκης ξεκινάει με την κλάση `Regex`. Δημιουργούμε ένα αντικείμενο αυτού του τύπου, δίνοντας στον δημιουργό το μοτίβο και [επιπλέον επιλογές](https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regexoptions?view=net-7.0), και το χρησιμοποιούμε για να κάνουμε αντιστοιχήσεις σε κείμενο.
+
+Ακολουθεί ένα απλό παράδειγμα χρήσης, παρμένο από [την τεκμηρίωση της κλάσης](https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex?view=net-6.0#examples):
+
+```csharp
+using System;
+using System.Text.RegularExpressions;
+
+// Define a regular expression for repeated words.
+Regex rx = new Regex(@"\b(?<word>\w+)\s+(\k<word>)\b",
+    RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+// Define a test string.
+string text = "The the quick brown fox  fox jumps over the lazy dog dog.";
+
+// Find matches.
+MatchCollection matches = rx.Matches(text);
+
+// Report the number of matches found.
+Console.WriteLine($"{matches.Count} matches found in:\n   {text}");
+
+// Report on each match.
+foreach (Match match in matches)
+{
+    GroupCollection groups = match.Groups;
+    Console.WriteLine($"'{groups["word"].Value}' repeated at positions {groups[0].Index} and {groups[1].Index}");
+}
+
+// The example produces the following output to the console:
+//       3 matches found in:
+//          The the quick brown fox  fox jumps over the lazy dog dog.
+//       'The' repeated at positions 0 and 4
+//       'fox' repeated at positions 20 and 25
+//       'dog' repeated at positions 49 and 53
+```
+
+> Το παράδειγμα έχει τροποποιηθεί από αυτό της τεκμηρίωσης για να χρησιμοποιεί νέες λειτουργίες της γλώσσας. Οι διαφορές είναι ενδιαφέρουσες· [δεν υπάρχει `Main`](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/program-structure/top-level-statements), και χρησιμοποιούνται [interpolated strings](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/tokens/interpolated), [τα οποία έγιναν πιο αποδοτικά στο .NET 6](https://devblogs.microsoft.com/dotnet/string-interpolation-in-c-10-and-net-6/).
+
+Κατά τη δημιουργία του αντικειμένου `Regex`, το μοτίβο υφίσταται συντακτική ανάλυση, και μετατρέπεται σε ένα συντακτικό δέντρο, το οποίο βελτιστοποιείται και περνιέται σε κάποια από τις υλοποιήσεις της βιβλιοθήκης που θα αναλάβει την αντιστοίχιση του κειμένου. Προσφέρονται τέσσερις υλοποιήσεις, εκ των οποίων οι δύο προστέθηκαν στο .NET 7:
+
+* Η __διερμηνευόμενη__ υλοποίηση μετατρέπει το μοτίβο σε μια σειρά εντολών μιας απλής μηχανής στοίβας, που κατά την αντιστοίχιση εκτελούνται από έναν διερμηνέα. Είναι η προεπιλεγμένη υλοποίηση.
+* Η __μεταγλωττισμένη__ υλοποίηση μετατρέπει το μοτίβο σε bytecode του .NET (ονομάζεται _IL_ από το Intermediate Language) το οποίο μεταγλωττίζεται σε native γλώσσα μηχανής από το JIT. Πληρώνοντας ένα υψηλότερο κόστος αρχικοποίησης, πετυχαίνουμε σημαντικά καλύτερες επιδόσεις από τη διερμηνευόμενη υλοποίηση. Χρησιμοποιείται περνώντας την επιλογή `RegexOptions.Compiled` κατά τη δημιουργία του αντικειμένου `Regex`. Στις πλατφόρμες που δεν υποστηρίζουν παραγωγή μεταγλωττισμένου δυναμικού κώδικα (όπως iOS και WebAssembly) χρησιμοποιείται η διερμηνευόμενη λειτουργία.
+*
+    Η υλοποίηση με __παραγόμενο πηγαίο κώδικα__ είναι καινούργια στο .NET 7 και χρησιμοποιεί επεκτάσεις του μεταγλωττιστή της C# που λέγονται [_γεννήτριες πηγαίου κώδικα_ (source generators)](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview). Ας δούμε πρώτα ένα παράδειγμα χρήσης της:
+
+    ```csharp
+    using System;
+    using System.Text.RegularExpressions;
+
+    Regex rx = MyRegex.GetMyRegex();
+
+    // Define a test string.
+    string text = "The the quick brown fox  fox jumps over the lazy dog dog.";
+
+    // Find matches.
+    int matches = rx.Count(text);
+
+    // Report the number of matches found.
+    Console.WriteLine($"{matches} matches found in:\n   {text}");
+
+    internal static partial class MyRegex
+    {
+        // Define a regular expression for repeated words.
+        [GeneratedRegex(@"\b(?<word>\w+)\s+(\k<word>)\b", RegexOptions.IgnoreCase)]
+        public static partial Regex GetMyRegex();
+    }
+    ```
+
+    Ορίζουμε τη μέθοδο `GetMyRegex` χωρίς υλοποίηση και με τη λέξη `partial`, που σημαίνει ότι η υλοποίησή της βρίσκεται σε κάποιο άλλο αρχείο, το οποίο θα το παράξει ο μεταγλωττιστής της C# όταν "χτίσουμε" το πρόγραμμα, και θα περιέχει εξειδικευμένο κώδικα σε C# για να αντιστοιχίσει το μοτίβο μας. Η χρήση του source generator προτείνεται σε κάθε περίπτωση όπου το μοτίβο είναι γνωστό κατά τη μεταγλώττιση, και με μόνο αρνητικό μια ελαφρά αύξηση του μεγέθους του μεταγλωττισμένου αρχείου, προσφέρει μια πληθώρα πλεονεκτημάτων:
+
+    * Το κόστος αρχικοποίησης του αντικειμένου `Regex` εκμηδενίζεται. Δεν χρειάζεται όταν εκτελέσουμε το πρόγραμμα να αναλύσουμε το μοτίβο, αυτό έγινε όταν μεταγλωττίσαμε το πρόγραμμα!
+        * Αυτό επίσης σημαίνει ότι τα σχετικά τμήματα της βιβλιοθήκης μπορούν να [περικοπούν](https://docs.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained), μειώνοντας το μέγεθος της τελικής εφαρμογής.
+    * Η απόδοση της αντιστοίχισης είναι ισάξια της μεταγλωττισμένης υλοποίησης (οι δύο υλοποιήσεις παράγουν ισοδύναμο κώδικα σε IL και C# αντίστοιχα), και χωρίς κανένα μειονέκτημα· επειδή δεν παράγεται κώδικας δυναμικά, μπορεί να χρησιμοποιηθεί οπουδήποτε υποστηρίζεται το .NET.
+    * Επειδή μπορούμε να δούμε τον παραγόμενο κώδικα, μπορούμε να βάλουμε breakpoints και να τον εκσφαλματώσουμε για να διαγνώσουμε λάθη στο μοτίβο μας, ή να μάθουμε πώς λειτουργεί. Ο παραγόμενος κώδικας είναι επίσης σχολιασμένος, βοηθώντας μας στο δεύτερο.
+* Η υλοποίηση __χωρίς οπισθοδρόμηση__ είναι επίσης καινούργια στο .NET 7, και εντελώς διαφορετική από τις άλλες δύο, βασιζόμενη στον [Symbolic Regex Matcher](https://www.microsoft.com/en-us/research/publication/symbolic-regex-matcher/), ένα ερευνητικό έργο της Microsoft Research που χρησιμοποιεί πεπερασμένα αυτόματα. Στόχος της είναι να αποφύγει τις λεγόμενες ["καταστροφικές οπισθοδρομήσεις" που οδηγούν σε εκθετικό χρόνο αντιστοίχισης και αποτελούν πηγή επιθέσεων άρνησης υπηρεσίας](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS). Περιορίζοντας ορισμένες δυνατότητες των κανονικών εκφράσεων όπως τα backreferences (τα παραδείγματα πάνω δε μπορούν να λειτουργήσουν χωρίς οπισθοδρόμηση), η υλοποίηση αυτή εγγυάται γραμμικό χρόνο αντιστοίχισης για κάθε είσοδο. Χρησιμοποιείται περνώντας την επιλογή `RegexOptions.NonBacktracking` κατά τη δημιουργία του αντικειμένου `Regex`. Προς το παρόν δεν είναι συμβατή με τη μεταγλωττισμένη υλοποίηση ή τον source generator.

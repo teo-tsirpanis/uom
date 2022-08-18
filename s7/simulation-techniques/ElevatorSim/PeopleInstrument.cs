@@ -7,9 +7,9 @@ public sealed class PeopleInstrument : ISimulationInstrument
 {
     private UpDownAccumulator _peopleOnBuildingAccumulator;
 
-    private IntegerAccumulator _timeSpentAccumulator, _waitingTimeAccumulator;
+    private ValueAccumulator<int> _timeSpentAccumulator, _waitingTimeAccumulator;
 
-    private RealAccumulator _waitingTimePercentageAccumulator;
+    private ValueAccumulator<double> _waitingTimePercentageAccumulator;
 
     public TimeSpan AverageTimeSpent => _timeSpentAccumulator.Average.ToSeconds();
 

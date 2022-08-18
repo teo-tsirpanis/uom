@@ -7,9 +7,9 @@ public sealed class FloorInstrument : ISimulationInstrument
 {
     private UpDownAccumulator _peopleOnFloorAccumulator;
 
-    private IntegerAccumulator _timeOnFloorAccumulator, _waitingTimeAccumulator;
+    private ValueAccumulator<int> _timeOnFloorAccumulator, _waitingTimeAccumulator;
 
-    private RealAccumulator _waitingTimePercentageAccumulator;
+    private ValueAccumulator<double> _waitingTimePercentageAccumulator;
 
     public int FloorNumber { get; }
 

@@ -9,7 +9,7 @@ public class WaitingQueueInstrument : ISimulationInstrument
 {
     private UpDownAccumulator _queueLengthAccumulator;
 
-    private IntegerAccumulator _waitingTimeAccumulator;
+    private ValueAccumulator<int> _waitingTimeAccumulator;
 
     /// <summary>
     /// The <see cref="WaitingQueue">'s name.

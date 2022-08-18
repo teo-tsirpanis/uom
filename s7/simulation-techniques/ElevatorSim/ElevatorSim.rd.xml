@@ -1,0 +1,8 @@
+<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
+  <Application>
+    <Assembly Name="System.Text.Json">
+      <!-- Works around https://github.com/dotnet/runtime/issues/73124. -->
+      <Type Name="System.Text.Json.Serialization.Converters.EnumConverter`1[[Dai19090.SimulationTechniques.ElevatorSim.ElevatorStrategy,ElevatorSim]]" Dynamic="Required All" />
+    </Assembly>
+  </Application>
+</Directives>

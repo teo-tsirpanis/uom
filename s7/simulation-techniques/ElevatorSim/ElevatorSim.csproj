@@ -5,8 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAOT>true</PublishAOT>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
+    <RdXmlFile Include="ElevatorSim.rd.xml" />
   </ItemGroup>
 </Project>

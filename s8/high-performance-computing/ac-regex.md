@@ -220,4 +220,189 @@ foreach (Match match in matches)
 
 Ο κώδικας επιλογής της συντόμευσης βρίσκεται [στον δημιουργό της κλάσης `RegexFindOptimizations`](https://github.com/teo-tsirpanis/dotnet-runtime/blob/752473231ee952db44223f698ddd2d2af5599aa7/src/libraries/System.Text.RegularExpressions/src/System/Text/RegularExpressions/RegexFindOptimizations.cs#L18-L226). Το βήμα 2 υλοποιείται στην μέθοδο [`RegexPrefixAnalyzer.CreatePrefixMatcher`](https://github.com/teo-tsirpanis/dotnet-runtime/blob/752473231ee952db44223f698ddd2d2af5599aa7/src/libraries/System.Text.RegularExpressions/src/System/Text/RegularExpressions/RegexPrefixAnalyzer.cs#L14-L97).
 
-<!-- TODO: prefix -> substring -->
+## Τρέχουσες Βελτιστοποιήσεις
+
+Χρησιμοποιούμε τα ακόλουθα τεχνάσματα για να βελτιστοποιήσουμε τις επιδόσεις της δημιουργίας του δέντρου και της αναζήτησης:
+
+* Αναφερθήκαμε πριν σε διανυσματοποιημένη αναζήτηση του πρώτου χαρακτήρα στον αλγόριθμο Aho-Corasick. Αυτό σημαίνει ότι αν στη ρίζα του δέντρου έχουμε το πολύ πέντε παιδιά, μπορούμε να χρησιμοποιήσουμε τη συνάρτηση `IndexOfAny` που είδαμε νωρίτερα, και να βρούμε με διανυσματοποιημένο τρόπο την θέση του πρώτου πιθανού χαρακτήρα. Αν δεν βρούμε κάποιον από τους πιθανούς πρώτους χαρακτήρες η αναζήτηση σταματάει.
+* Επειδή όπως είπαμε, κατά την αναζήτηση λέξεων αν βρούμε κάποια λέξη σταματάμε κατευθείαν, μπορούμε να αγνοήσουμε λέξεις που κάποιο μη κενό τους πρόθημα ανήκει επίσης στις λέξεις που θέλουμε να βρούμε. Αυτήν την απαλοιφή την κάνουμε σε δύο βήματα κατά τη δημιουργία του δέντρου. Πρώτον με το που μαρκάρουμε κάποιον κόμβο ως κόμβο αντιστοίχισης αφαιρούμε όλα τα παιδιά του. Αυτό όμως δεν τα αφαιρεί από τη λίστα τον κόμβων που σημαίνει ότι σε μοτίβα όπως το $ab|abc$ μπορεί να προκύψουν απροσπέλαστοι κόμβοι, και γι' αυτό μετά την κατασκευή του δέντρου και πριν την ανάθεση των τιμών για τον Aho-Corasick τους διαγράφουμε ανατρέχοντας το δέντρο ξεκινώντας από τη ρίζα και σημειώνοντας τους προσπελάσιμους κόμβους.
+
+## Μετρήσεις επιδόσεων
+
+Οι επιδόσεις της χρήσης του Aho-Corasick μετρήθηκαν παίρνοντας [ένα τυχαίο βιβλίο του Project Gutenberg](https://www.gutenberg.org/ebooks/68148) και [μετρώντας τις εμφανίσεις των πρώτων `WordCount` πιο συνηθισμένων λέξεων της αγγλικής γλώσσας](https://gist.github.com/deekayen/4148741). Η τιμή στη στήλη `ToolChain` συμβολίζει τις μετρήσεις πριν (`\main\corerun.exe`) και μετά (`\pr\corerun.exe`) τις αλλαγές που κάναμε. Επίσης συγκρίνουμε την απόδοση και στη διερμηνευόμενη και στη μεταγλωττισμένη υλοποίηση. Οι μετρήσεις έγιναν με τη βοήθεια της βιβλιοθήκης [BenchmarkDotNet](https://benchmarkdotnet.org/articles/overview.html).
+
+|     Method |         Toolchain | WordCount |  Options |        Mean |     Error |    StdDev | Ratio | RatioSD |
+|----------- |------------------ |---------- |--------- |------------:|----------:|----------:|------:|--------:|
+| **CountWords** | **\main\corerun.exe** |         **2** |     **None** |   **995.1 μs** |   **868.21 μs** |  **47.59 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         2 |     None |   670.7 μs |   236.26 μs |  12.95 μs |  0.67 |    0.03 |
+|            |                   |           |          |            |             |           |       |         |
+| **CountWords** | **\main\corerun.exe** |         **2** | **Compiled** |   **181.4 μs** |    **36.97 μs** |   **2.03 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         2 | Compiled |   248.1 μs |    34.42 μs |   1.89 μs |  1.37 |    0.03 |
+|            |                   |           |          |            |             |           |       |         |
+| **CountWords** | **\main\corerun.exe** |         **3** |     **None** | **1,225.2 μs** | **1,193.82 μs** |  **65.44 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         3 |     None |   797.4 μs |   630.72 μs |  34.57 μs |  0.65 |    0.03 |
+|            |                   |           |          |            |             |           |       |         |
+| **CountWords** | **\main\corerun.exe** |         **3** | **Compiled** |   **288.4 μs** |   **117.19 μs** |   **6.42 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         3 | Compiled |   261.5 μs |   119.35 μs |   6.54 μs |  0.91 |    0.01 |
+|            |                   |           |          |            |             |           |       |         |
+| **CountWords** | **\main\corerun.exe** |         **5** |     **None** | **2,075.1 μs** | **2,072.61 μs** | **113.61 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         5 |     None | 1,652.8 μs |   952.66 μs |  52.22 μs |  0.80 |    0.07 |
+|            |                   |           |          |            |             |           |       |         |
+| **CountWords** | **\main\corerun.exe** |         **5** | **Compiled** |   **609.5 μs** |   **773.25 μs** |  **42.38 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |         5 | Compiled |   532.8 μs |    50.28 μs |   2.76 μs |  0.88 |    0.07 |
+|            |                   |           |          |             |           |           |             |       |         |
+| **CountWords** | **\main\corerun.exe** |        **10** |     **None** |  **3,076.6 μs** |  **66.86 μs** | **192.91 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        10 |     None |  2,119.1 μs |  30.36 μs |  26.91 μs |  0.64 |    0.03 |
+|            |                   |           |          |             |           |           |       |         |
+| **CountWords** | **\main\corerun.exe** |        **10** | **Compiled** |    **770.6 μs** |  **12.76 μs** |  **11.94 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        10 | Compiled |    765.4 μs |   7.58 μs |   7.09 μs |  0.99 |    0.02 |
+|            |                   |           |          |             |           |           |       |         |
+| **CountWords** | **\main\corerun.exe** |        **25** |     **None** |  **5,405.6 μs** | **106.22 μs** | **104.32 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        25 |     None |  3,135.8 μs |  61.30 μs |  51.19 μs |  0.58 |    0.01 |
+|            |                   |           |          |             |           |           |       |         |
+| **CountWords** | **\main\corerun.exe** |        **25** | **Compiled** |  **1,136.8 μs** |  **15.11 μs** |  **14.13 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        25 | Compiled |    881.0 μs |  13.09 μs |  12.24 μs |  0.78 |    0.01 |
+|            |                   |           |          |             |           |           |       |         |
+| **CountWords** | **\main\corerun.exe** |        **50** |     **None** | **11,919.2 μs** | **216.99 μs** | **181.20 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        50 |     None |  3,970.2 μs |  78.87 μs | 153.82 μs |  0.34 |    0.01 |
+|            |                   |           |          |             |           |           |       |         |
+| **CountWords** | **\main\corerun.exe** |        **50** | **Compiled** |  **1,605.9 μs** |  **31.25 μs** |  **29.24 μs** |  **1.00** |    **0.00** |
+| CountWords |   \pr\corerun.exe |        50 | Compiled |  1,211.6 μs |  17.38 μs |  16.26 μs |  0.75 |    0.02 |
+
+Με πάνω από πενήντα λέξεις υπερβαίνουμε το ανώτατο όριο των κόμβων στο δέντρο και ο Aho-Corasick δεν χρησιμοποιείται.
+
+Όμως, [περαιτέρω μετρήσεις από την ομάδα του .NET](https://github.com/dotnet/runtime/pull/71588#issuecomment-1192735980) αναδεικνύουν μια δραματική μείωση της απόδοσης σε case-insensitive μοτίβα όπως το `(?i)Sherlock`, το οποίο ανάγεται στο μοτίβο `[Ss][Hh][Ee][Rr][Ll][Oo][Cc][KkK]` (το τρίτο K είναι ο χαρακτήρας `U+212A Kelvin Sign`). Εδώ συναντάμε μια παθογένεια του αλγορίθμου. Δημιουργούμε ένα μεγάλο δέντρο με όλους τους συνδυασμούς των κεφαλαίων-πεζών χαρακτήρων της λέξης `Sherlock`, που στην ουσία αναπαριστούν την ίδια λέξη, ενώ θα μπορούσαμε να χρησιμοποιήσουμε κάποια πολύ πιο αποδοτική συντόμευση όπως των συνόλων σε σταθερή απόσταση που διαλέγει το .NET.
+
+## Μελλοντικές βελτιστοποιήσεις
+
+Μια άμεση λύση για να φτιάξουμε την παραπάνω παθογενή κατάσταση είναι να τροποποιήσουμε τον κανόνα επιλογής 2.1. προσθέτοντας την περίπτωση "το μοτίβο δεν περιέχει μια δομή εναλλαγής στο εναρκτήριο σταθερό του τμήμα", και μοτίβα όπως το `(?i)Sherlock` θα αποκλειστούν (τα σύνολα αναπαρίστανται στο .NET διαφορετικά από τις δομές εναλλαγής).
+
+Κάτι άλλο που μπορούμε να κάνουμε και θα βοηθούσε τέτοιες περιπτώσεις είναι μετά την ανάθεση τιμών για τον Aho-Corasick να πραγματοποιήσουμε μια απαλοιφή των ισοδύναμων κόμβων του δέντρου χρησιμοποιώντας μια παραλλαγή του [θεωρήματος Myhill-Nerode](https://www.geeksforgeeks.org/minimization-of-dfa-using-myhill-nerode-theorem/). Εφαρμόζοντάς το στο παραπάνω παράδειγμα θα είχαμε μόνο εννιά κόμβους -την ρίζα και έναν για κάθε γράμμα της λέξης `Sherlock`- και μπορούμε να πάμε από τον έναν κόμβο στον άλλον και με τον κεφαλαίο και με τον πεζό χαρακτήρα. Ένα πρόβλημα με αυτό είναι ότι αν έχουμε πολλές λέξεις του ίδιου μήκους, θα υπάρχει μόνο ένας κόμβος αντιστοίχισης, και το κατώτατο όριο των κόμβων αντιστοίχισης θα απορρίψει το δέντρο. Η λύση σε αυτό είναι να ελέγξουμε το όριο πριν την απαλοιφή των ισοδύναμων κόμβων. Επίσης πρέπει να εξεταστεί η εφαρμοστικότητα του θεωρήματος Myhill-Nerode -που χρησιμοποιείται συνήθως σε πεπερασμένα αυτόματα- σε δέντρα συμβολοσειρών όπως τα δικά μας.
+
+Μιλώντας για απαλοιφή, είπαμε πριν ότι μπορούμε να απαλείψουμε λέξεις που κάποιο μη κενό τους _πρόθημα_ ανήκει κι' αυτό στις λέξεις. Μπορούμε να επεκτείνουμε τον κανόνα και να απαλείψουμε λέξεις που κάποιο μη κενό τους _υποσύνολο_ ανήκει κι' αυτό στις λέξεις. Για παράδειγμα, αν θέλουμε να βρούμε τη λέξη `bc` δε χρειάζεται να βρούμε και τη λέξη `abcd`.
+
+Όλες αυτές οι απαλοιφές μπορούν να γίνουν αποδοτικά και με μόνο μία αντιγραφή του δέντρου στον τελικό του προορισμό κατά τη διάρκεια ανάθεσης τιμών, αντί για πριν. Ένα άλλο πρόβλημα που παρουσιάζεται είναι ότι το άνω όριο των κόμβων δεν επηρεάζεται από αυτές. Για παράδειγμα αν έχουμε ένα δέντρο με 128 κόμβους και μετά τις απαλοιφές πέσει στους 50, θα μπορούσαμε αν αφήναμε περισσότερους κόμβους να το φτάναμε πιο κοντά στο όριο μετά τις απαλοιφές. Δεν υπάρχει κάποια εύκολη λύση σε αυτό το πρόβλημα.
+
+Οι παραπάνω βελτιστοποιήσεις είναι προγραμματισμένες να υλοποιηθούν σύντομα. Σε πιο μακροπρόθεσμο επίπεδο θα μπορούσαμε να χρησιμοποιήσουμε πιο διανυσματοποιημένους αλγορίθμους αναζήτησης, όπως τον [Teddy](https://github.com/jneem/teddy). Η κυριότερη πρόκληση σε αυτό είναι ότι τα χαρακτηρηστικά απόδοσης του Teddy πιθανότατα θα διαφέρουν από τον Aho-Croasick και πρέπει να βρούμε καινούργιους ευρετικούς κανόνες για να αποφασίσουμε πότε να χρησιμοποιηθεί ο Teddy και πότε ο σκέτος Aho-Corasick.
+
+## Ενδεικτικός παραγόμενος κώδικας
+
+Ακολουθεί τμήμα της εξόδου της υλοποίησης με παραγόμενο πηγαίο κώδικα, για το μοτίβο `abc|bad`, αν χρησιμοποιούταν ο Aho-Corasick (δεν θα χρησιμοποιηθεί στην πραγματικότητα επειδή έχουμε κάτω από πέντε λέξεις):
+
+```csharp
+/// <summary>Search <paramref name=\"inputSpan\"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+/// <param name="inputSpan">The text being scanned by the regular expression.</param>
+/// <returns>true if a possible match was found; false if no more matches are possible.</returns>
+private bool TryFindNextPossibleStartingPosition(ReadOnlySpan<char> inputSpan)
+{
+    int pos = base.runtextpos;
+    // Any possible match is at least 3 characters.
+    if (pos < inputSpan.Length - 3)
+    {
+        // The pattern starts with one of 2 literals. Search for all of them together using a trie data structure.
+        // If none of them can be found, there's no match.
+        char c;
+        // We are using a simplified version of the Aho-Corasick algorithm.
+        // Each of the 11 states of our trie corresponds to a word. The root
+        // of the trie corresponds to the empty string. At each state we read
+        // the next character and compare to see if it can lead to one of the
+        // state's children. If it does not, we repeat the search with the
+        // characters of another state called the "suffix link".
+        // If the state we landed in represents a match, we go backwards by
+        // the length of the word we matched, and report that position.
+
+        // ""
+        State0:
+        // We can perform a vectorized search to quickly find characters we are interested in.
+        // If we can't find any, the search fails.
+        switch (inputSpan.Slice(pos).IndexOfAny('a', 'b'))
+        {
+            case -1: return false;
+            case int firstCharPos:
+                pos += firstCharPos;
+                break;
+        }
+
+        if (pos >= inputSpan.Length) return false;
+        c = inputSpan[pos++];
+
+        State0_Fallback:
+        switch (c)
+        {
+            case 'a': goto State1;
+            case 'b': goto State4;
+            // We are at the root state and didn't find a character.
+            // We will restart the algorithm and read a new one.
+            default: goto State0;
+        }
+
+        // "a"
+        State1:
+        if (pos >= inputSpan.Length) return false;
+        c = inputSpan[pos++];
+
+        State1_Fallback:
+        switch (c)
+        {
+            case 'b': goto State2;
+            default: goto State0_Fallback;
+        }
+
+        // "ab"
+        State2:
+        if (pos >= inputSpan.Length) return false;
+        c = inputSpan[pos++];
+
+        switch(c)
+        {
+            case 'c': goto State3;
+            default: goto State4_Fallback;
+        }
+
+        // "abc"
+        State3:
+        pos -= 3;
+        goto FoundMatch;
+
+        // "b"
+        State4:
+        if (pos >= inputSpan.Length) return false;
+        c = inputSpan[pos++];
+
+        State4_Fallback:
+        switch (c)
+        {
+            case 'a': goto State5;
+            default: goto State0_Fallback;
+        }
+
+        // "ba"
+        State5:
+        if (pos >= inputSpan.Length) return false;
+        c = inputSpan[pos++];
+
+        switch(c)
+        {
+            case 'd': goto State6;
+            default: goto State1_Fallback;
+        }
+
+        // "bad"
+        State6:
+        pos -= 3;
+        goto FoundMatch;
+
+        FoundMatch:
+        base.runtextpos = pos;
+        return true;
+    }
+}
+```
+
+## Εκτιμώμενη κυκλοφορία
+
+Για την ενσωμάτωση του Aho-Corasick στο .NET έχει υποβληθεί το Pull Request [#71588](https://github.com/dotnet/runtime/pull/71588) στο αποθετήριο `dotnet/runtime` του GitHub (την στιγμή που γράφτηκε η αναφορά το Pull Request είναι κλειστό αλλά προσωρινά). Λόγω των προαναφερθέντων χειροτερεύσεων στην απόδοση στα case-insinsitive μοτίβα η αποδοχή του θα καθυστερήσει, και αναμένεται να κυκλοφορήσει με το .NET 8, του οποίου η πρώτη έκδοση προεπισκόπισης θα κυκλοφορήσει τον Φεβρουάριο του 2023, και η τελική έκδοση τον Νοέμβριο του 2023.
+
+## Ευχαριστίες
+
+Από την ομάδα του .NET θα ήθελα να ευχαριστήσω τον [Dan Moseley](https://github.com/danmoseley) που με προέτρεψε να ασχοληθώ με αυτό, τον [Stephen Toub](https://github.com/stephentoub) για το review του Pull Request. Επίσης ευχαριστώ και τον [Andrew Gallant](https://github.com/BurntSushi) για την υλοποίηση του Aho-Corasick που έγραψε στην Rust και με βοήθησε να τον καταλάβω, και για κάποιες πολύτιμες συμβουλές του.

@@ -15,7 +15,7 @@ The time between each arrival follows an exponential distribution with mean equa
 
 The number of floors each person visited follows a normal distribution with mean equal to **4** and standard deviation equal to **1**.
 
-The time each person stays on a floor follows a normal distrubution with mean equal to **00:30:00** and standard deviation equal to **00:07:30**.
+The time each person stays on a floor follows a normal distribution with mean equal to **00:30:00** and standard deviation equal to **00:07:30**.
 
 The simulation's random number generator seed is **7321007903481422866**
 

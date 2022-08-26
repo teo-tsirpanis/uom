@@ -32,7 +32,7 @@ public static class MarkdownRenderer
         await output.WritePaddedLineAsync($"The time between each arrival follows an exponential distribution with mean equal to **{options.MeanTimeBetweenArrivals.ToSeconds()}**.");
         await output.WritePaddedLineAsync($"The number of floors each person visited follows a normal distribution with mean equal to **{options.NumberOfFloorsVisited.Mean}** " +
             $"and standard deviation equal to **{options.NumberOfFloorsVisited.Stdev}**.");
-        await output.WritePaddedLineAsync($"The time each person stays on a floor follows a normal distrubution with mean equal to **{options.DurationOfStayOnFloor.Mean.ToSeconds()}** " +
+        await output.WritePaddedLineAsync($"The time each person stays on a floor follows a normal distribution with mean equal to **{options.DurationOfStayOnFloor.Mean.ToSeconds()}** " +
             $"and standard deviation equal to **{options.DurationOfStayOnFloor.Stdev.ToSeconds()}**.");
         await output.WritePaddedLineAsync($"The simulation's random number generator seed is **{options.Seed.GetValueOrDefault()}**");
         await output.WritePaddedLineAsync("You can replay the simulation by running the program with the following JSON file:");

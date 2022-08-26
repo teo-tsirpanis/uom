@@ -53,12 +53,22 @@ public struct AsyncSimulationOpMethodBuilder<TResult>
         switch (op)
         {
             case null:
-                var newBox = new AsyncStateMachineBox<TStateMachine>()
-                {
-                    StateMachine = stateMachine,
-                    Context = executionContext
-                };
+                var newBox = new AsyncStateMachineBox<TStateMachine>();
+                // important: this must be done before storing stateMachine into newBox.StateMachine!
+                // Failure to do so will result in: losing more than two days from your life figuring
+                // out that weird bug that manifests only in Release.
+                // Let's see why it happens. The state machine contains a method builder, and the method
+                // builder contains op. What we did before was assign the state machine inside the box,
+                // and then assign op to the box. It worked well in Debug mode because the state machine
+                // is a class, but in Release mode, the state machine is a struct, and if we assign op
+                // at the end, it would update the state machine on the stack; not the state machine
+                // in the box.
+                // How to prevent it? Read the real source code and not ILSpy. The implementation was
+                // copied from the BCL and contained the comment at the beginning of this. But ILSpy does
+                // not contain comments so I didn't think much of it.
                 op = newBox;
+                newBox.StateMachine = stateMachine;
+                newBox.Context = executionContext;
                 return newBox;
             case AsyncStateMachineBox<TStateMachine> box:
                 box.Context = executionContext;

@@ -5,6 +5,13 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LinearProgrammingProblemParser", "LinearProgrammingProblemParser.fsproj", "{8B219952-55BE-4530-B056-9EF491D7CB27}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF06B9AB-F78D-48C9-84EF-167DD1C040E8}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		README_1.md = README_1.md
+		README_2.md = README_2.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

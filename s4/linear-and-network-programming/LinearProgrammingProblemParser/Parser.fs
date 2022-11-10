@@ -172,7 +172,7 @@ let designtime =
     // προμεταγλωττιστεί. Ο compiler θα το ανακαλύψει κατά τη μεταγλώττιση
     // του προγράμματος, και η κατασκευή του RuntimeFarkle από κάτω θα πάρει
     // σημαντικά λιγότερο χρόνο.
-    |> RuntimeFarkle.markForPrecompile
+    |> fun x -> x.MarkForPrecompile typeof<LPP>.Assembly
 
 // Το runtime είναι τύπου RuntimeFarkle<LPP>.
 // Περιέχει τους πίνακες για την λεκτική και τη συντακτική ανάλυση

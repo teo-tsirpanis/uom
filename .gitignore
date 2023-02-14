@@ -7,6 +7,7 @@
 s1/procedural-programming/main.c
 
 **/cmake-build-*/
+build/
 bin/
 lib/
 obj/

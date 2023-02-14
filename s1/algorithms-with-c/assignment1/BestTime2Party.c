@@ -22,7 +22,7 @@
     } \
 }
 
-unsigned int getBestHour(const size_t length, const unsigned int data[length][2]) {
+unsigned int getBestHour(const size_t length, const unsigned int data[][2]) {
     int hours[HOURS];
 
     memset(hours, 0, HOURS * sizeof(int));

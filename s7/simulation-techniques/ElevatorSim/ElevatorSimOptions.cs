@@ -8,7 +8,7 @@ namespace Dai19090.SimulationTechniques.ElevatorSim;
 [JsonSerializable(typeof(ElevatorSimOptions))]
 internal partial class ElevatorSimJsonContext : JsonSerializerContext { }
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<ElevatorStrategy>))]
 public enum ElevatorStrategy { Simple, Smart }
 
 public sealed class ElevatorSimOptions

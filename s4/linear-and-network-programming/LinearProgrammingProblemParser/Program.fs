@@ -24,7 +24,9 @@ let readInput argv =
     | _ -> Error "Invalid command-line arguments. Try <program name> input [output]"
 
 let parseIt args =
-    RuntimeFarkle.parseFile Parser.runtime args.InputFile
+    let parser = Parser.parser()
+    CharParser.parseFile parser args.InputFile
+    |> ParserResult.toResult
     |> Result.mapError string
 
 [<EntryPoint>]

@@ -1,4 +1,4 @@
-﻿module LinearProgrammingProblemParser.Parser
+module LinearProgrammingProblemParser.Parser
 
 open System.Globalization
 open Farkle
@@ -9,32 +9,37 @@ open System
 
 let inline private curry f x1 x2 = f(x1, x2)
 
-// Αυτό είναι ένα αντικείμενο τύπου DesigntimeFarkle<LPP>.
+// Αυτή η συνάρτηση επιστρέφει ένα αντικείμενο τύπου IGrammarBuilder<LPP>.
 // Συμβολίζει μια γραμματική που θα "δώσει" αντικείμενα τύπου LPP.
-// Μπορεί να είναι ένα τερματικό ή ένα μη-τερματικό, δε χρειάζεται
-// να ξέρουμε. Όπως θα δούμε, ένα DesigntimeFarkle αποτελείται από μικρότερα
-// τέτοια αντικείμενα, που ενωμένα, συνθέτουν πιο μεγάλες γραμματικές.
-let designtime =
+// Μαρκάρουμε τη μέθοδο με το PrecompilerInputAttribute, για να πούμε στον
+// προμεταγλωττιστή να την καλέσει για να πάρει τη γραμματική.
+[<PrecompilerInput>]
+let builder() =
+    let whitespaceChars = chars "\t\n\r "
+    let numberChars = charRanges ['0', '9']
     // Ξεκινάμε να φτιάξουμε το τερματικό για τα νούμερα.
     // Τα τερματικά ορίζονται με κανονικές εκφράσεις.
-    let number: DesigntimeFarkle<Number> =
+    // Το IGrammarSymbol είναι ένας υπο-τύπος του IGrammarBuilder.
+    // Μπορεί να είναι ένα τερματικό ή ένα μη-τερματικό, δε χρειάζεται
+    // να ξέρουμε. Όπως θα δούμε, ένα IGrammarSymbol αποτελείται από μικρότερα
+    // τέτοια αντικείμενα, που ενωμένα, συνθέτουν πιο μεγάλες γραμματικές.
+    let number: IGrammarSymbol<Number> =
         // Αυτή είναι μια κανονική έκφραση που αναγνωρίζει τουλάχιστον ένα ψηφίο.
         // Οι κανονικές εκφράσεις μπορούν να συνθέσουν μεγαλύτερες, όπως και τα
-        // DesigntimeFarkle. Πρέπει να είμαστε πιο συγκεκριμένοι με το PredefinedSets.Number,
-        // γιατί το σκέτο Number το ορίσαμε ήδη στον κώδικά μας.
-        let atLeastOneNumber = chars PredefinedSets.Number |> atLeast 1
+        // IGrammarSymbol.
+        let atLeastOneNumber = numberChars |> atLeast 1
         // Η συνάρτηση concat επιστρέφει μια κανονική έκφραση που αποτελείται από
         // την συνένωση (concatenation) άλλων κανονικών εκφράσεων.
         concat [
             atLeastOneNumber
 
-            // Ο τελεστής a <&> b είναι μια συντομογραφία του concat [a; b].
-            optional (char '.' <&> atLeastOneNumber)
+            // Ο τελεστής a + b είναι μια συντομογραφία του concat [a; b].
+            optional (char '.' + atLeastOneNumber)
 
             [chars "e"; chars "+-" |> optional; atLeastOneNumber]
             |> concat
             |> optional
-        // Η συνάρτηση terminal δημιουργεί ένα DesigntimeFarkle που
+        // Η συνάρτηση terminal δημιουργεί ένα IGrammarSymbol που
         // αντιπροσωπεύει ένα τερματικό. Δέχεται το όνομά του (για περιγραφικούς σκοπούς,
         // δεν έχει πρακτική χρησιμότητα), την κανονική έκφραση που το ορίζει
         // και μια συνάρτηση η οποία δέχεται την θέση του στο κείμενο (η οποία
@@ -46,7 +51,7 @@ let designtime =
         // Χωρίς τη δεύτερη παράμετρο στην Number.Parse, οι τελείες δε θα διαχώριζαν
         // το κλασματικό μέρος στους υπολογιστές που είναι στα Ελληνικά.
         ] |> terminal "Number" (T(fun _ data -> Number.Parse(data, provider = NumberFormatInfo.InvariantInfo)))
-    // Το ST είναι τύπου DesigntimeFarkle, χωρίς κάποια παράμετρο.
+    // Το ST είναι τύπου IGrammarSymbol, χωρίς κάποια παράμετρο.
     // Δε μας ενδιαφέρει ποια ακριβώς λέξη χρησιμοποιήθηκε, οπότε
     // το αντικείμενο αυτό δε "δίνει" τίποτα.
     let ST =
@@ -54,9 +59,8 @@ let designtime =
             string "st"
             string "s.t."
             // Στο "subject to" δεν χρειάζεται να έχουμε μόνο ένα κενό
-            // ανάμεσα στις λέξεις. Επίσης μπορούμε να γράψουμε Whitespace
-            // αντί για PredefinedSets.Whitespace, για ευκολία.
-            string "subject" <&> atLeast 1 (chars Whitespace) <&> string "to"
+            // ανάμεσα στις λέξεις.
+            string "subject" + atLeast 1 whitespaceChars + string "to"
         ]
         // Η συνάρτηση choice επιστρέφει μια κανονική έκφραση που αποτελείται από
         // την εναλλαγή (alternation) άλλων κανονικών εκφράσεων.
@@ -69,7 +73,7 @@ let designtime =
         // Μπορεί να υπάρχει κενός χαρακτήρας μεταξύ του 'x' και του αριθμού.
         // Η συνάρτηση star εφαρμόζει το αστέρι του Kleene σε μια κανονική
         // έκφραση (καμία ή πολλές επαναλήψεις, ισοδύναμο με το atLeast 0).
-        char 'x' <&> (star <| chars Whitespace) <&> (atLeast 1 <| chars PredefinedSets.Number)
+        char 'x' + (star whitespaceChars) + (atLeast 1 numberChars)
         // Θα κόψουμε τον πρώτο χαρακτήρα (το x) και θα μετατρέψουμε
         // τους υπόλοιπους χαρακτήρες σε έναν ακέραιο, που θα τον
         // "τυλίξουμε" σε ένα αντικείμενο τύπου X. Η ενσωματομένη συνάρτηση
@@ -79,7 +83,7 @@ let designtime =
     // Πάμε τώρα στα μη-τερματικά.
     let expression =
         let mkVariable isFirstVariable name =
-            // Ο τελεστής ||= δημιουργεί ένα DesigntimeFarkle που αντιπροσωπεύει
+            // Ο τελεστής ||= δημιουργεί ένα IGrammarSymbol που αντιπροσωπεύει
             // ένα μη-τερματικό. Δέχεται το όνομά του, και τις παραγωγές που το αποτελούν.
             // Οι παραγωγές έχουν και μια συνάρτηση η οποία μετατρέπει τα επιμέρους
             // μέλη της σε ένα πιο σύνθετο αντικείμενο. Προφανώς όλες οι παραγωγές πρέπει να
@@ -94,15 +98,15 @@ let designtime =
                     // Ο τελεστής => τελειώνει τη δημιουργία της παραγωγής.
                     // Δέχεται μια συνάρτηση που μετατρέπει τα μέλη της παραγωγής που μας
                     // ενδιαφέρουν σε ένα αντικείμενο τύπου Variable, στην περίπτωσή μας.
-                    !@ number .>>. X => (fun num x -> Variable(num, x))
-                    !@             X => (fun     x -> Variable(1.0, x))
+                    !@ number .>>. X => fun num x -> Variable(num, x)
+                    !@             X => fun     x -> Variable(1.0, x)
                 // Ο τελεστής !& ξεκινάει την δημιοργία μιας παραγωγής της οποίας
                 // το πρώτο μέλος είναι ένα κυριολέκτημα (literal). Δε μας ενδιαφέρει
                 // το περιεχόμενό του, πάντα το ίδιο θα είναι σε κάθε παραγωγή.
-                !& "+" .>>. number .>>. X => (fun num x -> Variable( num, x))
-                !& "-" .>>. number .>>. X => (fun num x -> Variable(-num, x))
-                !& "+"             .>>. X => (fun     x -> Variable( 1.0, x))
-                !& "-"             .>>. X => (fun     x -> Variable(-1.0, x))
+                !& "+" .>>. number .>>. X => fun num x -> Variable( num, x)
+                !& "-" .>>. number .>>. X => fun num x -> Variable(-num, x)
+                !& "+"             .>>. X => fun     x -> Variable( 1.0, x)
+                !& "-"             .>>. X => fun     x -> Variable(-1.0, x)
             ]
         let firstVariable = mkVariable true  "First Variable"
         let moreVariables = mkVariable false "More Variables"
@@ -112,9 +116,9 @@ let designtime =
             // και μετά από αυτήν μπορεί να έχει περισσότερες.
             // Η συνάρτηση many επιστρέφει ένα μη-τερματικό που
             // αποτελείται από καμία ή πολλές επαναλήψεις του δοθέντος
-            // DesigntimeFarkle. Ο τύπος list είναι συνδεδεμένη λίστα.
+            // IGrammarSymbol. Ο τύπος list είναι συνδεδεμένη λίστα.
             // Στοιχεία στην κορυφή της μπορούν να μπουν σε χρόνο O(1).
-            !@ firstVariable .>>. many moreVariables => (fun x xs -> x :: xs |> Expression)
+            !@ firstVariable .>>. many moreVariables => fun x xs -> x :: xs |> Expression
         ]
 
     let objective = "Objective" ||= [
@@ -136,9 +140,9 @@ let designtime =
             // του δε μας ενδιαφέρει. Μπορεί να είναι DesigntimeFarkle ή κυριολέκτημα.
             // Η συνάρτηση curry που την ορίσαμε πιο πριν μπορούμε να αποφύγουμε
             // το πιο φλύαρο (fun exp v -> Constraint.Equal(exp, v)).
-            !@ expression .>> "="  .>>. signedNumber => (curry Constraint.Equal)
-            !@ expression .>> "<=" .>>. signedNumber => (curry Constraint.LessThanOrEqual)
-            !@ expression .>> ">=" .>>. signedNumber => (curry Constraint.GreaterThanOrEqual)
+            !@ expression .>> "="  .>>. signedNumber => curry Constraint.Equal
+            !@ expression .>> "<=" .>>. signedNumber => curry Constraint.LessThanOrEqual
+            !@ expression .>> ">=" .>>. signedNumber => curry Constraint.GreaterThanOrEqual
         // Η συνάρτηση many1 είναι σαν την many, αλλά πρέπει να υπάρχει
         // τουλάχιστον μία επανάληψη· δεν έχει νόημα πρόβλημα χωρίς περιορισμούς.
         ] |> many1
@@ -160,28 +164,31 @@ let designtime =
     // Παίρνουμε την αντικειμενική συνάρτηση και τους περιορισμούς,
     // και δημιουργούμε το αντικείμενο τύπου LPP.
     "Linear Programming Problem" ||= [
-        !@ objective .>> ST .>>. constraints .>> endMaybe => (fun o c ->
-            {Objective = o; Constraints = c})
+        !@ objective .>> ST .>>. constraints .>> endMaybe => fun o c -> {Objective = o; Constraints = c}
     ]
-    // Προσθέτουμε και τα σχόλια, και επιστρέφουμε το τελικό DesigntimeFarkle.
-    // Από προεπιλογή, η γραμματική είναι case-insensitive και αγνωεί τους
-    // χαρακτήρες διαστήματος (κενό, tab, carriage return και line feed)
-    // μεταξύ των τερματικών.
-    |> DesigntimeFarkle.addLineComment "!"
-    // Η παρακάτω συνάρτηση μαρκάρει το DesigntimeFarkle ότι μπορεί να
-    // προμεταγλωττιστεί. Ο compiler θα το ανακαλύψει κατά τη μεταγλώττιση
-    // του προγράμματος, και η κατασκευή του RuntimeFarkle από κάτω θα πάρει
-    // σημαντικά λιγότερο χρόνο.
-    |> fun x -> x.MarkForPrecompile typeof<LPP>.Assembly
+    // Προσθέτουμε και τα σχόλια, θέτουμε τη γραμματική ως case-insensitive,
+    // και επιστρέφουμε το τελικό IGrammarBuilder. Από προεπιλογή, η γραμματική
+    // αγνωεί τους χαρακτήρες διαστήματος (κενό, tab, carriage return και line
+    // feed) μεταξύ των τερματικών.
+    // Με το που θέσουμε αυτές τις ρυθμίσεις, σταματάμε να έχουμε αντικείμενα τύπου
+    // IGrammarSymbol, και πηγαίνουμε στον τύπο IGrammarBuilder. Ένα IGrammarBuilder
+    // δε μπορεί να αποτελέσει μέρος μιας άλλης γραμματικής, που σημαίνει ότι αυτές οι
+    // ρυθμίσεις μπορούν να τεθούν μόνο στο εναρκτήριο σύμβολο, και ισχύουν για όλη τη
+    // γραμματική.
+    |> _.CaseSensitive(false)
+    |> _.AddLineComment("!")
 
-// Το runtime είναι τύπου RuntimeFarkle<LPP>.
+// Η συνάρτηση parser επιστρέφει ένα αντικείμενο τύπου CharParser<LPP>.
 // Περιέχει τους πίνακες για την λεκτική και τη συντακτική ανάλυση
 // Δε μπορεί να αποτελέσει μέρος μιας άλλης γραμματικής, σε αντίθεση
-// με τα DesigntimeFarkle, τα οποία όμως δε μπορούν να χρησιμοποιηθούν
+// με το IGrammarBuilder, το οποίο όμως δε μπορεί να χρησιμοποιηθεί
 // από τον parser. Επειδή η δημιουργία των πινάκων αυτών είναι υπολογιστικά
-// δαπανηρή, υπάρχει η διάκριση μεταξύ των DesigntimeFarkle και RuntimeFarkle.
-// Η συνάρτηση RuntimeFarkle.build επιτρέπει την μονόδρομη μετατροπή από
-// τον πρώτο στον δεύτερο τύπο όπου χρειάζεται. Αν υπάρχει κάποιο πρόβλημα με
-// τη γραμματική, το RuntimeFarkle θα δημιουργηθεί παρ' όλα αυτά, μόνο
-// που η χρήση του θα αποτυχαίνει πάντα.
-let runtime = RuntimeFarkle.buildPrecompiled designtime
+// δαπανηρή, υπάρχει η διάκριση μεταξύ των IGrammarBuilder και CharParser.
+// Η συνάρτηση CharParser.mustPrecompile επιστρέφει έναν CharParser που
+// αποτυγχάνει πάντα, με ένα μήνυμα που προτρέπει ότι ο προμεταγλωττιστής
+// δεν έχει τρέξει. Επειδή όμως μαρκάραμε τη συνάρτηση με το PrecompilerOutputAttribute,
+// ο προμεταγλωττιστής θα τροποποιήσει τον bytecode της, ώστε να επιστρέφει την
+// γραμματική που έχτισε έχοντας καλέσει την συνάρτηση builder από πάνω.
+// Αυτό θα κάνει την δημιουργία του CharParser πολύ πιο γρήγορη.
+[<PrecompilerOutput>]
+let parser() = CharParser.mustPrecompile<LPP>

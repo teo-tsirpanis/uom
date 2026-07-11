@@ -5,8 +5,6 @@ namespace Dai19090.SimulationTechniques.ElevatorSim;
 
 public static class MarkdownRenderer
 {
-    private static readonly JsonSerializerOptions s_jsonSerializerOptions = new() { WriteIndented = true };
-
     private static readonly FileStreamOptions s_fileWriteOptions = new() { Options = FileOptions.Asynchronous, Mode = FileMode.Create, Access = FileAccess.Write };
 
     private static async Task WritePaddedLineAsync(this TextWriter output, string x)
@@ -37,7 +35,7 @@ public static class MarkdownRenderer
         await output.WritePaddedLineAsync($"The simulation's random number generator seed is **{options.Seed.GetValueOrDefault()}**");
         await output.WritePaddedLineAsync("You can replay the simulation by running the program with the following JSON file:");
         await output.WriteLineAsync("``` json");
-        await output.WriteLineAsync(JsonSerializer.Serialize(options, typeof(ElevatorSimOptions), ElevatorSimJsonContext.Default));
+        await output.WriteLineAsync(JsonSerializer.Serialize(options, ElevatorSimJsonContext.Default.ElevatorSimOptions));
         await output.WriteLineAsync("```");
         await output.WriteLineAsync();
 
